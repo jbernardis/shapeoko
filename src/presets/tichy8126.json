@@ -1,0 +1,18 @@
+{
+  "Rectangle": {
+    "label": "tichy 8126",
+    "anchorPoint": [
+      0,
+      0,
+      0
+    ],
+    "anchorType": 0,
+    "pocketType": 0,
+    "cutDirection": 1,
+    "toolMovement": 1,
+    "angle": 0.0,
+    "height": 24.892,
+    "width": 20.574,
+    "depth": 10
+  }
+}

@@ -11,7 +11,7 @@ INIFILE = "presets.ini"
 class Presets:
 	def __init__(self, folder):
 		self.presetList = {}
-		self.inifile = os.path.join(folder, INIFILE)
+		self.inifile = os.path.join(folder, "presets", INIFILE)
 		
 		self.cfg = configparser.ConfigParser()
 		self.cfg.optionxform = str
@@ -26,6 +26,8 @@ class Presets:
 				#print("%s:%s = %s" % (sect, opt, value))
 				
 			self.presetList[sect] = sectPresets
+			
+		#pprint.pprint(self.presetList)
 
 		
 	def getPresetList(self):
