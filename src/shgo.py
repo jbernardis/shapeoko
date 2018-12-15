@@ -65,6 +65,10 @@ class MyFrame(wx.Frame):
 		self.SetStatusText("")
 
 		self.images = Images(os.path.join(cmdFolder, "images"))
+		
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "shapeoko.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
+
 		self.setCnc()
 
 		self.objectTypes = {
@@ -178,10 +182,10 @@ class MyFrame(wx.Frame):
 					self.Bind(wx.EVT_MENU, lambda evt, text=self.presetList[cat][lbl]: self.onMenuAddPreset(evt, text), id=MENU_PRESET_BASE + presetOffset)
 					presetOffset += 1
 
-				presetMenu.Append(MENU_PRESETCAT_BASE + presetCatOffset, cat, catMenu)
+				presetMenu.AppendSubMenu(catMenu, cat)
 				presetCatOffset += 1
 
-			menu2.Append(MENU_ADD_BASE + addOffset, "Preset", presetMenu)
+			menu2.AppendSubMenu(presetMenu, "Preset")
 
 		menuBar.Append(menu2, "&Add")
 
