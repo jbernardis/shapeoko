@@ -1,6 +1,8 @@
 import wx
+import os
 
-BTNDIM = (48, 48)
+BTNDIM = (64, 64) if os.name == 'posix' else (48,48)
+TCDIM = (80, -1) if os.name == 'posix' else (60, -1)
 
 DEFAULT_TITLE = "Point List Edit"
 fmtFloat = "%8.3f"
@@ -75,7 +77,7 @@ class PointListEditDialog(wx.Dialog):
 		label = wx.StaticText(self, -1, "X:")
 		box.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-		text = wx.TextCtrl(self, -1, "", size=(60,-1), style=wx.TE_RIGHT)
+		text = wx.TextCtrl(self, -1, "", size=TCDIM, style=wx.TE_RIGHT)
 		text.SetToolTip("Enter the X coordinate")
 		self.tcX = text
 		box.Add(text, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
@@ -85,7 +87,7 @@ class PointListEditDialog(wx.Dialog):
 		label = wx.StaticText(self, -1, "Y:")
 		box.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-		text = wx.TextCtrl(self, -1, "", size=(60,-1), style=wx.TE_RIGHT)
+		text = wx.TextCtrl(self, -1, "", size=TCDIM, style=wx.TE_RIGHT)
 		text.SetToolTip("Enter the Y coordinate")
 		self.tcY = text
 		box.Add(text, 1, wx.ALIGN_CENTRE|wx.ALL, 5)

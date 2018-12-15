@@ -4,7 +4,9 @@ import time
 
 from model import Model
 
-BTNDIM = (48, 48)
+BTNDIM = (64, 64) if os.name == 'posix' else (48,48)
+SPDIM = (110, -1) if os.name == 'posix' else (60, -1)
+SBMARGIN = 10 if os.name == 'posix' else 5
 
 def timeStamp():
 	return time.asctime()
@@ -25,8 +27,11 @@ class RenderDlg(wx.Dialog):
 		sz = wx.BoxSizer(wx.VERTICAL)
 				
 		box = wx.StaticBox(self, wx.ID_ANY, " Options ")
-		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		hbsizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
+		bsizer = wx.BoxSizer(wx.VERTICAL)
 		
+		bsizer.AddSpacer(SBMARGIN)
+
 		self.cbComment = wx.CheckBox(self, wx.ID_ANY, " Add Comments to G Code ")
 		self.cbComment.SetValue(True)
 		bsizer.Add(self.cbComment)
@@ -40,23 +45,30 @@ class RenderDlg(wx.Dialog):
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
 		hsz.Add(wx.StaticText(self, wx.ID_ANY, "Decimal Places:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		
-		sc = wx.SpinCtrl(self, wx.ID_ANY, size=(60, -1))
+		sc = wx.SpinCtrl(self, wx.ID_ANY, size=SPDIM)
 		sc.SetRange(2, 7)
 		sc.SetValue(4)
 		hsz.Add(sc, 0, wx.ALIGN_CENTER_VERTICAL)
 		self.scPlaces = sc
 		bsizer.Add(hsz)
+		bsizer.AddSpacer(SBMARGIN)
 		
-		sz.Add(bsizer, 0, wx.ALIGN_CENTER_HORIZONTAL)
+		hbsizer.AddSpacer(SBMARGIN)
+		hbsizer.Add(bsizer)
+		hbsizer.AddSpacer(SBMARGIN)
+
+		sz.Add(hbsizer, 0, wx.ALIGN_CENTER_HORIZONTAL)
 		sz.AddSpacer(10)
 				
 		box = wx.StaticBox(self, wx.ID_ANY, " Offsets ")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bsizer.AddSpacer(SBMARGIN)
 		
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz.AddSpacer(SBMARGIN)
 		hsz.Add(wx.StaticText(self, wx.ID_ANY, "X:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		
-		sc = wx.SpinCtrl(self, wx.ID_ANY, size=(60, -1))
+		sc = wx.SpinCtrl(self, wx.ID_ANY, size=SPDIM)
 		sc.SetRange(-1000, 1000)
 		sc.SetValue(0)
 		hsz.Add(sc, 0, wx.ALIGN_CENTER_VERTICAL)
@@ -65,7 +77,7 @@ class RenderDlg(wx.Dialog):
 		
 		hsz.Add(wx.StaticText(self, wx.ID_ANY, "Y:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		
-		sc = wx.SpinCtrl(self, wx.ID_ANY, size=(60, -1))
+		sc = wx.SpinCtrl(self, wx.ID_ANY, size=SPDIM)
 		sc.SetRange(-1000, 1000)
 		sc.SetValue(0)
 		hsz.Add(sc, 0, wx.ALIGN_CENTER_VERTICAL)
@@ -74,24 +86,36 @@ class RenderDlg(wx.Dialog):
 		
 		hsz.Add(wx.StaticText(self, wx.ID_ANY, "Z:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		
-		sc = wx.SpinCtrl(self, wx.ID_ANY, size=(60, -1))
+		sc = wx.SpinCtrl(self, wx.ID_ANY, size=SPDIM)
 		sc.SetRange(-10, 10)
 		sc.SetValue(0)
 		hsz.Add(sc, 0, wx.ALIGN_CENTER_VERTICAL)
 		self.scOffZ = sc
 		bsizer.Add(hsz)
+		hsz.AddSpacer(SBMARGIN)
 		
+		bsizer.AddSpacer(SBMARGIN)
+
 		sz.Add(bsizer, 0, wx.ALIGN_CENTER_HORIZONTAL)
 		
 		sz.AddSpacer(10)
 
 		box = wx.StaticBox(self, wx.ID_ANY, " Selected Tool ")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bsizer.AddSpacer(SBMARGIN)
 
+		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz.AddSpacer(SBMARGIN)
 		self.chTool = wx.Choice(self, wx.ID_ANY, size=[200, -1], choices=[t["name"] for t in self.toolList])
 		self.chTool.SetSelection(0)
 		self.Bind(wx.EVT_CHOICE, self.onToolChoice, self.chTool)
-		bsizer.Add(self.chTool, 0,  wx.ALL, 5)
+		hsz.Add(self.chTool, 0,  wx.ALL, 5)
+		hsz.AddSpacer(SBMARGIN)
+
+		bsizer.Add(hsz)
+
+		bsizer.AddSpacer(SBMARGIN)
+
 		sz.Add(bsizer, 0, wx.ALIGN_CENTER_HORIZONTAL)
 		
 		sz.AddSpacer(10)

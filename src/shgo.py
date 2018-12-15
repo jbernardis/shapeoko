@@ -32,7 +32,9 @@ from carvediamond import CarveDiamond
 
 cmdFolder = os.path.realpath(
 	os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
-BTNDIM = (48, 48)
+BTNDIM = (64, 64) if os.name == 'posix' else (48,48)
+SPDIM = (120, -1) if os.name == 'posix' else (60, -1)
+SBMARGIN = 10 if os.name == 'posix' else 5
 
 DEFAULT_TITLE = "Shapeoko"
 
@@ -334,40 +336,45 @@ class MyFrame(wx.Frame):
 		vsz.AddSpacer(5)
 
 		box = wx.StaticBox(self, wx.ID_ANY, " Material Dimensions ")
-		bsizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
+		vbsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-		bsizer.AddSpacer(5)
+		bsizer.AddSpacer(SBMARGIN)
 		bsizer.Add(wx.StaticText(self, wx.ID_ANY, "Wd:"), 0, wx.TOP, 9)
 
-		self.fsWidth = FS.FloatSpin(self, wx.ID_ANY, size=(60, -1), min_val=0, max_val=400,
+		self.fsWidth = FS.FloatSpin(self, wx.ID_ANY, size=SPDIM, min_val=0, max_val=400,
 				   increment=0.1, value=self.material.getWidth(), agwStyle=FS.FS_RIGHT)
 		self.fsWidth.SetFormat("%f")
 		self.fsWidth.SetDigits(1)
 		bsizer.Add(self.fsWidth, 0, wx.TOP+wx.BOTTOM, 5)
 		self.fsWidth.Bind(FS.EVT_FLOATSPIN, self.onFSMaterialWidth)
 
-		bsizer.AddSpacer(5)
+		bsizer.AddSpacer(SBMARGIN)
 		bsizer.Add(wx.StaticText(self, wx.ID_ANY, "Ht:"), 0, wx.TOP, 9)
 
-		self.fsHeight = FS.FloatSpin(self, wx.ID_ANY, size=(60, -1), min_val=0, max_val=400,
+		self.fsHeight = FS.FloatSpin(self, wx.ID_ANY, size=SPDIM, min_val=0, max_val=400,
 				   increment=0.1, value=self.material.getHeight(), agwStyle=FS.FS_RIGHT)
 		self.fsHeight.SetFormat("%f")
 		self.fsHeight.SetDigits(1)
 		bsizer.Add(self.fsHeight, 0, wx.TOP+wx.BOTTOM, 5)
 		self.fsHeight.Bind(FS.EVT_FLOATSPIN, self.onFSMaterialHeight)
 
-		bsizer.AddSpacer(5)
+		bsizer.AddSpacer(SBMARGIN)
 		bsizer.Add(wx.StaticText(self, wx.ID_ANY, "Thk:"), 0, wx.TOP, 9)
 
-		self.fsThick = FS.FloatSpin(self, wx.ID_ANY, size=(60, -1), min_val=0, max_val=50,
+		self.fsThick = FS.FloatSpin(self, wx.ID_ANY, size=SPDIM, min_val=0, max_val=50,
 					increment=0.1, value=self.material.getThickness(), agwStyle=FS.FS_RIGHT)
 		self.fsThick.SetFormat("%f")
 		self.fsThick.SetDigits(1)
 		bsizer.Add(self.fsThick, 0, wx.TOP+wx.BOTTOM, 5)
 		self.fsThick.Bind(FS.EVT_FLOATSPIN, self.onFSMaterialThick)
 
-		bsizer.AddSpacer(5)
-		vsz.Add(bsizer)
+		bsizer.AddSpacer(SBMARGIN)
+
+		vbsizer.AddSpacer(SBMARGIN)
+		vbsizer.Add(bsizer)
+		vbsizer.AddSpacer(SBMARGIN)
+		vsz.Add(vbsizer)
 
 		sz.Add(vsz)
 

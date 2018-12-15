@@ -192,7 +192,7 @@ class Rectangle(cncObject):
 			self.renderWarning("Object %s exceeds material depth (%f > %f)" % (self.params["label"], depth, materialthickness))
 			depth = materialthickness
 			
-		self.checkExtents(map, [[xmin, ymin], [xmax, ymax]])
+		self.checkExtents(mat, [[xmin, ymin], [xmax, ymax]])
 
 
 		passdepth = cnc.getPassDepth()
