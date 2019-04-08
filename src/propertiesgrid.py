@@ -18,8 +18,8 @@ class Point2DProperty(wxpg.PGProperty):
 	def __init__(self, label, name, value):
 		wxpg.PGProperty.__init__(self, label, name)
 
-		self.AddPrivateChild(wxpg.IntProperty("X", value=value[0]))
-		self.AddPrivateChild(wxpg.IntProperty("Y", value=value[1]))
+		self.AddPrivateChild(wxpg.StringProperty("X", value=value[0]))
+		self.AddPrivateChild(wxpg.StringProperty("Y", value=value[1]))
 
 		self.m_value = value
 
@@ -47,7 +47,7 @@ class Point2DProperty(wxpg.PGProperty):
 
 	def ValueToString(self, value, argFlags):
 		# TODO: Convert given property value to a string and return it
-		return "[%d, %d]" % (value[0], value[1])
+		return "[%s, %s]" % (value[0], value[1])
 
 	def StringToValue(self, text, argFlags):
 		# TODO: Adapt string to property value and return it
@@ -59,9 +59,9 @@ class Point3DProperty(wxpg.PGProperty):
 	def __init__(self, label, name, value):
 		wxpg.PGProperty.__init__(self, label, name)
 
-		self.AddPrivateChild(wxpg.IntProperty("X", value=value[0]))
-		self.AddPrivateChild(wxpg.IntProperty("Y", value=value[1]))
-		self.AddPrivateChild(wxpg.IntProperty("Z", value=value[2]))
+		self.AddPrivateChild(wxpg.StringProperty("X", value=value[0]))
+		self.AddPrivateChild(wxpg.StringProperty("Y", value=value[1]))
+		self.AddPrivateChild(wxpg.StringProperty("Z", value=value[2]))
 
 		self.m_value = value
 
@@ -92,7 +92,8 @@ class Point3DProperty(wxpg.PGProperty):
 
 	def ValueToString(self, value, argFlags):
 		# TODO: Convert given property value to a string and return it
-		return "[%d, %d, %d]" % (value[0], value[1], value[2])
+		#return "[\"%s\", \"%s\", \"%s\"]" % (value[0], value[1], value[2])
+		return "[%s, %s, %s]" % (value[0], value[1], value[2])
 
 	def StringToValue(self, text, argFlags):
 		# TODO: Adapt string to property value and return it
@@ -146,7 +147,7 @@ class PointList2DProperty(wxpg.ArrayStringProperty):
 		""" If failed, return False or (False, None). If success, return tuple
 			(True, newValue).
 		"""
-		delim = self.GetAttribute("Delimiter")
+		delim = self.GetAttribute("Delimiter") 
 		if delim == '"' or delim == "'":
 			# Proper way to call same method from super class
 			return super(PointList2DProperty, self).StringToValue(text, 0)
@@ -257,10 +258,10 @@ class PropertiesGrid(wxpg.PropertyGrid):
 			pgp = PointList2DProperty(label, name, value=[], images=self.images)
 
 		elif dt == "point2d":
-			pgp = Point2DProperty(label, name, [0.0, 0.0])
+			pgp = Point2DProperty(label, name, ["0.0", "0.0"])
 
 		elif dt == "point3d":
-			pgp = Point3DProperty(label, name, [0.0, 0.0, 0.0])
+			pgp = Point3DProperty(label, name, ["0.0", "0.0", "0.0"])
 
 		elif dt == "anchorType":
 			pgp = wxpg.EnumProperty(label, name, labels=anchorType.names, values=range(len(anchorType.names)), value=0)
@@ -322,13 +323,13 @@ class PropertiesGrid(wxpg.PropertyGrid):
 
 		elif dt == "point2d":
 			if v is None:
-				self.SetPropertyValue(pg, [0.0, 0.0])
+				self.SetPropertyValue(pg, ["0.0", "0.0"])
 			else:
 				self.SetPropertyValue(pg, v)
 
 		elif dt == "point3d":
 			if v is None:
-				self.SetPropertyValue(pg, [0.0, 0.0, 0.0])
+				self.SetPropertyValue(pg, ["0.0", "0.0", "0.0"])
 			else:
 				self.SetPropertyValue(pg, v)
 

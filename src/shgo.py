@@ -752,6 +752,7 @@ class MyFrame(wx.Frame):
 			self.fsWidth.SetValue(self.material.getWidth())
 			self.fsHeight.SetValue(self.material.getHeight())
 			self.fsThick.SetValue(self.material.getThickness())
+			self.cnc.setMaterial(self.material)
 			return None
 
 		if k not in self.rawObjectTypes.keys():
