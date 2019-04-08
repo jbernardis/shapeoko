@@ -1,5 +1,4 @@
-import math 
-import pprint
+import math
 
 # Given a vector (defined by 2 points) and the distance, 
 # calculate a new vector that is distance away from the original 
@@ -36,6 +35,8 @@ def intersection(sp):
 	except ZeroDivisionError:
 		vert1 = True
 		vertx = p1[0]
+		m1 = 0
+		d1 = 0
 
 	p1 = s2[0]
 	p2 = s2[1]
@@ -50,6 +51,8 @@ def intersection(sp):
 	except ZeroDivisionError:
 		vert2 = True
 		vertx = p1[0]
+		m2 = 0
+		d2 = 0
 
 	if vert1 and not vert2:
 		nx = vertx
@@ -71,7 +74,7 @@ def intersection(sp):
 		nx = (d1-d2)/(m2-m1)
 		ny = m1*nx+d1
 
-	return (nx, ny)
+	return nx, ny
 
 
 def offsetPath(pts, d, closePath = False):
@@ -93,6 +96,9 @@ def offsetPath(pts, d, closePath = False):
 		# if we are not going to close the path
 		saveStart = segments[0][0]
 		saveEnd = segments[-1][1]
+	else:
+		saveStart = None
+		saveEnd = None
 
 	segpairs = []
 	for i in range(len(segments) - 1):

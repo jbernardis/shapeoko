@@ -1,8 +1,8 @@
-'''
+"""
 Created on Sep 17, 2018
 
 @author: Jeff
-'''
+"""
 class Material:
 	def __init__(self, params):
 		self.params = params.copy()

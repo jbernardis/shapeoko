@@ -74,7 +74,6 @@ class Polygon(cncObject):
 			if not rc:
 				self.renderError("Error calculating polygon offset")
 
-
 		elif tm == toolMovement.outside:
 			points, rc = offsetPath(points, trad, closePath=True)
 			if not rc:
@@ -85,9 +84,9 @@ class Polygon(cncObject):
 		mat = cnc.getMaterial()
 		materialthickness = mat.getThickness()
 		if depth > materialthickness:
-			depth = materialthickness
 			self.renderWarning("Object %s exceeds material depth (%f > %f)" % (self.params["label"], depth, materialthickness))
-			
+			depth = materialthickness
+
 		self.checkExtents(mat, points)
 
 		passdepth = cnc.getPassDepth()

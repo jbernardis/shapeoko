@@ -69,6 +69,17 @@ class MyFrame(wx.Frame):
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "shapeoko.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
 
+		self.cnc = None
+		self.material = None
+		self.toolList = None
+		self.pGrid = None
+		self.objListBox = None
+		self.bScrollUp = self.bScrollDown = None
+		self.bMoveUp = self.bMoveDown = None
+		self.fsWidth = self.fsHeight = self.fsThick = None
+		self.bAdd = self.bDel = self.bRender = self.bNew = self.bLoad = self.bSave = self.bSaveAs = None
+
+
 		self.setCnc()
 
 		self.objectTypes = {
@@ -100,6 +111,7 @@ class MyFrame(wx.Frame):
 		self.presets = Presets(cmdFolder)
 		self.presetList = self.presets.getPresetList()
 
+		self.fileMenu = None
 		self.setMenu()
 
 		self.t = 0
@@ -297,7 +309,7 @@ class MyFrame(wx.Frame):
 
 		bhsz = wx.BoxSizer(wx.HORIZONTAL)
 
-		self.bScrollUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngScrollup, size=BTNDIM)
+		self.bScrollUp = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("scrollup"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBScrollUp, self.bScrollUp)
 		self.bScrollUp.SetToolTip("Move the selection cursor up 1 line")
 		self.bScrollUp.Enable(False)
@@ -305,7 +317,7 @@ class MyFrame(wx.Frame):
 
 		bhsz.AddSpacer(20)
 
-		self.bMoveUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngMoveup, size=BTNDIM)
+		self.bMoveUp = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("moveup"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBMoveUp, self.bMoveUp)
 		self.bMoveUp.SetToolTip("Move the selected object up 1 line")
 		self.bMoveUp.Enable(False)
@@ -315,7 +327,7 @@ class MyFrame(wx.Frame):
 		vsz.AddSpacer(20)
 
 		bhsz = wx.BoxSizer(wx.HORIZONTAL)
-		self.bScrollDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngScrolldown, size=BTNDIM)
+		self.bScrollDown = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("scrolldown"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBScrollDown, self.bScrollDown)
 		self.bScrollDown.SetToolTip("Move the selection cursor down 1 line")
 		self.bScrollDown.Enable(False)
@@ -323,7 +335,7 @@ class MyFrame(wx.Frame):
 
 		bhsz.AddSpacer(20)
 
-		self.bMoveDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngMovedown, size=BTNDIM)
+		self.bMoveDown = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("movedown"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBMoveDown, self.bMoveDown)
 		self.bMoveDown.SetToolTip("Move the selected object down 1 line")
 		self.bMoveDown.Enable(False)
@@ -385,14 +397,14 @@ class MyFrame(wx.Frame):
 		sz.AddSpacer(10)
 
 		bsz = wx.BoxSizer(wx.HORIZONTAL)
-		self.bAdd = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAdd, size=BTNDIM)
+		self.bAdd = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("add"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBAdd, self.bAdd)
 		self.bAdd.SetToolTip("Add a new object to the bottom of the list")
 		bsz.Add(self.bAdd)
 
 		bsz.AddSpacer(10)
 
-		self.bDel = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDelete, size=BTNDIM)
+		self.bDel = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("delete"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBDel, self.bDel)
 		self.bDel.SetToolTip("Delete the selected object")
 		self.bDel.Enable(False)
@@ -400,7 +412,7 @@ class MyFrame(wx.Frame):
 
 		bsz.AddSpacer(10)
 
-		self.bRender = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRender, size=BTNDIM)
+		self.bRender = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("render"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBRender, self.bRender)
 		self.bRender.SetToolTip("Render the G Code and save to file")
 		self.bRender.Enable(False)
@@ -408,21 +420,21 @@ class MyFrame(wx.Frame):
 
 		bsz.AddSpacer(10)
 
-		self.bNew = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNew, size=BTNDIM)
+		self.bNew = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("new"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBNew, self.bNew)
 		self.bNew.SetToolTip("Create a new empty model")
 		bsz.Add(self.bNew)
 
 		bsz.AddSpacer(10)
 
-		self.bLoad = wx.BitmapButton(self, wx.ID_ANY, self.images.pngOpen, size=BTNDIM)
+		self.bLoad = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("open"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBLoad, self.bLoad)
 		self.bLoad.SetToolTip("Load a model from file")
 		bsz.Add(self.bLoad)
 
 		bsz.AddSpacer(10)
 
-		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSave, size=BTNDIM)
+		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("save"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBSave, self.bSave)
 		self.bSave.SetToolTip("Save the model to the current file")
 		self.bSave.Enable(False)
@@ -430,7 +442,7 @@ class MyFrame(wx.Frame):
 
 		bsz.AddSpacer(10)
 
-		self.bSaveAs = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSaveas, size=BTNDIM)
+		self.bSaveAs = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName("saveas"), size=BTNDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBSaveAs, self.bSaveAs)
 		self.bSaveAs.SetToolTip("Save the model to a named file")
 		self.bSaveAs.Enable(False)
@@ -446,7 +458,7 @@ class MyFrame(wx.Frame):
 
 		return hsz
 
-	def onLbProp(self, evt):
+	def onLbProp(self, _):
 		self.showObjectProperties()
 		self.updateScrollButtons()
 
@@ -457,25 +469,25 @@ class MyFrame(wx.Frame):
 		else:
 			self.pGrid.setProperties(self.objList[ox])
 
-	def onClose(self, evt):
+	def onClose(self, _):
 		if not self.warnIfModified():
 			return 
 
 		self.Destroy()
 
-	def onBScrollUp(self, evt):
+	def onBScrollUp(self, _):
 		ox = self.objListBox.GetSelection()
 		self.objListBox.SetSelection(ox-1)
 		self.showObjectProperties()
 		self.updateScrollButtons()
 
-	def onBScrollDown(self, evt):
+	def onBScrollDown(self, _):
 		ox = self.objListBox.GetSelection()
 		self.objListBox.SetSelection(ox+1)
 		self.showObjectProperties()
 		self.updateScrollButtons()
 
-	def onBMoveUp(self, evt):
+	def onBMoveUp(self, _):
 		ox = self.objListBox.GetSelection()
 		sobj = self.objList[ox]
 		self.objList[ox] = self.objList[ox-1]
@@ -484,7 +496,7 @@ class MyFrame(wx.Frame):
 		self.objListBox.SetSelection(ox-1)
 		self.updateScrollButtons()
 
-	def onBMoveDown(self, evt):
+	def onBMoveDown(self, _):
 		ox = self.objListBox.GetSelection()
 		sobj = self.objList[ox]
 		self.objList[ox] = self.objList[ox+1]
@@ -508,10 +520,10 @@ class MyFrame(wx.Frame):
 		self.bScrollDown.Enable(not (ox == (l-1)))
 		self.bMoveDown.Enable(not (ox == (l-1)))
 
-	def onMenuAddObject(self, evt, objType):
+	def onMenuAddObject(self, _, objType):
 		self.doObjectAddType(objType)
 
-	def onMenuAddPreset(self, evt, fn):
+	def onMenuAddPreset(self, _, fn):
 		path = os.path.join(cmdFolder, "presets", fn)
 		try:
 			with open(path, 'r') as f:
@@ -522,19 +534,19 @@ class MyFrame(wx.Frame):
 		except IOError:
 			self.message("Cannot read preset file '%s'." % path)
 
-	def onFSMaterialWidth(self, evt):
+	def onFSMaterialWidth(self, _):
 		nw = self.fsWidth.GetValue()
 		self.material.setWidth(nw)
 
-	def onFSMaterialHeight(self, evt):
+	def onFSMaterialHeight(self, _):
 		nh = self.fsHeight.GetValue()
 		self.material.setHeight(nh)
 
-	def onFSMaterialThick(self, evt):
+	def onFSMaterialThick(self, _):
 		nt = self.fsThick.GetValue()
 		self.material.setThickness(nt)
 
-	def onBAdd(self, evt):
+	def onBAdd(self, _):
 		dlg = wx.SingleChoiceDialog(
 				self, 'Choose the type of object to add', 'Add New Object',
 				list(self.objectTypes.keys()),
@@ -542,6 +554,7 @@ class MyFrame(wx.Frame):
 				)
 
 		rc = dlg.ShowModal()
+		objType = None
 		if rc == wx.ID_OK:
 			objType = dlg.GetStringSelection()
 
@@ -583,7 +596,7 @@ class MyFrame(wx.Frame):
 		for obj in self.objList:
 			self.objListBox.Append(obj.getTitle())
 
-	def onBDel(self, evt):
+	def onBDel(self, _):
 		ox = self.objListBox.GetSelection()
 		if ox == wx.NOT_FOUND:
 			return
@@ -622,7 +635,7 @@ class MyFrame(wx.Frame):
 		self.showObjectProperties()
 		self.updateScrollButtons()
 
-	def onBRender(self, evt):
+	def onBRender(self, _):
 		dlg = RenderDlg(self, self.objList, self.cnc, self.toolList, self.images, self.settings)
 		dlg.ShowModal()
 		dlg.Destroy()
@@ -647,7 +660,7 @@ class MyFrame(wx.Frame):
 
 		self.setModified(False)
 
-	def onBSaveAs(self, evt):
+	def onBSaveAs(self, _):
 		skey = "modeldir"
 		sdir = self.settings.setting(skey)
 		with wx.FileDialog(self, "Save Model file", wildcard="JSON files (*.json)|*.json",
@@ -666,13 +679,13 @@ class MyFrame(wx.Frame):
 			# save the current contents in the file
 			self.saveFile(self.currentFile)
 
-	def onSaveEachObject(self, evt):
+	def onSaveEachObject(self, _):
 		skey = "objectdir"
 		sdir = self.settings.setting(skey)
 		for o in self.objList:
 			lbl = o.getLabel()
 			with wx.FileDialog(self, "Save Object '%s' to file" % lbl, wildcard="JSON files (*.json)|*.json",
-						defaultDor = sdir,
+						defaultDir = sdir,
 						style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
 
 				if fileDialog.ShowModal() == wx.ID_CANCEL:
@@ -767,7 +780,7 @@ class MyFrame(wx.Frame):
 				print(e)
 		return obj
 
-	def onBNew(self, evt):
+	def onBNew(self, _):
 		if not self.warnIfModified():
 			return 
 
@@ -778,7 +791,7 @@ class MyFrame(wx.Frame):
 		self.updateScrollButtons()
 		self.setModified(False)
 
-	def onShapeokoProperties(self, evt):
+	def onShapeokoProperties(self, _):
 		dlg = ShapeokoDlg(self, self.cnc, self.images)
 		dlg.ShowModal()
 		dlg.Destroy()

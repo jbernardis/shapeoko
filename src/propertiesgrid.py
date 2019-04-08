@@ -45,14 +45,14 @@ class Point2DProperty(wxpg.PGProperty):
 
 		return size
 
-	def ValueToString(self, value, argFlags):
+	def ValueToString(self, value, argFlags=0):
 		# TODO: Convert given property value to a string and return it
 		return "[%s, %s]" % (value[0], value[1])
 
-	def StringToValue(self, text, argFlags):
+	def StringToValue(self, text, argFlags=0):
 		# TODO: Adapt string to property value and return it
 		value = eval(text)
-		return (True, value)
+		return True, value
 
 
 class Point3DProperty(wxpg.PGProperty):
@@ -90,15 +90,15 @@ class Point3DProperty(wxpg.PGProperty):
 
 		return size
 
-	def ValueToString(self, value, argFlags):
+	def ValueToString(self, value, argFlags=0):
 		# TODO: Convert given property value to a string and return it
 		#return "[\"%s\", \"%s\", \"%s\"]" % (value[0], value[1], value[2])
 		return "[%s, %s, %s]" % (value[0], value[1], value[2])
 
-	def StringToValue(self, text, argFlags):
+	def StringToValue(self, text, argFlags=0):
 		# TODO: Adapt string to property value and return it
 		value = eval(text)
-		return (True, value)
+		return True, value
 
 
 class PointList2DProperty(wxpg.ArrayStringProperty):
@@ -109,7 +109,7 @@ class PointList2DProperty(wxpg.ArrayStringProperty):
 		a bit 'manually'. Which is not too bad since Python has excellent
 		string and list manipulation facilities.
 	"""
-	def __init__(self, label, name = wxpg.PG_LABEL, value=[], images=None):
+	def __init__(self, label, name = wxpg.PG_LABEL, value=(), images=None):
 		wxpg.ArrayStringProperty.__init__(self, label, name, value)
 		self.m_display = '[ ]'
 		self.images = images
@@ -128,7 +128,7 @@ class PointList2DProperty(wxpg.ArrayStringProperty):
 	def DoGetEditorClass(self):
 		return wxpg.PropertyGridInterface.GetEditorByName("TextCtrlAndButton")
 
-	def ValueToString(self, value, flags):
+	def ValueToString(self, value, argFlags=0):
 		# let's just use the cached display value
 		return self.m_display
 
@@ -143,7 +143,7 @@ class PointList2DProperty(wxpg.ArrayStringProperty):
 		ls = self.GetValue()
 		self.m_display = str(ls)
 
-	def StringToValue(self, text, argFlags):
+	def StringToValue(self, text, argFlags=0):
 		""" If failed, return False or (False, None). If success, return tuple
 			(True, newValue).
 		"""
@@ -152,7 +152,7 @@ class PointList2DProperty(wxpg.ArrayStringProperty):
 			# Proper way to call same method from super class
 			return super(PointList2DProperty, self).StringToValue(text, 0)
 		v = [a.strip() for a in text.split(delim)]
-		return (True, v)
+		return True, v
 
 
 	def OnEvent(self, propgrid, primaryEditor, event):
@@ -232,7 +232,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 				if "minvals" in self.properties[k]:
 					mv = self.properties[k]["minvals"]
 				else:
-					mv = 2;
+					mv = 2
 					
 				pgp.setMinVals(mv)
 
@@ -294,7 +294,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 		pg = self.props[tag]
 		try:
 			v = self.properties[tag]["value"]
-		except:
+		except IndexError:
 			v = None
 
 		if dt == "str":
@@ -384,7 +384,8 @@ class PropertiesGrid(wxpg.PropertyGrid):
 	def setModified(self, flag=True):
 		self.modified = flag
 
-	def formHelpText(self, stg, cv):
+	@staticmethod
+	def formHelpText(stg, cv):
 		ht = stg.getDescription()
 
 		ut = stg.getUnit()
@@ -404,7 +405,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 
 	def setProperty(self, pid, value):
 		if pid not in self.properties.keys():
-			self.log("Unknown property key: %s" % pid)
+			# self.log("Unknown property key: %s" % pid)
 			return
 
 		self.properties[pid].SetValue(value)

@@ -178,8 +178,8 @@ class RectangularDrill(cncObject):
 			
 		self.checkExtents(mat, [[minx, miny], [maxx, maxy]])
 
-		nrows = int((maxy - miny)/(spacing))
-		ncols = int((maxx - minx)/(spacing))
+		nrows = int((maxy - miny)/spacing)
+		ncols = int((maxx - minx)/spacing)
 
 		xstep = (maxx - minx) / float(ncols)
 		ystep = (maxy - miny) / float(nrows)
@@ -193,7 +193,7 @@ class RectangularDrill(cncObject):
 
 		rendering.extend(cnc.moveZ(safez))
 
-		passes = int(math.ceil(materialthickness/passdepth))
+		passes = int(math.ceil(depth/passdepth))
 		for iy in range(nrows+1):
 			for ix in range(ncols+1):
 				includeHole = False
@@ -209,8 +209,8 @@ class RectangularDrill(cncObject):
 					cz = sz
 					for i in range(passes):
 						cz -= passdepth
-						if cz < -materialthickness:
-							cz = -materialthickness
+						if cz < -depth:
+							cz = -depth
 						rendering.extend(cnc.cutZ(cz))
 						if hDiam > tdiam:
 							maxyoff = (hDiam-tdiam)/2.0

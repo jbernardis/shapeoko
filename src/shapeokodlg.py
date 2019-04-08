@@ -34,5 +34,5 @@ class ShapeokoDlg(wx.Dialog):
 	def setModified(self, flag=True):
 		self.parent.setModified(flag)
 
-	def onBOK(self, evt):
+	def onBOK(self, _):
 		self.EndModal(wx.ID_OK)

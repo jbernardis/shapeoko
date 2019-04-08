@@ -4,6 +4,7 @@ class cncObject:
 		self.parent = parent
 		self.errors = None
 		self.reporter = None
+		self.params = {}
 		
 	def getTitle(self):
 		return "%s: %s" % (type(self).__name__, self.params["label"])
@@ -18,7 +19,7 @@ class cncObject:
 		if tag not in self.params:
 			return None
 
-		return(self.params[tag])
+		return self.params[tag]
 
 	def createErrors(self, elist):
 		self.errors = [e for e in elist]

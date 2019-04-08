@@ -178,7 +178,7 @@ class RenderDlg(wx.Dialog):
 		self.Layout()
 		self.Fit()
 
-	def onToolChoice(self, evt):
+	def onToolChoice(self, _):
 		s = self.chTool.GetSelection()
 		if s == wx.NOT_FOUND:
 			return
@@ -186,7 +186,7 @@ class RenderDlg(wx.Dialog):
 		tool = self.toolList[s]
 		self.cnc.setTool(tool)
 
-	def onBRender(self, evt):
+	def onBRender(self, _):
 		self.tcLog.Clear()
 		self.renderInfo("Rendering started at %s" % timeStamp())
 		cmt = self.cbComment.GetValue()
@@ -210,7 +210,7 @@ class RenderDlg(wx.Dialog):
 		self.cbAppend.Enable(True)
 		self.renderInfo("Rendering completed at %s" % timeStamp())
 			
-	def onBSaveAs(self, evt):
+	def onBSaveAs(self, _):
 		append = self.cbAppend.GetValue()
 
 		skey = "gcodedir"
@@ -245,7 +245,7 @@ class RenderDlg(wx.Dialog):
 			except IOError:
 				self.renderError("Cannot save current data in file '%s'." % pathname)
 			
-	def onBExit(self, evt):
+	def onBExit(self, _):
 		if self.rendering is not None and not self.savedRendering:
 			dlg = wx.MessageDialog(self, 'Are you sure you want to exit without saving?',
 								   'Discard Rendering?',

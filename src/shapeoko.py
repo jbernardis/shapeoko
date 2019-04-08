@@ -11,7 +11,10 @@ class Shapeoko:
 		self.offZ = 0.0
 
 		self.material = None
-		
+
+		self.fmt = None
+		self.speedTerm = None
+
 		fn = "shapeoko.json"
 		try:
 			with open(fn, 'r') as f:
