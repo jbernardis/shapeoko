@@ -15,6 +15,7 @@ class Shapeoko:
 		self.fmt = None
 		self.speedTerm = None
 
+		# TODO: CNC/Shapeoko parameters - save to/load from alternate files, etc, set as default
 		fn = "shapeoko.json"
 		try:
 			with open(fn, 'r') as f:

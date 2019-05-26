@@ -1,7 +1,7 @@
 [
 	{
-		"name": "3mm end mill",
-		"diameter": 3,
+		"name": "1/8 end mill",
+		"diameter": 3.175,
 		"stepover": 0.75
 	},
 	{

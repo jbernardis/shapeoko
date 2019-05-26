@@ -195,7 +195,8 @@ class RenderDlg(wx.Dialog):
 		addPreamble = self.cbPreamble.GetValue()
 				
 		self.cnc.setOptions(commentCode=cmt, addSpeed=spd, decimalPlaces = places)
-		
+
+		# TODO: Allow for tool changing mid cut - will need to reset z height - which will require some kind of referencing???
 		ox = self.scOffX.GetValue()
 		oy = self.scOffY.GetValue()
 		oz = self.scOffZ.GetValue()

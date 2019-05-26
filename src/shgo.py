@@ -52,8 +52,8 @@ MENU_PRESET_BASE = 600
 
 MENU_SHAPEOKO_PROPERTIES = 400
 
-class MyFrame(wx.Frame): 
-
+# TODO: basic design question - should tool be recorded in each object, or should it be the same throughout
+class MyFrame(wx.Frame):
 	def __init__(self):
 		wx.Frame.__init__(self, None, -1, DEFAULT_TITLE)
 		
@@ -78,7 +78,6 @@ class MyFrame(wx.Frame):
 		self.bMoveUp = self.bMoveDown = None
 		self.fsWidth = self.fsHeight = self.fsThick = None
 		self.bAdd = self.bDel = self.bRender = self.bNew = self.bLoad = self.bSave = self.bSaveAs = None
-
 
 		self.setCnc()
 
@@ -155,7 +154,6 @@ class MyFrame(wx.Frame):
 	def setMenu(self):
 		menuBar = wx.MenuBar()
 
-		# File
 		menu1 = wx.Menu()
 		menu1.Append(MENU_FILE_NEW, "&New", "Create a new model file")
 		menu1.Append(MENU_FILE_OPEN, "&Open", "Open an existing model file")
@@ -167,7 +165,7 @@ class MyFrame(wx.Frame):
 		menu1.Append(MENU_FILE_RENDER, "&Render", "Render the current model and create a G Code file")
 		menu1.AppendSeparator()
 		menu1.Append(MENU_FILE_EXIT, "E&xit", "Exit the application")
-		# Add menu to the menu bar
+
 		menuBar.Append(menu1, "&File")
 		self.fileMenu = menu1
 		self.fileMenu.Enable(MENU_FILE_SAVE, False)
@@ -208,7 +206,6 @@ class MyFrame(wx.Frame):
 
 		self.SetMenuBar(menuBar)
 
-		# Menu events
 		self.Bind(wx.EVT_MENU, self.onBNew, id=MENU_FILE_NEW)
 		self.Bind(wx.EVT_MENU, self.onBLoad, id=MENU_FILE_OPEN)
 		self.Bind(wx.EVT_MENU, self.onBSave, id=MENU_FILE_SAVE)
@@ -676,7 +673,6 @@ class MyFrame(wx.Frame):
 			if ndir != sdir:
 				self.settings.setSetting(skey, ndir)
 
-			# save the current contents in the file
 			self.saveFile(self.currentFile)
 
 	def onSaveEachObject(self, _):

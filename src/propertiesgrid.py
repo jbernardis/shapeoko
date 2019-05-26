@@ -27,7 +27,7 @@ class Point2DProperty(wxpg.PGProperty):
 		return self.__class__.__name__
 
 	def DoGetEditorClass(self):
-		return wxpg.PropertyGridInterface.GetEditorByName("TextCtrl")
+		return wxpg.PropetyGridInterface.GetEditorByName("TextCtrl")
 
 	def RefreshChildren(self):
 		size = self.m_value
@@ -46,11 +46,9 @@ class Point2DProperty(wxpg.PGProperty):
 		return size
 
 	def ValueToString(self, value, argFlags=0):
-		# TODO: Convert given property value to a string and return it
 		return "[%s, %s]" % (value[0], value[1])
 
 	def StringToValue(self, text, argFlags=0):
-		# TODO: Adapt string to property value and return it
 		value = eval(text)
 		return True, value
 
@@ -91,24 +89,13 @@ class Point3DProperty(wxpg.PGProperty):
 		return size
 
 	def ValueToString(self, value, argFlags=0):
-		# TODO: Convert given property value to a string and return it
-		#return "[\"%s\", \"%s\", \"%s\"]" % (value[0], value[1], value[2])
 		return "[%s, %s, %s]" % (value[0], value[1], value[2])
 
 	def StringToValue(self, text, argFlags=0):
-		# TODO: Adapt string to property value and return it
 		value = eval(text)
 		return True, value
 
-
 class PointList2DProperty(wxpg.ArrayStringProperty):
-	""" Sample of a custom custom ArrayStringProperty.
-
-		Because currently some of the C++ helpers from wxArrayStringProperty
-		and wxProperytGrid are not available, our implementation has to quite
-		a bit 'manually'. Which is not too bad since Python has excellent
-		string and list manipulation facilities.
-	"""
 	def __init__(self, label, name = wxpg.PG_LABEL, value=(), images=None):
 		wxpg.ArrayStringProperty.__init__(self, label, name, value)
 		self.m_display = '[ ]'
@@ -118,18 +105,10 @@ class PointList2DProperty(wxpg.ArrayStringProperty):
 	def setMinVals(self, mv):
 		self.minvals = mv
 
-	# NOTE: In the Classic version of the propgrid classes, all of the wrapped
-	# property classes override DoGetEditorClass so it calls GetEditor and
-	# looks up the class using that name, and hides DoGetEditorClass from the
-	# usable API. Jumping through those hoops is no longer needed in Phoenix
-	# as Phoenix allows overriding all necessary virtual methods without
-	# special support in the wrapper code, so we just need to override
-	# DoGetEditorClass here instead.
 	def DoGetEditorClass(self):
 		return wxpg.PropertyGridInterface.GetEditorByName("TextCtrlAndButton")
 
 	def ValueToString(self, value, argFlags=0):
-		# let's just use the cached display value
 		return self.m_display
 
 	def OnSetValue(self):
@@ -144,16 +123,11 @@ class PointList2DProperty(wxpg.ArrayStringProperty):
 		self.m_display = str(ls)
 
 	def StringToValue(self, text, argFlags=0):
-		""" If failed, return False or (False, None). If success, return tuple
-			(True, newValue).
-		"""
-		delim = self.GetAttribute("Delimiter") 
+		delim = self.GetAttribute("Delimiter")
 		if delim == '"' or delim == "'":
-			# Proper way to call same method from super class
 			return super(PointList2DProperty, self).StringToValue(text, 0)
 		v = [a.strip() for a in text.split(delim)]
 		return True, v
-
 
 	def OnEvent(self, propgrid, primaryEditor, event):
 		if event.GetEventType() == wx.wxEVT_COMMAND_BUTTON_CLICKED:
@@ -283,7 +257,6 @@ class PropertiesGrid(wxpg.PropertyGrid):
 			pgp = wxpg.StringProperty(label, name, value="")
 
 		return pgp
-
 
 	def setBaseValues(self):
 		for tag in self.props.keys():
