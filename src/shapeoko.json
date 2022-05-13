@@ -1,9 +1,0 @@
-{
-	"safez": 10.0,
-	"metric": true,
-	"xyMoveSpeed": 140,
-	"xyCutSpeed": 70,
-	"zMoveSpeed": 140,
-	"zCutSpeed": 70,
-	"passDepth": 1.0
-}
