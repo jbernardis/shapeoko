@@ -245,7 +245,7 @@ class Shapeoko:
 		self.gcodeQ.put({"cmd": "END", "name": fn})
 		return True
 
-	def nextAsyncMessage(self, wait=True):
+	def nextAsyncMessage(self, wait=False):
 		if not self.connected:
 			return None
 

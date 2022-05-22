@@ -8,28 +8,24 @@ int zup = 2;
 int zdown = 3;
 
 int getBand(int v) {
-	if (v > 412 and v <= 612)
+	if (v > 400 and v <= 700)
 		return (0);
 
-	if (v <= 412) {
-		if (v >= 312)
+	if (v <= 400) {
+		if (v >= 300)
 			return(-1);
-		else if (v >= 212)
+		else if (v >= 200)
 			return(-2);
-		else if (v > 112)
-			return(-3);
 		else
-			return(-4);
+			return(-3);
 	}
 	else {
-		if (v < 712)
+		if (v < 800)
 			return(1);
-		else if (v < 812)
+		else if (v < 900)
 			return(2);
-		else if (v < 912)
-			return(3);
 		else
-			return(4);
+			return(3);
 	}
 }
 
@@ -47,16 +43,16 @@ void loop() {
 void report() {
 	int xVal = getBand(analogRead(xaxis));
 	int yVal = getBand(1024-analogRead(yaxis));
-	int zup = digitalRead(zup);
-	int zdown = digitalRead(zdown);
+	int zUp = digitalRead(zup);
+	int zDown = digitalRead(zdown);
 
 	serial.print("[");
-	serial.print(xval);
+	serial.print(xVal);
 	Serial.print(",");
-	Serial.print(yval);
+	Serial.print(yVal);
 	Serial.print(",");
-	Serial.print(zup);
+	Serial.print(zUp);
 	Serial.print(",");
-	Serial.print(zdown);
+	Serial.print(zDown);
 	Serial.println("]");
 }
