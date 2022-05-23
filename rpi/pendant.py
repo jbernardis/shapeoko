@@ -17,4 +17,4 @@ class Pendant:
 		if self.port.in_waiting == 0:
 			return None
 
-		return self.port.read_until().strip()
+		return self.port.read_until().strip().decode("UTF-8")

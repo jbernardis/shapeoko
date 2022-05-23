@@ -76,7 +76,7 @@ class SendThread(threading.Thread):
 		response = self.responseQ.get(False)
 		message = self.waitOKQ.get(False)
 		outMsg = "[%s: %s]" % (response, message)
-		#print(outMsg)
+		print(outMsg)
 		if response != "ok":
 			self.asyncQ.put(outMsg)
 		return False
@@ -192,6 +192,7 @@ class Shapeoko:
 		if y is not None:
 			jogcmd += "Y%f" % y
 		jogcmd += "F%d\n" % speed
+		print(jogcmd)
 		return self.sendCommand(jogcmd)
 
 	def jogz(self, z, speed, absolute=False, metric=True):
@@ -201,9 +202,11 @@ class Shapeoko:
 		if z is not None:
 			jogcmd += "Z%f" % z
 		jogcmd += "F%d\n" % speed
+		print(jogcmd)
 		return self.sendCommand(jogcmd)
 
 	def stopJog(self):
+		print("stop jog immediate")
 		return self.sendImmediate(chr(0x85))
 
 	def startPoll(self):
