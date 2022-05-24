@@ -17,6 +17,11 @@ int * inputValues;
 
 void setup() {
 	Serial.begin(115200);
+	
+	bResetX.begin();
+	bResetY.begin();
+	bResetZ.begin();
+
 	inputValues = (int *) malloc(ibits * sizeof(int));
 	inBd.setup(ichips);
 
