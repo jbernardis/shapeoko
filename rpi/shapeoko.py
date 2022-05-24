@@ -27,6 +27,7 @@ class SendThread(threading.Thread):
 		self.endOfLife = False
 		self.lineCt = 0
 		self.waitOKQ = queue.Queue(0)
+		self.sequence = 0
 
 		self.start()
 		
@@ -48,8 +49,9 @@ class SendThread(threading.Thread):
 
 			elif not self.commandQ.empty():
 				string = self.commandQ.get(False)
+				self.waitOKQ.put({"seq": self.sequence, "data": string.rstrip()})
 				self.sendMessage(string)
-				self.waitOKQ.put(string.rstrip())
+				self.sequence += 1
 				
 			elif not self.gcodeQ.empty():
 				msg = self.gcodeQ.get(False)
@@ -58,10 +60,12 @@ class SendThread(threading.Thread):
 				elif msg["cmd"] == "DATA":
 					self.lineCt += 1
 					#print("(%s)" % msg["data"])
+					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
 					self.sendMessage(msg["data"])
-					self.waitOKQ.put(msg["data"].rstrip())
+					self.sequence += 1
+
 				elif msg["cmd"] == "END":
-					self.asyncQ.put("[EOF,%s]" % msg["name"])
+					self.asyncQ.put({"event": "EOF", "file": msg["name"], "lines": self.lineCt})
 					#print("EOF: %d lines" % self.lineCt)
 
 			else:
@@ -75,10 +79,9 @@ class SendThread(threading.Thread):
 
 		response = self.responseQ.get(False)
 		message = self.waitOKQ.get(False)
-		outMsg = "[%s: %s]" % (response, message)
-		print(outMsg)
-		if response != "ok":
-			self.asyncQ.put(outMsg)
+		outMsg = {"event": "response", "type": response, "data": message["data"], "sequence": message["seq"]}
+		#print(outMsg)
+		self.asyncQ.put(outMsg)
 		return False
 
 	def getPosition(self):
@@ -101,7 +104,7 @@ class SendThread(threading.Thread):
 			try:
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "END":
-					self.asyncQ.put("[ABORT,%s]" % msg["name"])
+					self.asyncQ.put({"event": "ABORT", "file": msg["name"]})
 					#print("ABORT: %d lines" % self.lineCt)
 			except queue.Empty:
 				break
@@ -137,7 +140,7 @@ class ListenThread(threading.Thread):
 	
 				else:
 					#print("got async (%s)" % line)
-					self.asyncQ.put(line)
+					self.asyncQ.put({"event": "message", "data": line})
 
 		self.endOfLife = True
 
