@@ -32,6 +32,7 @@ echo(rowy);
 *row3();
 *zpad2();
 *zpad3();
+z3back();
 
 *z2back();
 *resetpad();
@@ -40,7 +41,7 @@ echo(rowy);
 *translate([0, -10, 0]) ybutton_pad();
 *translate([0, -20, 0]) zbutton_pad();
 
- resetback();
+*resetback();
 
 *fullback();
 
@@ -211,6 +212,42 @@ module zpad3() {
                      row3();
                  }
     }
+}
+
+module z3back() {
+    mirror([1, 0,0])
+    union() {
+        //translate([0, 30, 0]) rotate([0, 0, 17.7]) cube([100, 4, 4], true);
+        difference() {
+            hull() {
+                for (i=[-1, 1], j=[-1, 1])
+                    translate([j*rowx, i*row3y/2+j*7, 0])
+                        cylinder(r=10, h=3);
+            }
+            
+            translate([rowx, row3y/2+7, bezel])
+                cylinder(r=2, h=20, center=true);
+            translate([-rowx, -(row3y/2+7), bezel])
+                cylinder(r=2, h=20, center=true);
+            
+            hull() for (i=[-1, 1])
+                translate([0, i*8, 0])
+                    cylinder(r=4, h=20, center=true);
+            
+            translate([0, -17, 0]) {
+                cylinder(r=2, h=20, center=true);
+                translate([0, 0, 1.5])
+                    cylinder(r=3.2, h=3, $fn=6);
+            }
+    
+         }
+         for (i=[-1, 1])
+             translate([i*(rowx/2+2), i*4, braceheight/2+3])
+                difference() {
+                    cube([rowx-6, 15, braceheight], true);
+                    cube([bx+bgap+1, 16, braceheight+1], true);
+                }
+   }
 }
 
 module z2back() {

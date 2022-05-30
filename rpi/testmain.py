@@ -68,96 +68,37 @@ class Grbl:
 				else:
 					print("invalid WCO term (%s)" % term)
 
+	def getDistance(self, dx):
+		if dx < 0:
+			sign = -1
+			dx = -dx
+		else:
+			sign = 1
+		if dx == 4:
+			return sign*1000.0
+		elif dx == 3:
+			return sign*10.0
+		elif dx == 2:
+			return sign*1.0
+		elif dx == 1:
+			return sign*0.1
+		return 0
+
 	def jog(self, cmd):
-		if self.cycleCount == 0:
-			return
+		terms = cmd.split(" ")
+		if len(terms) == 2:
+			if terms[1] == "STOP":
+				self.sh.stopJog()
 
-		self.cycleCount -= 1
-		if self.cycleCount == 0:
-			print("reset cc")
-			self.jogx = 0
-			self.jogy = 0
-			self.jogz = 0
-
-		try:
-			jog = eval(pcmd)
-		except:
-			print("unable to parse")
-			return
-
-		if len(jog) != 4:
-			print("not 4 parameters")
-			return
-
-		if self.status not in ["Idle", "Jog"]:
-			print("ignoring jog while not in valid state")
-			return
-
-		#print("dx = %d, dy = %d, zup = %d, zdown=%d" % (jog[0], jog[1], jog[2], jog[3]))
-		if jog[0] != 0 or jog[1] != 0:
-			jogxy = False
-			if self.jogx != jog[0]:
-				self.jogx = jog[0]
-				jogxy = True
-			if self.jogy != jog[1]:
-				self.jogy = jog[1]
-				jogxy = True
-
-			if jogxy:
-				print("jog x,y %d,%d" % (self.jogx, self.jogy))
-				if self.jogx == 0:
-					jx = 0
-				elif self.jogx > 0:
-					jx = 10
-				else:
-					jx = -10
-				if self.jogy == 0:
-					jy = 0
-				elif self.jogy > 0:
-					jy = 10
-				else:
-					jy = -10
-
-				if self.invertXJog:
-					jx = -jx
-				if self.invertYJog:
-					jy = -jy
-
-				sx = abs(self.jogx)*300;
-				sy = abs(self.jogy)*300;
-
-				self.sh.jogxy(jx, jy, max(sx, sy))
-
-				self.jogging = True
-				self.cycleCount = 3
-
-		elif jog[2] == 0 or jog[3] == 0:
-			if jog[2] == 0:
-				jogz = 1
-			elif jog[3] == 0:
-				jogz = -1
-			else:
-				jogz = 0
-
-			if self.invertZJog:
-				jogz = -jogz
-
-			if jogz != 0:
-				if self.jogz != jogz:
-					self.jogz = jogz
-					print("jog z %d" % self.jogz)
-					self.sh.jogz(jogz*10, 300)
-					self.jogging = True
-					self.cycleCount = 3
-			
-		elif self.jogging:
-			print("stop jogging")
-			self.sh.stopJog()
-			self.jogging = False
-			self.cycleCount = 0
-			self.jogx = 0
-			self.jogy = 0
-			self.jogz = 0
+		elif len(terms) == 3:
+			axis = terms[1]
+			distance = int(terms[2])
+			if axis == "X":
+				self.sh.jogxy(self.getDistance(distance), None, 800)
+			elif axis == "Y":
+				self.sh.jogxy(None, self.getDistance(distance), 800)
+			elif axis == "Z":
+				self.sh.jogz(self.getDistance(distance), 800)
 
 
 	def run(self):
@@ -173,15 +114,26 @@ class Grbl:
 		while True:
 			msg = self.sh.nextAsyncMessage()
 			if msg is not None:
-				if msg.startswith("<"):
-					self.parseStatus(msg)
+				if msg["data"].startswith("<"):
+					self.parseStatus(msg["data"])
 				else:
 					print("Async: (%s)" % str(msg))
 
 			pcmd = self.p.getCommand()
 			if pcmd is not None:
 				print("Pendant: (%s)" % pcmd)
-				#self.jog(pcmd)
+				if pcmd.startswith("JOG "):
+					self.jog(pcmd)
+				elif pcmd.startswith("RESET "):
+					axis = pcmd.split(" ")[1]
+					if axis == "X":
+						self.sh.resetAxis(0, None, None);
+					elif axis == "Y":
+						self.sh.resetAxis(None, 0, None);
+					elif axis == "Z":
+						self.sh.resetAxis(None, None, 0);
+				else:
+					print("skipping for now");
 
 grbl = Grbl()
 grbl.run()

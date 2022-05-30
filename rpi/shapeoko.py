@@ -191,9 +191,9 @@ class Shapeoko:
 		jogcmd += "G90" if absolute else "G91"
 		jogcmd += "G21" if metric else "G20"
 		if x is not None:
-			jogcmd += "X%f" % x
+			jogcmd += "X%.3f" % x
 		if y is not None:
-			jogcmd += "Y%f" % y
+			jogcmd += "Y%.3f" % y
 		jogcmd += "F%d\n" % speed
 		print(jogcmd)
 		return self.sendCommand(jogcmd)
@@ -203,10 +203,21 @@ class Shapeoko:
 		jogcmd += "G90" if absolute else "G91"
 		jogcmd += "G21" if metric else "G20"
 		if z is not None:
-			jogcmd += "Z%f" % z
+			jogcmd += "Z%.3f" % z
 		jogcmd += "F%d\n" % speed
 		print(jogcmd)
 		return self.sendCommand(jogcmd)
+
+	def resetAxis(self, x, y, z):
+		resetCmd = "G10 P0 L20 "
+		if x is not None:
+			resetCmd += "X%.3f " % x
+		if y is not None:
+			resetCmd += "Y%.3f " % y
+		if z is not None:
+			resetCmd += "Z%.3f " % z
+		print(resetCmd)
+		return self.sendCommand(resetCmd)
 
 	def stopJog(self):
 		print("stop jog immediate")
