@@ -32,7 +32,7 @@ echo(rowy);
 *row3();
 *zpad2();
 *zpad3();
-z3back();
+*z3back();
 
 *z2back();
 *resetpad();
@@ -43,23 +43,24 @@ z3back();
 
 *resetback();
 
-*fullback();
+fullback();
 
 module fullback() {
     union() {
         xyback();
         translate([-38, -38, 0])
             resetback();
-        translate([-50, -20, 1.5])
+        translate([-41, -20, 1.5])
             rotate([0, 0, 72.3])
-                cube([10, 30, 3], true);
-        translate([-20, -50, 1.5])
+                cube([10, 50, 3], true);
+        translate([-20, -40, 1.5])
             rotate([0, 0, 17.7])
-                cube([10, 30, 3], true);
-        translate([94, 0, 0])
-            z2back();
-        translate([78, 0, 1.5])
-            cube([10, 20, 3], true);
+                cube([10, 50, 3], true);
+        translate([58.5, -45, 0])
+            z3back();
+        translate([52, -20, 1.5])
+           rotate([0, 0, -72.3])
+            cube([10, 35, 3], true);
     }
 }
 
@@ -215,7 +216,6 @@ module zpad3() {
 }
 
 module z3back() {
-    mirror([1, 0,0])
     union() {
         //translate([0, 30, 0]) rotate([0, 0, 17.7]) cube([100, 4, 4], true);
         difference() {
