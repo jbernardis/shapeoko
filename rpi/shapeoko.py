@@ -194,7 +194,7 @@ class Shapeoko:
 			jogcmd += "X%.3f" % x
 		if y is not None:
 			jogcmd += "Y%.3f" % y
-		jogcmd += "F%d\n" % speed
+		jogcmd += "F%d" % speed
 		print(jogcmd)
 		return self.sendCommand(jogcmd)
 
@@ -204,7 +204,7 @@ class Shapeoko:
 		jogcmd += "G21" if metric else "G20"
 		if z is not None:
 			jogcmd += "Z%.3f" % z
-		jogcmd += "F%d\n" % speed
+		jogcmd += "F%d" % speed
 		print(jogcmd)
 		return self.sendCommand(jogcmd)
 

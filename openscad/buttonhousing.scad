@@ -43,7 +43,53 @@ echo(rowy);
 
 *resetback();
 
-fullback();
+*fullback();
+resettunnel();
+translate([-70, 0, 0])ztunnel();
+
+module resettunnel() {
+    translate([-38, -38, 0]) {
+        difference() {
+            union() {
+                translate([0, 0, -4])
+                    cylinder(r=14, h=2, center=true);
+                cylinder(r=8, h=10, center=true);
+                translate([0, 15, 0])
+                    cube([16, 30, 10], true);
+            }
+            translate([0, 0, -1])
+                cylinder(r=5, h=8.01, center=true);
+            translate([0, 15, -1])
+                cube([10.02, 30.01, 8.01], true);
+            rotate([0, 0, -17.7]) {
+                translate([0, -10, 0]) {
+                    translate([0, 0, 2])
+                        cylinder(r=3, center=true, h=10);
+                    cylinder(r=2, center=true, h=30);
+                }
+            }
+        }
+    }
+
+}
+
+module ztunnel() {
+    translate([58.5, -45-17, 0]) {
+        difference() {
+            union() {
+                cylinder(r=8, h=10, center=true);
+                translate([0, 27, 0])
+                    cube([16, 54, 10], true);
+            }
+            translate([0, 33, -1])
+                cube([10, 54.01, 8.01], true);
+            cylinder(r=2, h=20, center=true);
+            translate([0, 0, 6])
+                cylinder(r=4, h=10, center=true);
+        }
+    }
+
+}
 
 module fullback() {
     union() {
