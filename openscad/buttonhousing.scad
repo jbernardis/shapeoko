@@ -43,9 +43,43 @@ echo(rowy);
 
 *resetback();
 
-*fullback();
-resettunnel();
-translate([-70, 0, 0])ztunnel();
+translate([0, 18, -20])
+fullback();
+*resettunnel();
+*translate([-70, 0, 0])ztunnel();
+backbox();
+
+module backbox() {
+    difference() {
+        union() {
+            hull() {
+                for (i=[-1, 1])
+                    translate([i*57/2, 0, 0])
+                        cylinder(r=35, h=44, center=true);
+            }
+            translate([0, 10, 0])
+                cylinder(r=35, h=44, center=true);
+            hull() {
+                for (i=[-1, 1])
+                    translate([53.5, -22+i*20, -12])
+                        cylinder(r=10, h=20, center=true);
+            }
+        }
+        hull() {
+            for (i=[-1, 1])
+                translate([i*57/2, 0, 2])
+                    cylinder(r=33, h=44, center=true);
+        }
+        translate([0, 10, 2])
+            cylinder(r=33, h=44, center=true);
+
+        hull() {
+            for (i=[-1, 1])
+                translate([53.5, -22+i*20, -14])
+                    cylinder(r=8, h=20, center=true);
+        }
+    }
+}
 
 module resettunnel() {
     translate([-38, -38, 0]) {

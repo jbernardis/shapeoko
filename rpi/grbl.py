@@ -181,7 +181,10 @@ class Grbl(threading.Thread):
 						self.shapeoko.resetAxis(None, 0, None);
 					elif axis == "Z":
 						self.shapeoko.resetAxis(None, None, 0);
-				else:
-					print("skipping for now");
 
 		self.endOfLife = True
+
+	def terminate(self):
+		self.kill()
+		while not self.endOfLife:
+			time.sleep(0.1)
