@@ -43,42 +43,95 @@ echo(rowy);
 
 *resetback();
 
-translate([0, 18, -20])
+*translate([-13, 18, -40])
 fullback();
 *resettunnel();
 *translate([-70, 0, 0])ztunnel();
-backbox();
+*backbox();
+lid();
+
+module lid() {
+    mirror([0, 0, 0])
+     union() {
+        difference() {
+            union() {
+                hull() for(i=[-1, 1], j=[-1, 1])
+                    translate([i*(93/2+4), j*(50/2+4), 0])
+                        cylinder(r=4, h=8, center=true);
+               translate([-13, 18, 0])
+                    cylinder(r=30, h=8, center=true);
+            }
+            translate([0, 0, 2])
+                cube([93, 50, 8], true);
+            translate([-13, 18, 2]) 
+                cylinder(r=27, h=8, center=true);
+            
+   
+            translate([93/2, -(50/2+4)-4+2.5+37, 8/2-4/2])
+                cube([20, 5, 4.01], true);
+             
+             
+            for(i=[-1, 1], j=[-1, 1])
+                translate([i*(93/2+4), j*(50/2+4), 0])
+                    cylinder(r=2, h=10, center=true);
+
+         }
+     }
+}
 
 module backbox() {
-    difference() {
-        union() {
-            hull() {
-                for (i=[-1, 1])
-                    translate([i*57/2, 0, 0])
-                        cylinder(r=35, h=44, center=true);
+    mirror([0, 1, 0])
+     union() {
+        difference() {
+            union() {
+                hull() for(i=[-1, 1], j=[-1, 1])
+                    translate([i*(93/2+4), j*(50/2+4), 0])
+                        cylinder(r=4, h=40, center=true);
+                translate([46, 0, 0])
+                    hull() for (i=[-1, 1])
+                        translate([0, i*15-30, -40/2+10/2])
+                            cylinder(r=8, h=10, center=true);
+                translate([-50, -20, -40/2+10/2])
+                    cylinder(r=15, h=10, center=true);
+                translate([-13, 18, 0])
+                    cylinder(r=30, h=40, center=true);
             }
-            translate([0, 10, 0])
-                cylinder(r=35, h=44, center=true);
-            hull() {
-                for (i=[-1, 1])
-                    translate([53.5, -22+i*20, -12])
-                        cylinder(r=10, h=20, center=true);
+            translate([0, 0, 2])
+                cube([93, 50, 40], true);
+            translate([46, 0, 0])
+                hull() for (i=[-1, 1])
+                    translate([0, i*15-30, -40/2+10/2-2])
+                        cylinder(r=6, h=10, center=true);
+            translate([-50, -20, -40/2+10/2-2])
+                cylinder(r=13, h=10, center=true);
+            translate([-13, 18, 2]) {
+                cylinder(r=27, h=40, center=true);
+                cylinder(r=8, h=50, center=true);
+                for(i=[-1, 1], j=[-1, 1])
+                    translate([i*15, j*15, 0]) {
+                        cylinder(r=1.9, h=50, center=true);
+                    }
             }
-        }
-        hull() {
-            for (i=[-1, 1])
-                translate([i*57/2, 0, 2])
-                    cylinder(r=33, h=44, center=true);
-        }
-        translate([0, 10, 2])
-            cylinder(r=33, h=44, center=true);
+             
+             
+             
+            for(i=[-1, 1], j=[-1, 1])
+                translate([i*(93/2+4), j*(50/2+4), 40/2-5+0.01])
+                    cylinder(r=2.6, h=10, center=true);
 
-        hull() {
-            for (i=[-1, 1])
-                translate([53.5, -22+i*20, -14])
-                    cylinder(r=8, h=20, center=true);
-        }
-    }
+         }
+         translate([41.5, 14.75, -40/2+10/2])
+            difference() {
+                cylinder(r=4, h=10, center=true);
+                cylinder(r=2.6, h=11, center=true);
+            }
+         translate([-37.5, -14., -40/2+10/2])
+            difference() {
+                cylinder(r=4, h=10, center=true);
+                translate([0, 0, 2])
+                    cylinder(r=2.6, h=10, center=true);
+            }
+     }
 }
 
 module resettunnel() {

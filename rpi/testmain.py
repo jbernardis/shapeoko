@@ -3,9 +3,11 @@ from wx.lib import newevent
 
 
 from grbl import Grbl
+from common import XAXIS, YAXIS, ZAXIS, AxisList
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 (PositionEvent, EVT_NEWPOSITION) = newevent.NewEvent()  
+
 
 
 class MainFrame(wx.Frame):
@@ -15,9 +17,9 @@ class MainFrame(wx.Frame):
 		self.SetBackgroundColour("white")
 
 		self.shapeokoStatus = ""
-		self.shapeokoMPos = [0.0, 0.0, 0.0]
-		self.shapeokoWCO  = [0.0, 0.0, 0.0]
-		self.displayPos = [None, None, None]
+		self.shapeokoMPos = { XAXIS: 0.0, YAXIS: 0.0, ZAXIS: 0.0 }
+		self.shapeokoWCO  = { XAXIS: 0.0, YAXIS: 0.0, ZAXIS: 0.0 }
+		self.displayPos = { XAXIS: None, YAXIS: None, ZAXIS: None }
 		self.showMPos = False
 
 		self.grbl = None
@@ -25,15 +27,16 @@ class MainFrame(wx.Frame):
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
 
-		self.status = wx.StaticText(self, wx.ID_ANY, "", pos=(10, 1))
+		w,h = dc.GetTextExtent("XXXXXXXX")
+		self.status = wx.StaticText(self, wx.ID_ANY, "IDLE", pos=(10, 1), size=(w, h))
 		self.status.SetFont(font)
-		self.status.SetLabel("IDLE")
 
-		self.labels = {}
+		self.stAxisNames = {}
+		self.stAxisValues = {}
 
-		self.posX = self.addPositionLine("X", 120, font, dc)
-		self.posY = self.addPositionLine("Y", 240, font, dc)
-		self.posZ = self.addPositionLine("Z", 360, font, dc)
+		self.addPositionLine(XAXIS, 120, font, dc)
+		self.addPositionLine(YAXIS, 240, font, dc)
+		self.addPositionLine(ZAXIS, 360, font, dc)
 
 		b = wx.Button(self, wx.ID_ANY, "exit", pos=(500, 360))
 		self.Bind(wx.EVT_BUTTON, self.onClose, b)
@@ -51,17 +54,16 @@ class MainFrame(wx.Frame):
 
 	def addPositionLine(self, axis, ycoord, font, dc):
 		labelAxis ="%s:" % axis
-		w,h = dc.GetTextExtent(labelAxis)
-		lbl = wx.StaticText(self, wx.ID_ANY, labelAxis, pos=(10, ycoord), size=(w, h))
+		lblw,lblh = dc.GetTextExtent(labelAxis)
+		lbl = wx.StaticText(self, wx.ID_ANY, labelAxis, pos=(10, ycoord), size=(lblw, lblh))
 		lbl.SetFont(font)
-		self.labels[axis] = lbl
+		self.stAxisNames[axis] = lbl
 
-		lblw = w
-		labelValue = "   0.00"
-		w,h = dc.GetTextExtent(labelValue)
-		value = wx.StaticText(self, wx.ID_ANY, labelValue, pos=(lblw+20, ycoord), size=(w, h))
+		valueAxis = "   0.00"
+		w,h = dc.GetTextExtent(valueAxis)
+		value = wx.StaticText(self, wx.ID_ANY, valueAxis, pos=(lblw+20, ycoord), size=(w, h))
 		value.SetFont(font)
-		return value
+		self.stAxisValues[axis] = value
 
 	def statusUpdate(self, newStatus): # Thread context
 		evt = StatusEvent(status=newStatus)
@@ -78,23 +80,23 @@ class MainFrame(wx.Frame):
 
 	def setPositionEvent(self, evt):
 		posChanged = False
-		for i in range(3):
-			if evt.mpos[i] != self.shapeokoMPos[i]:
-				self.shapeokoMPos[i] = evt.mpos[i]
+		for a in AxisList:
+			if evt.mpos[a] != self.shapeokoMPos[a]:
+				self.shapeokoMPos[a] = evt.mpos[a]
 				posChanged = True
-			if evt.wco[i] != self.shapeokoWCO[i]:
-				self.shapeokoWCO[i] = evt.wco[i]
+			if evt.wco[a] != self.shapeokoWCO[a]:
+				self.shapeokoWCO[a] = evt.wco[a]
 				posChanged = True
-		if posChanged:
-			print("new position: [%f %f %f] [%f %f %f]" % (evt.mpos[0], evt.mpos[1], evt.mpos[2], evt.wco[0], evt.wco[1], evt.wco[2]))
-			if self.showMPos:
-				nx, ny, nz = self.shapeokoMPos
-			else:
-				nx, ny, nz = [self.shapeokoMPos[i]-self.shapeokoWCO[i] for i in range(3)]
 
-			for stpos, nv in [[self.posX, nx], [self.posY, ny], [self.posZ, nz]]:
-				nvl = "%7.3f" % nv
-				stpos.SetLabel(nvl)
+		if posChanged:
+			print("new position: [%f %f %f] [%f %f %f]" % (evt.mpos[XAXIS], evt.mpos[YAXIS], evt.mpos[ZAXIS], evt.wco[XAXIS], evt.wco[YAXIS], evt.wco[ZAXIS]))
+			for a in AxisList:
+				if self.showMPos:
+					newValue = self.shapeokoPos[a]
+				else:
+					newValue = self.shapeokoMPos[a]-self.shapeokoWCO[a]
+
+				self.stAxisValues[a].SetLabel("%7.3f" % newValue)
 
 	def onClose(self, _):
 		if self.grbl is not None:
@@ -106,8 +108,8 @@ class App(wx.App):
 	def OnInit(self):
 
 		self.frame = MainFrame()
-		self.frame.Show()
-		#self.frame.ShowFullScreen(True)
+		#self.frame.Show()
+		self.frame.ShowFullScreen(True)
 #		self.frame.Maximize(True)
 #		self.SetTopWindow(self.frame)
 		return True

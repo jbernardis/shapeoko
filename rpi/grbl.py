@@ -4,6 +4,8 @@ import threading
 from shapeoko import Shapeoko
 from pendant import Pendant
 
+from common import XAXIS, YAXIS, ZAXIS
+
 # <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
 class Grbl(threading.Thread):
 	def __init__(self, ttyShapeoko, ttyPendant):
@@ -122,7 +124,7 @@ class Grbl(threading.Thread):
 
 		if posChanged:
 			if callable(self.cbNewPosition):
-				self.cbNewPosition([self.x, self.y, self.z], [self.offx, self.offy, self.offz])
+				self.cbNewPosition({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
 
 	def getDistance(self, dx):
 		if dx < 0:

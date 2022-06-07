@@ -1,0 +1,21 @@
+abort job
+
+unlock alarm
+tool on
+tool off
+tool speed
+
+check size
+open/load file
+start job
+stop job
+resume job
+
+goto 0  (G90 G0 X0 Y0; G90 G0 Z0)
+feed hold
+
+get state ($G)
+
+soft reset
+
+check mode ($c) ??
