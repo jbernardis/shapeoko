@@ -7,6 +7,7 @@ from pendant import Pendant
 # <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
 class Grbl(threading.Thread):
 	def __init__(self, ttyShapeoko, ttyPendant):
+		threading.Thread.__init__(self)
 		self.status = None
 		self.x = None
 		self.y = None
@@ -185,6 +186,9 @@ class Grbl(threading.Thread):
 		self.endOfLife = True
 
 	def terminate(self):
+		if self.shapeoko is not None:
+			self.shapeoko.terminate()
+
 		self.kill()
 		while not self.endOfLife:
 			time.sleep(0.1)

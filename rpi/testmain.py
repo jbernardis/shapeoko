@@ -21,20 +21,24 @@ class MainFrame(wx.Frame):
 		self.showMPos = False
 
 		self.grbl = None
-		font = wx.Font(28, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial Black")
+		font = wx.Font(72, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
+		dc = wx.ScreenDC()
+		dc.SetFont(font)
 
-
-		self.status = wx.StaticText(self, wx.ID_ANY, "IDLE", pos=(10, 1))
+		self.status = wx.StaticText(self, wx.ID_ANY, "", pos=(10, 1))
 		self.status.SetFont(font)
+		self.status.SetLabel("IDLE")
 
-		self.posX = self.addPositionLine("X", 160, font)
-		self.posY = self.addPositionLine("Y", 320, font)
-		self.posZ = self.addPositionLine("Z", 480, font)
+		self.labels = {}
 
-		b = wx.Button(self, wx.ID_ANY, "exit", pos=(500, 480))
+		self.posX = self.addPositionLine("X", 120, font, dc)
+		self.posY = self.addPositionLine("Y", 240, font, dc)
+		self.posZ = self.addPositionLine("Z", 360, font, dc)
+
+		b = wx.Button(self, wx.ID_ANY, "exit", pos=(500, 360))
 		self.Bind(wx.EVT_BUTTON, self.onClose, b)
 
-		#wx.CallAfter(self.initialize)
+		wx.CallAfter(self.initialize)
 
 	def initialize(self):
 		self.grbl = Grbl("/dev/ttyACM0", "/dev/ttyUSB0")
@@ -45,11 +49,17 @@ class MainFrame(wx.Frame):
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 		self.Bind(EVT_NEWPOSITION, self.setPositionEvent)
 
-
-	def addPositionLine(self, axis, ycoord, font):
-		lbl = wx.StaticText(self, wx.ID_ANY, "%s:" % axis, pos=(10, ycoord))
+	def addPositionLine(self, axis, ycoord, font, dc):
+		labelAxis ="%s:" % axis
+		w,h = dc.GetTextExtent(labelAxis)
+		lbl = wx.StaticText(self, wx.ID_ANY, labelAxis, pos=(10, ycoord), size=(w, h))
 		lbl.SetFont(font)
-		value = wx.StaticText(self, wx.ID_ANY, "0000.000", pos=(60, ycoord))
+		self.labels[axis] = lbl
+
+		lblw = w
+		labelValue = "   0.00"
+		w,h = dc.GetTextExtent(labelValue)
+		value = wx.StaticText(self, wx.ID_ANY, labelValue, pos=(lblw+20, ycoord), size=(w, h))
 		value.SetFont(font)
 		return value
 
@@ -82,7 +92,7 @@ class MainFrame(wx.Frame):
 			else:
 				nx, ny, nz = [self.shapeokoMPos[i]-self.shapeokoWCO[i] for i in range(3)]
 
-			for stpos, nv in [[self.posX, nx], [self.poxY, ny], [self.posZ, nz]]:
+			for stpos, nv in [[self.posX, nx], [self.posY, ny], [self.posZ, nz]]:
 				nvl = "%7.3f" % nv
 				stpos.SetLabel(nvl)
 
@@ -96,7 +106,8 @@ class App(wx.App):
 	def OnInit(self):
 
 		self.frame = MainFrame()
-		self.frame.ShowFullScreen(True)
+		self.frame.Show()
+		#self.frame.ShowFullScreen(True)
 #		self.frame.Maximize(True)
 #		self.SetTopWindow(self.frame)
 		return True
