@@ -2,7 +2,7 @@ import wx
 from wx.lib import newevent
 
 
-from grbl import Grbl
+from shapeoko import Shapeoko
 from common import XAXIS, YAXIS, ZAXIS, AxisList
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
@@ -22,7 +22,7 @@ class MainFrame(wx.Frame):
 		self.displayPos = { XAXIS: None, YAXIS: None, ZAXIS: None }
 		self.showMPos = False
 
-		self.grbl = None
+		self.shapeoko = None
 		font = wx.Font(72, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
@@ -44,10 +44,10 @@ class MainFrame(wx.Frame):
 		wx.CallAfter(self.initialize)
 
 	def initialize(self):
-		self.grbl = Grbl("/dev/ttyACM0", "/dev/ttyUSB0")
-		self.grbl.registerNewStatus(self.statusUpdate)
-		self.grbl.registerNewPosition(self.positionChange)
-		self.grbl.go()
+		self.shapeoko = Shapeoko("/dev/ttyACM0", "/dev/ttyUSB0")
+		self.shapeoko.registerNewStatus(self.statusUpdate)
+		self.shapeoko.registerNewPosition(self.positionChange)
+		self.shapeoko.go()
 
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 		self.Bind(EVT_NEWPOSITION, self.setPositionEvent)
@@ -99,8 +99,8 @@ class MainFrame(wx.Frame):
 				self.stAxisValues[a].SetLabel("%7.3f" % newValue)
 
 	def onClose(self, _):
-		if self.grbl is not None:
-			self.grbl.terminate()
+		if self.shapeoko is not None:
+			self.shapeoko.terminate()
 
 		self.Destroy()
 

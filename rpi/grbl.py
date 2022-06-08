@@ -1,196 +1,306 @@
-import time
+from serial import Serial
 import threading
+import queue
+import time
 
-from shapeoko import Shapeoko
-from pendant import Pendant
-
-from common import XAXIS, YAXIS, ZAXIS
-
-# <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
-class Grbl(threading.Thread):
-	def __init__(self, ttyShapeoko, ttyPendant):
+class RepeatTimer(threading.Thread):
+	def __init__(self, event, interval, function):
 		threading.Thread.__init__(self)
-		self.status = None
-		self.x = None
-		self.y = None
-		self.z = None
-		self.offx = None
-		self.offy = None
-		self.offz = None
-		self.jogx = 0
-		self.jogy = 0
-		self.jogz = 0
-		self.jogging = False
-		self.cycleCount = 0
-		self.invertXJog = False
-		self.inveryYJog = True
-		self.invertZJog = False
+		self.interval = interval
+		self.stopped = event
+		self.function = function
 
-		self.running = False
+	def run(self):
+		while not self.stopped.wait(self.interval):
+			self.function()
+
+class SendThread(threading.Thread):
+	def __init__(self, port, immedQ, commandQ, gcodeQ, responseQ, asyncQ):
+		super(SendThread,self).__init__()
+		self.port = port
+		self.immedQ = immedQ
+		self.commandQ = commandQ
+		self.gcodeQ = gcodeQ		
+		self.responseQ = responseQ
+		self.asyncQ = asyncQ	
+		self.isRunning = False
 		self.endOfLife = False
+		self.lineCt = 0
+		self.waitOKQ = queue.Queue(0)
+		self.sequence = 0
 
-		self.cbNewStatus = None
-		self.cbNewPosition = None
-
-		self.shapeoko = Shapeoko(tty=ttyShapeoko)
-		self.shapeoko.startPoll()
-
-		self.pendant = Pendant(tty=ttyPendant)
-
-	def go(self):
 		self.start()
-
-	def registerNewStatus(self, cbNewStatus):
-		self.cbNewStatus = cbNewStatus
-
-	def registerNewPosition(self, cbNewPosition):
-		self.cbNewPosition = cbNewPosition
-
-	def parseStatus(self, msg):
-		terms = msg.split("|")
-		ns = terms[0][1:]
-		if ns != self.status:
-			self.status = ns
-			if callable(self.cbNewStatus):
-				self.cbNewStatus(self.status)
-
-		posChanged = False
-		for term in terms[1:]:
-			if term.startswith("MPos:"):
-				posterm = term[5:].replace(">", "")
-				newpos = posterm.split(",")
-				if len(newpos) == 3:
-					nx = float(newpos[0])
-					ny = float(newpos[1])
-					nz = float(newpos[2])
-					if self.x != nx:
-						self.x = nx
-						posChanged = True
-						#print("new x: %f" % nx)
-					if self.y != ny:
-						self.y = ny
-						posChanged = True
-						#print("new y: %f" % ny)
-					if self.z != nz:
-						self.z = nz
-						posChanged = True
-						#print("new z: %f" % nz)
-				else:
-					print("invalid MPos term (%s)" % term)
-
-			elif term.startswith("WPos:"):
-				posterm = term[5:].replace(">", "")
-				newpos = posterm.split(",")
-				if len(newpos) == 3:
-					nx = float(newpos[0])
-					ny = float(newpos[1])
-					nz = float(newpos[2])
-					if self.x != nx - self.offx:
-						self.x = nx - self.offx
-						posChanged = True
-						#print("new WC x: %f, MP: %f" % (nx, self.x))
-					if self.y != ny - self.offy:
-						self.y = ny - self.offy
-						posChanged = True
-						#print("new WC y: %f, MP: %f" % (ny, self.y))
-					if self.z != nz - self.offz:
-						self.z = nz - self.offz
-						posChanged = True
-						#print("new WC z: %f, MP: %f" % (nz, self.z))
-				else:
-					print("invalid MPos term (%s)" % term)
-
-			elif term.startswith("WCO:"):
-				posterm = term[4:].replace(">", "")
-				newpos = posterm.split(",")
-				if len(newpos) == 3:
-					nx = float(newpos[0])
-					ny = float(newpos[1])
-					nz = float(newpos[2])
-					if self.offx != nx:
-						self.offx = nx
-						posChanged = True
-						#print("new offx: %f" % nx)
-					if self.offy != ny:
-						self.offy = ny
-						posChanged = True
-						#print("new offy: %f" % ny)
-					if self.offz != nz:
-						self.offz = nz
-						posChanged = True
-					#print("new offz: %f" % nz)
-				else:
-					print("invalid WCO term (%s)" % term)
-
-		if posChanged:
-			if callable(self.cbNewPosition):
-				self.cbNewPosition({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
-
-	def getDistance(self, dx):
-		if dx < 0:
-			sign = -1
-			dx = -dx
-		else:
-			sign = 1
-		if dx == 4:
-			return sign*1000.0
-		elif dx == 3:
-			return sign*10.0
-		elif dx == 2:
-			return sign*1.0
-		elif dx == 1:
-			return sign*0.1
-		return 0
-
-	def jog(self, cmd):
-		terms = cmd.split(" ")
-		if len(terms) == 2:
-			if terms[1] == "STOP":
-				self.shapeoko.stopJog()
-
-		elif len(terms) == 3:
-			axis = terms[1]
-			distance = int(terms[2])
-			if axis == "X":
-				self.shapeoko.jogxy(self.getDistance(distance), None, 800)
-			elif axis == "Y":
-				self.shapeoko.jogxy(None, self.getDistance(distance), 800)
-			elif axis == "Z":
-				self.shapeoko.jogz(self.getDistance(distance), 800)
-
+		
 	def kill(self):
 		self.isRunning = False
+
+	def isKilled(self):
+		return self.endOfLife
 
 	def run(self):
 		self.isRunning = True
 		while self.isRunning:
-			msg = self.shapeoko.nextAsyncMessage()
-			if msg is not None:
-				if msg["data"].startswith("<"):
-					self.parseStatus(msg["data"])
-				else:
-					print("Async: (%s)" % str(msg))
+			if not self.immedQ.empty():
+				string = self.immedQ.get(False)
+				self.sendMessage(string)
+				
+			elif not self.waitOKQ.empty():
+				self.checkForOK()
 
-			pcmd = self.pendant.getCommand()
-			if pcmd is not None:
-				print("Pendant: (%s)" % pcmd)
-				if pcmd.startswith("JOG "):
-					self.jog(pcmd)
-				elif pcmd.startswith("RESET "):
-					axis = pcmd.split(" ")[1]
-					if axis == "X":
-						self.shapeoko.resetAxis(0, None, None);
-					elif axis == "Y":
-						self.shapeoko.resetAxis(None, 0, None);
-					elif axis == "Z":
-						self.shapeoko.resetAxis(None, None, 0);
+			elif not self.commandQ.empty():
+				string = self.commandQ.get(False)
+				self.waitOKQ.put({"seq": self.sequence, "data": string.rstrip()})
+				self.sendMessage(string)
+				self.sequence += 1
+				
+			elif not self.gcodeQ.empty():
+				msg = self.gcodeQ.get(False)
+				if msg["cmd"] == "START":
+					self.lineCt = 0
+				elif msg["cmd"] == "DATA":
+					self.lineCt += 1
+					#print("(%s)" % msg["data"])
+					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
+					self.sendMessage(msg["data"])
+					self.sequence += 1
+
+				elif msg["cmd"] == "END":
+					self.asyncQ.put({"event": "EOF", "file": msg["name"], "lines": self.lineCt})
+					#print("EOF: %d lines" % self.lineCt)
+
+			else:
+				time.sleep(0.001)
 
 		self.endOfLife = True
 
-	def terminate(self):
-		if self.shapeoko is not None:
-			self.shapeoko.terminate()
+	def checkForOK(self):
+		if self.responseQ.empty():
+			return True
 
-		self.kill()
-		while not self.endOfLife:
+		response = self.responseQ.get(False)
+		message = self.waitOKQ.get(False)
+		outMsg = {"event": "response", "type": response, "data": message["data"], "sequence": message["seq"]}
+		#print(outMsg)
+		self.asyncQ.put(outMsg)
+		return False
+
+	def getPosition(self):
+		return self.lineCt
+				
+	def sendMessage(self, string):
+		try:
+			#print("sending (%s)" % string)
+			bmsg = bytes(string, 'UTF-8')
+			self.port.write(bmsg)
+		except:
+			print("write failure sending (%s)" % string)
+			self.killJob()
+			
+	def killJob(self):
+		self.drainQueue()
+			
+	def drainQueue(self):
+		while True:
+			try:
+				msg = self.gcodeQ.get(False)
+				if msg["cmd"] == "END":
+					self.asyncQ.put({"event": "ABORT", "file": msg["name"]})
+					#print("ABORT: %d lines" % self.lineCt)
+			except queue.Empty:
+				break
+	
+class ListenThread(threading.Thread):
+	def __init__(self, port, responseQ, asyncQ):
+		super(ListenThread,self).__init__()
+		self.port = port
+		self.responseQ = responseQ		
+		self.isRunning = False
+		self.endOfLife = False
+		self.asyncQ = asyncQ
+
+		self.start()
+		
+	def kill(self):
+		self.isRunning = False
+
+	def isKilled(self):
+		return self.endOfLife
+		
+	def run(self):
+		self.isRunning = True
+		while self.isRunning:
+			line=self.port.readline().decode("UTF-8").strip()
+
+			if (len(line)>=1):
+				#print("input (%s)" % line)
+				llow = line.lower()
+				
+				if self.isResponse(llow):
+					self.responseQ.put(llow)
+	
+				else:
+					#print("got async (%s)" % line)
+					self.asyncQ.put({"event": "message", "data": line})
+
+		self.endOfLife = True
+
+	def isResponse(self, string):
+		if string.startswith("ok"):
+			return True
+		if string.startswith("error:"):
+			return True
+
+		return False
+		
+class Grbl:
+	def __init__(self, tty="/dev/ttyACM0", baud=115200, pollInterval=0.2):
+		try:
+			self.port = Serial(tty, baud, timeout=0.02)
+			self.connected = True
+		except Exception as e:
+			self.connected = False
+			raise e
+
+		self.immedQ = queue.Queue(0)
+		self.commandQ = queue.Queue(0)
+		self.gcodeQ = queue.Queue(0)
+
+		self.stopPoll = None
+		self.pollTimer = None
+		self.pollInterval = pollInterval
+
+		self.responseQ = queue.Queue(0)
+		self.asyncQ = queue.Queue(0)
+
+		if self.connected:		
+			self.listener = ListenThread(self.port, self.responseQ, self.asyncQ)
+			self.sender = SendThread(self.port, self.immedQ, self.commandQ, self.gcodeQ, self.responseQ, self.asyncQ)
+			self.sendImmediate("\r\n") # wake up grbl
+			self.sendImmediate("\r\n")
+			time.sleep(2)
+
+		else:
+			self.listener = None
+			self.sender = None
+
+	def isConnected(self):
+		return self.connected
+
+	def jogxy(self, x, y, speed, absolute=False, metric=True):
+		jogcmd = "$J="
+		jogcmd += "G90" if absolute else "G91"
+		jogcmd += "G21" if metric else "G20"
+		if x is not None:
+			jogcmd += "X%.3f" % x
+		if y is not None:
+			jogcmd += "Y%.3f" % y
+		jogcmd += "F%d" % speed
+		print(jogcmd)
+		return self.sendCommand(jogcmd)
+
+	def jogz(self, z, speed, absolute=False, metric=True):
+		jogcmd = "$J="
+		jogcmd += "G90" if absolute else "G91"
+		jogcmd += "G21" if metric else "G20"
+		if z is not None:
+			jogcmd += "Z%.3f" % z
+		jogcmd += "F%d" % speed
+		print(jogcmd)
+		return self.sendCommand(jogcmd)
+
+	def resetAxis(self, x, y, z):
+		resetCmd = "G10 P0 L20 "
+		if x is not None:
+			resetCmd += "X%.3f " % x
+		if y is not None:
+			resetCmd += "Y%.3f " % y
+		if z is not None:
+			resetCmd += "Z%.3f " % z
+		print(resetCmd)
+		return self.sendCommand(resetCmd)
+
+	def stopJog(self):
+		print("stop jog immediate")
+		return self.sendImmediate(chr(0x85))
+
+	def startPoll(self):
+		if not self.connected:
+			return False
+
+		self.stopPoll = threading.Event()
+		self.pollTimer = RepeatTimer(self.stopPoll, self.pollInterval, self.sendPoll)
+		self.pollTimer.start()
+		return True
+
+	def sendPoll(self):
+		self.sendImmediate("?")
+
+	def sendCommand(self, cmd):
+		if not self.connected:
+			return False
+
+		self.commandQ.put(cmd + '\n')
+		return True
+
+	def sendImmediate(self, cmd):
+		if not self.connected:
+			return False
+
+		self.immedQ.put(cmd)
+		return True
+
+	def sendGCodeFile(self, fn):
+		if not self.connected:
+			return False
+
+		self.gcodeQ.put({"cmd": "START", "name": fn})
+
+		with open(fn,'r') as fp:
+			for ln in fp:
+				self.gcodeQ.put({"cmd": "DATA", "data": ln.strip() + '\n'})
+
+		self.gcodeQ.put({"cmd": "END", "name": fn})
+		return True
+
+	def nextAsyncMessage(self, wait=False):
+		if not self.connected:
+			return None
+
+		if wait:
+			response = self.asyncQ.get(True, timeout=None)
+		else:
+			if self.asyncQ.empty():
+				return None
+			response = self.asyncQ.get(False)
+		return response
+		
+	def terminate(self):
+		if self.stopPoll:
+			self.stopPoll.set()
+
+		senderKilled = True
+		if self.sender is not None:
+			senderKilled = False
+			try:
+				self.sender.kill()
+			except:
+				senderKilled = True
+
+		listenerKilled = True
+		if self.listener is not None:
+			listenerKilled = False
+			try:
+				self.listener.kill()
+			except:
+				listenerKilled = True
+
+		while not (senderKilled and listenerKilled):
+			if not senderKilled:
+				senderKilled = self.sender.isKilled()
+			if not listenerKilled:
+				listenerKilled = self.listener.isKilled()
 			time.sleep(0.1)
+
+		self.connected = False
+		self.sender = None
+		self.listener = None
