@@ -1,115 +1,101 @@
 import wx
-from wx.lib import newevent
-
 
 from shapeoko import Shapeoko
-from common import XAXIS, YAXIS, ZAXIS, AxisList
-
-(StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
-(PositionEvent, EVT_NEWPOSITION) = newevent.NewEvent()  
-
+from images import Images
+from dropanel import DROPanel
+from statpanel import StatPanel
+from jobpanel import JobPanel
+from jogpanel import JogPanel 
+from settings import Settings
 
 
 class MainFrame(wx.Frame):
 	def __init__(self):		
-		wx.Frame.__init__(self, None, size=(800, 480), title="")
+		wx.Frame.__init__(self, None)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
-		self.SetBackgroundColour("white")
-
-		self.shapeokoStatus = ""
-		self.shapeokoMPos = { XAXIS: 0.0, YAXIS: 0.0, ZAXIS: 0.0 }
-		self.shapeokoWCO  = { XAXIS: 0.0, YAXIS: 0.0, ZAXIS: 0.0 }
-		self.displayPos = { XAXIS: None, YAXIS: None, ZAXIS: None }
-		self.showMPos = False
+		self.SetBackgroundColour(wx.Colour(196, 196, 196))
+		self.SetClientSize((800, 480))
 
 		self.shapeoko = None
-		font = wx.Font(72, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
-		dc = wx.ScreenDC()
-		dc.SetFont(font)
+		self.settings = Settings()
 
-		w,h = dc.GetTextExtent("XXXXXXXX")
-		self.status = wx.StaticText(self, wx.ID_ANY, "IDLE", pos=(10, 1), size=(w, h))
-		self.status.SetFont(font)
+		self.images = Images("images")
 
-		self.stAxisNames = {}
-		self.stAxisValues = {}
+		self.lb = wx.Listbook(self, wx.ID_ANY, style=wx.BK_RIGHT)
+		il = wx.ImageList(32, 32)
 
-		self.addPositionLine(XAXIS, 120, font, dc)
-		self.addPositionLine(YAXIS, 240, font, dc)
-		self.addPositionLine(ZAXIS, 360, font, dc)
+		il.Add(self.images.pngDropanel)
+		il.Add(self.images.pngStatpanel)
+		il.Add(self.images.pngJobpanel)
+		il.Add(self.images.pngJogpanel)
+		il.Add(self.images.pngExitpanel)
+		self.lb.AssignImageList(il)
 
-		b = wx.Button(self, wx.ID_ANY, "exit", pos=(500, 360))
-		self.Bind(wx.EVT_BUTTON, self.onClose, b)
+		self.DROPanel = DROPanel(self.lb, self)
+		self.lb.AddPage(self.DROPanel, "DRO", imageId=0)
+
+		self.StatPanel = StatPanel(self.lb, self)
+		self.lb.AddPage(self.StatPanel, "Status", imageId=1)
+
+		self.JobPanel = JobPanel(self.lb, self)
+		self.lb.AddPage(self.JobPanel, "Job", imageId=2)
+
+		self.JogPanel = JogPanel(self.lb, self)
+		self.lb.AddPage(self.JogPanel, "Jog", imageId=3)
+
+
+
+
+		self.ExitPanel = ExitPanel(self.lb, self)
+		self.lb.AddPage(self.ExitPanel, "EXIT", imageId=4)
 
 		wx.CallAfter(self.initialize)
 
 	def initialize(self):
-		self.shapeoko = Shapeoko("/dev/ttyACM0", "/dev/ttyUSB0")
-		self.shapeoko.registerNewStatus(self.statusUpdate)
-		self.shapeoko.registerNewPosition(self.positionChange)
-		self.shapeoko.go()
+		try:
+			self.shapeoko = Shapeoko(self.settings.ttyshapeoko, self.settings.ttypendant)
+		except Exception as e:
+			print("exception (%s)" % str(e))
+			self.shapeoko = None
 
-		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
-		self.Bind(EVT_NEWPOSITION, self.setPositionEvent)
+		self.DROPanel.initialize(self.shapeoko, self.settings)
+		self.StatPanel.initialize(self.shapeoko, self.settings)
+		self.JobPanel.initialize(self.shapeoko, self.settings)
+		self.JogPanel.initialize(self.shapeoko, self.settings)
 
-	def addPositionLine(self, axis, ycoord, font, dc):
-		labelAxis ="%s:" % axis
-		lblw,lblh = dc.GetTextExtent(labelAxis)
-		lbl = wx.StaticText(self, wx.ID_ANY, labelAxis, pos=(10, ycoord), size=(lblw, lblh))
-		lbl.SetFont(font)
-		self.stAxisNames[axis] = lbl
 
-		valueAxis = "   0.00"
-		w,h = dc.GetTextExtent(valueAxis)
-		value = wx.StaticText(self, wx.ID_ANY, valueAxis, pos=(lblw+20, ycoord), size=(w, h))
-		value.SetFont(font)
-		self.stAxisValues[axis] = value
-
-	def statusUpdate(self, newStatus): # Thread context
-		evt = StatusEvent(status=newStatus)
-		wx.PostEvent(self, evt)
-
-	def setStatusEvent(self, evt):
-		print("new status = (%s)" % evt.status)
-		self.shapeokoStatus = evt.status
-		self.status.SetLabel(evt.status)
-
-	def positionChange(self, pos, off): # thread context
-		evt = PositionEvent(mpos=pos, wco=off)
-		wx.PostEvent(self, evt)
-
-	def setPositionEvent(self, evt):
-		posChanged = False
-		for a in AxisList:
-			if evt.mpos[a] != self.shapeokoMPos[a]:
-				self.shapeokoMPos[a] = evt.mpos[a]
-				posChanged = True
-			if evt.wco[a] != self.shapeokoWCO[a]:
-				self.shapeokoWCO[a] = evt.wco[a]
-				posChanged = True
-
-		if posChanged:
-			print("new position: [%f %f %f] [%f %f %f]" % (evt.mpos[XAXIS], evt.mpos[YAXIS], evt.mpos[ZAXIS], evt.wco[XAXIS], evt.wco[YAXIS], evt.wco[ZAXIS]))
-			for a in AxisList:
-				if self.showMPos:
-					newValue = self.shapeokoPos[a]
-				else:
-					newValue = self.shapeokoMPos[a]-self.shapeokoWCO[a]
-
-				self.stAxisValues[a].SetLabel("%7.3f" % newValue)
+		self.ExitPanel.initialize(self)
 
 	def onClose(self, _):
+		self.settings.save()
+		
 		if self.shapeoko is not None:
 			self.shapeoko.terminate()
 
 		self.Destroy()
 
+class ExitPanel(wx.Panel):
+	def __init__(self, parent, win):		
+		wx.Panel.__init__(self, parent, wx.ID_ANY)
+		self.SetBackgroundColour(wx.Colour(196, 196, 196))
+
+		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
+
+		self.b = wx.Button(self, wx.ID_ANY, "exit", pos=(50, 50), size=(120, 120))
+
+	def OnPanelSize(self, evt):
+		self.SetPosition((0,0))
+		self.SetSize(evt.GetSize())
+
+	def initialize(self, win):
+		self.Bind(wx.EVT_BUTTON, win.onClose, self.b)
+
 class App(wx.App):
 	def OnInit(self):
 
 		self.frame = MainFrame()
-		#self.frame.Show()
-		self.frame.ShowFullScreen(True)
+		self.frame.Show()
+		#self.frame.ShowFullScreen(True)
 #		self.frame.Maximize(True)
 #		self.SetTopWindow(self.frame)
 		return True
