@@ -25,7 +25,9 @@ class JobPanel(wx.Panel):
 		self.bFiles.SetFont(fontButton)
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
 
-		st = wx.StaticText(self, wx.ID_ANY, "Current file:", pos=(200, 30))
+		txt = "Current file:"
+		w,h = self.dc.GetTextExtent(txt)
+		st = wx.StaticText(self, wx.ID_ANY, "Current file:", pos=(200, 30), size=(w, h))
 		st.SetFont(fontText)
 
 		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 80))
@@ -52,6 +54,8 @@ class JobPanel(wx.Panel):
 
 	def onBFiles(self, evt):
 		dlg = FilesDlg(self, self.settings.datadir)
+		#dlg.CenterOnParent()
+		dlg.SetPosition((0,0))
 		rc = dlg.ShowModal()
 
 		if rc == wx.ID_OK:
@@ -107,68 +111,39 @@ class JobPanel(wx.Panel):
 
 class FilesDlg(wx.Dialog):
 	def __init__(self, parent, datadir):
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "")
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(500, 440))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
-		font = wx.Font(24, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
+		font = wx.Font(28, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
+		fontbutton = wx.Font(18, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
 
 		self.parent = parent
 		self.datadir = datadir
 		self.loadFileNames()
 
-		vsz = wx.BoxSizer(wx.VERTICAL)
-		vsz.AddSpacer(10)
-
-		self.lbFiles = wx.CheckListBox(self, wx.ID_ANY, size=(400, 220), choices=self.flist)
+		self.lbFiles = wx.CheckListBox(self, wx.ID_ANY, size=(400, 220), pos=(50, 30), choices=self.flist)
 		self.lbFiles.SetFont(font)
 		self.Bind(wx.EVT_LISTBOX, self.onLbFilesList, self.lbFiles)
 		self.Bind(wx.EVT_CHECKLISTBOX, self.onLbFiles, self.lbFiles)
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
-		vsz.Add(self.lbFiles, 0, wx.LEFT + wx.RIGHT, 20)
 
-		vsz.AddSpacer(10)
-
-		bsz = wx.BoxSizer(wx.HORIZONTAL)
-		bsz.AddSpacer(20)
-
-		self.bLoad = wx.Button(self, wx.ID_ANY, "Load", size=(60, 60))
+		self.bLoad = wx.Button(self, wx.ID_ANY, "Load", size=(100, 100), pos=(20, 300))
 		self.bLoad.Enable(False)
-		bsz.Add(self.bLoad)
+		self.bLoad.SetFont(fontbutton)
 		self.Bind(wx.EVT_BUTTON, self.onBLoad, self.bLoad)
 
-		bsz.AddSpacer(10)
-
-		self.bDelete = wx.Button(self, wx.ID_ANY, "Delete", size=(60, 60))
+		self.bDelete = wx.Button(self, wx.ID_ANY, "Delete", size=(100, 100), pos=(130, 300))
 		self.bDelete.Enable(False)
-		bsz.Add(self.bDelete)
+		self.bDelete.SetFont(fontbutton)
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 
-		bsz.AddSpacer(10)
-
-		self.bRefresh = wx.Button(self, wx.ID_ANY, "Refresh", size=(60, 60))
-		bsz.Add(self.bRefresh)
+		self.bRefresh = wx.Button(self, wx.ID_ANY, "Refresh", size=(100, 100), pos=(240, 300))
+		self.bRefresh.SetFont(fontbutton)
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
-		bsz.AddSpacer(10)
-
-		self.bCancel = wx.Button(self, wx.ID_ANY, "Cancel", size=(60, 60))
-		bsz.Add(self.bCancel)
+		self.bCancel = wx.Button(self, wx.ID_ANY, "Cancel", size=(100, 100), pos=(350, 300))
+		self.bCancel.SetFont(fontbutton)
 		self.Bind(wx.EVT_BUTTON, self.onBCancel, self.bCancel)
-
-		bsz.AddSpacer(20)
-
-		vsz.Add(bsz, 0, wx.ALIGN_CENTER_HORIZONTAL)
-
-		vsz.AddSpacer(10)
-
-		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		hsz.AddSpacer(10)
-		hsz.Add(vsz)
-		hsz.AddSpacer(10)
-
-		self.SetSizer(hsz)
-		self.Layout()
-		self.Fit()
 
 	def loadFileNames(self):
 		self.flist = []
