@@ -28,6 +28,7 @@ class SendThread(threading.Thread):
 		self.lineCt = 0
 		self.waitOKQ = queue.Queue(0)
 		self.sequence = 0
+		self.inFile = False
 
 		self.start()
 		
@@ -57,16 +58,25 @@ class SendThread(threading.Thread):
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "START":
 					self.lineCt = 0
+					self.inFile = True
+
 				elif msg["cmd"] == "DATA":
-					self.lineCt += 1
+					if self.inFile:
+						self.lineCt += 1
 					#print("(%s)" % msg["data"])
 					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
 					self.sendMessage(msg["data"])
 					self.sequence += 1
 
 				elif msg["cmd"] == "END":
+					self.inFile = False
 					self.asyncQ.put({"event": "EOF", "file": msg["name"], "lines": self.lineCt})
 					#print("EOF: %d lines" % self.lineCt)
+
+				elif msg["cmd"] == "LINE":
+					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
+					self.sendMessage(msg["data"])
+					self.sequence += 1
 
 			else:
 				time.sleep(0.001)
@@ -247,6 +257,14 @@ class Grbl:
 			return False
 
 		self.immedQ.put(cmd)
+		return True
+
+	def sendGCodeLines(self, lines):
+		if not self.connected:
+			return False
+
+		for ln in lines:
+			self.gcodeQ.put({"cmd": "LINE", "data": ln.strip() + '\n'})
 		return True
 
 	def sendGCodeFile(self, fn):

@@ -2,6 +2,8 @@ import wx
 import glob
 import os
 import time
+import queue
+from gparser import Scanner
 
 ACTION_LOAD = 0
 ACTION_DELETE = 1
@@ -29,8 +31,12 @@ class JobPanel(wx.Panel):
 		self.bFiles = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBfiles, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
 
-		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 80))
+		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 40))
 		self.stFileName.SetFont(fontText)
+		self.stFileSize = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 80))
+		self.stFileSize.SetFont(fontText)
+		self.stFileDate = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 120))
+		self.stFileDate.SetFont(fontText)
 
 		self.bCheckSize = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBchecksize, size=(120, 120), pos=(50, 160))
 		self.Bind(wx.EVT_BUTTON, self.onBCheckSize, self.bCheckSize)
@@ -42,6 +48,13 @@ class JobPanel(wx.Panel):
 		self.Bind(wx.EVT_BUTTON, self.onBPause, self.bPause)
 
 		self.enableBasedOnFile()
+
+	def initialize(self, shapeoko, settings):
+		self.shapeoko = shapeoko
+		self.settings = settings
+
+		self.currentFile = None
+		self.displayCurrentFileInfo()
 
 	def enableBasedOnFile(self):
 		self.bCheckSize.Enable(self.currentFile is not None)
@@ -78,11 +91,41 @@ class JobPanel(wx.Panel):
 		self.enableBasedOnFile()
 
 	def onBCheckSize(self, evt):
-		print("check size")
+		scanq = queue.Queue()
+		sc = Scanner(scanq, self.fullFileName)
+
+		data = scanq.get()
+		minx = 1000
+		miny = 1000
+		maxx = -1000
+		maxy = -1000
+		while data is not None:
+			if data[0] in ["X", "x"]:
+				x = float(data[1:])
+				if x < minx:
+					minx = x
+				if x > maxx:
+					maxx = x
+			elif data[0] in ["Y", "y"]:
+				y = float(data[1:])
+				if y < miny:
+					miny = y
+				if y > maxy:
+					maxy = y
+
+			data = scanq.get()
+
+		lines = []
+		for x, y in [[minx, miny], [maxx, miny], [maxx, maxy], [minx, maxy], [minx, miny]]:
+			lines.append("G0X%.3fY%.3f" % (x, y))
+
+		self.shapeoko.sendGcodeLines(lines)
 
 	def onBPlay(self, evt):
 		self.playing = True
 		self.enableBasedOnFile()
+		self.shapeoko.sendGCodeFile(self.fullFileName)
+
 
 	def onBPause(self, evt):
 		self.playing = False
@@ -92,29 +135,24 @@ class JobPanel(wx.Panel):
 		self.SetPosition((0,0))
 		self.SetSize(evt.GetSize())
 
-	def initialize(self, shapeoko, settings):
-		self.shapeoko = shapeoko
-		self.settings = settings
-
-		self.currentFile = None
-		self.displayCurrentFileInfo()
-
 	def displayCurrentFileInfo(self):
-		if self.currentFile is None:
-			txt = "<no file chosen>"
-		else:
-			txt = self.currentFile
-
+		txt = "<no file chosen>" if self.currentFile is None else self.currentFile
 		w,h = self.dc.GetTextExtent(txt)
 		self.stFileName.SetLabel(txt)
 		self.stFileName.SetSize((w, h))
 
-		if self.currentFile is None:
-			print("clear file info")
-		else:
+		if self.currentFile is not None:
 			fi = os.stat(self.fullFileName)
-			print("file size: %d" % fi.st_size)
-			print("mtime: %s" % time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.localtime(fi.st_mtime)))
+
+		txt = " " if self.currentFile is None else "%d bytes" % fi.st_size
+		w,h = self.dc.GetTextExtent(txt)
+		self.stFileSize.SetLabel(txt)
+		self.stFileSize.SetSize((w, h))
+
+		txt = " " if self.currentFile is None else time.strftime("%d %b %Y %H:%M:%S", time.localtime(fi.st_mtime))
+		w,h = self.dc.GetTextExtent(txt)
+		self.stFileDate.SetLabel(txt)
+		self.stFileDate.SetSize((w, h))
 
 class FilesDlg(wx.Dialog):
 	def __init__(self, parent, datadir):

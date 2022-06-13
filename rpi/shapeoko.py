@@ -142,6 +142,12 @@ class Shapeoko(threading.Thread):
 			return sign*0.1
 		return 0
 
+	def sendGCodeFile(self, fn):
+		return self.grbl.sendGCodeFile(fn)
+
+	def sendGcodeLines(self, lines):
+		return self.grbl.sendGCodeLines(lines)
+
 	def jog(self, cmd):
 		terms = cmd.split(" ")
 		if len(terms) == 2:
@@ -188,9 +194,10 @@ class Shapeoko(threading.Thread):
 		self.endOfLife = True
 
 	def terminate(self):
-		if self.grbl is not None:
-			self.grbl.terminate()
-
 		self.kill()
 		while not self.endOfLife:
 			time.sleep(0.1)
+
+		if self.grbl is not None:
+			self.grbl.terminate()
+
