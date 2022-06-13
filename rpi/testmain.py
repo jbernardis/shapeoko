@@ -37,7 +37,7 @@ class MainFrame(wx.Frame):
 		self.StatPanel = StatPanel(self.lb, self)
 		self.lb.AddPage(self.StatPanel, "Status", imageId=1)
 
-		self.JobPanel = JobPanel(self.lb, self)
+		self.JobPanel = JobPanel(self.lb, self, self.images)
 		self.lb.AddPage(self.JobPanel, "Job", imageId=2)
 
 		self.JogPanel = JogPanel(self.lb, self)

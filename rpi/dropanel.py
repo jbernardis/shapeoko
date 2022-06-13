@@ -18,13 +18,19 @@ class DROPanel(wx.Panel):
 		self.displayPos = { XAXIS: None, YAXIS: None, ZAXIS: None }
 		self.showMPos = False
 
-		font = wx.Font(72, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
+		font = wx.Font(72, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
+		fontCoords = wx.Font(72, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
+		fontButton = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
 
 		w,h = dc.GetTextExtent("XXXXXXXX")
 		self.status = wx.StaticText(self, wx.ID_ANY, "IDLE", pos=(10, 1), size=(w, h))
 		self.status.SetFont(font)
+
+		self.bCoord = wx.Button(self, wx.ID_ANY, "Work", pos=(550, 30), size=(160, 60))
+		self.bCoord.SetFont(fontButton)
+		self.Bind(wx.EVT_BUTTON, self.onBCoord, self.bCoord)
 
 		self.stAxisNames = {}
 		self.stAxisValues = {}
@@ -34,9 +40,9 @@ class DROPanel(wx.Panel):
 		lblPosX = 10;
 		valPosX = lblPosX + lblw + 20;
 
-		self.addPositionLine(XAXIS, lblPosX, valPosX, 120, lblw, valw, valh, font)
-		self.addPositionLine(YAXIS, lblPosX, valPosX, 240, lblw, valw, valh, font)
-		self.addPositionLine(ZAXIS, lblPosX, valPosX, 360, lblw, valw, valh, font)
+		self.addPositionLine(XAXIS, lblPosX, valPosX, 120, lblw, valw, valh, font, fontCoords)
+		self.addPositionLine(YAXIS, lblPosX, valPosX, 240, lblw, valw, valh, font, fontCoords)
+		self.addPositionLine(ZAXIS, lblPosX, valPosX, 360, lblw, valw, valh, font, fontCoords)
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -45,8 +51,10 @@ class DROPanel(wx.Panel):
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
+		self.displayPosition()
 		if shapeoko is None:
 			return
+
 
 		self.shapeoko.registerNewStatus(self.statusUpdate)
 		self.shapeoko.registerNewPosition(self.positionChange)
@@ -55,18 +63,26 @@ class DROPanel(wx.Panel):
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 		self.Bind(EVT_NEWPOSITION, self.setPositionEvent)
 
-	def addPositionLine(self, axis, lblXCoord, valXCoord, yCoord, lblWidth, valWidth, ht, font):
+	def addPositionLine(self, axis, lblXCoord, valXCoord, yCoord, lblWidth, valWidth, ht, fontText, fontCoords):
 		labelAxis ="%s:" % axis
 		lbl = wx.StaticText(self, wx.ID_ANY, labelAxis, pos=(lblXCoord, yCoord), size=(lblWidth, ht))
-		lbl.SetFont(font)
+		lbl.SetFont(fontText)
 		self.stAxisNames[axis] = lbl
 
 		valueAxis = "      0.000"
 		value = wx.StaticText(self, wx.ID_ANY, valueAxis, pos=(valXCoord, yCoord), size=(valWidth, ht))
-		value.SetFont(font)
+		value.SetFont(fontCoords)
 		value.SetForegroundColour((0,0,0)) # set text color
 		value.SetBackgroundColour((255,255,255)) # set text back color
 		self.stAxisValues[axis] = value
+
+	def onBCoord(self, evt):
+		self.showMPos = not self.showMPos
+		if self.showMPos:
+			self.bCoord.SetLabel("Machine")
+		else:
+			self.bCoord.SetLabel("Work")
+		self.displayPosition()
 
 	def statusUpdate(self, newStatus): # Thread context
 		evt = StatusEvent(status=newStatus)
@@ -92,11 +108,14 @@ class DROPanel(wx.Panel):
 				posChanged = True
 
 		if posChanged:
-			print("new position: [%f %f %f] [%f %f %f]" % (evt.mpos[XAXIS], evt.mpos[YAXIS], evt.mpos[ZAXIS], evt.wco[XAXIS], evt.wco[YAXIS], evt.wco[ZAXIS]))
-			for a in AxisList:
-				if self.showMPos:
-					newValue = self.shapeokoPos[a]
-				else:
-					newValue = self.shapeokoMPos[a]-self.shapeokoWCO[a]
+			self.displayPosition()
 
-				self.stAxisValues[a].SetLabel("%7.3f" % newValue)
+	def displayPosition(self):
+		#print("new position: [%f %f %f] [%f %f %f]" % (evt.mpos[XAXIS], evt.mpos[YAXIS], evt.mpos[ZAXIS], evt.wco[XAXIS], evt.wco[YAXIS], evt.wco[ZAXIS]))
+		for a in AxisList:
+			if self.showMPos:
+				newValue = self.shapeokoMPos[a]
+			else:
+				newValue = self.shapeokoMPos[a]-self.shapeokoWCO[a]
+
+			self.stAxisValues[a].SetLabel("%9.3f" % newValue)

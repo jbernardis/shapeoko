@@ -1,61 +1,56 @@
 import wx
 import glob
 import os
+import time
 
 ACTION_LOAD = 0
 ACTION_DELETE = 1
 
 class JobPanel(wx.Panel):
-	def __init__(self, parent, win):		
+	def __init__(self, parent, win, images):		
 		wx.Panel.__init__(self, parent, wx.ID_ANY)
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
 
+		self.parentFrame = win
+		self.images = images
+
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
-		font = wx.Font(72, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
-		fontButton = wx.Font(24, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
-		fontText = wx.Font(24, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
+		fontButton = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+		fontText = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		self.dc = wx.ScreenDC()
 		self.dc.SetFont(fontText)
 
 		self.currentFile = None
+		self.fullFileName = None
 
+		self.playing = False
 
-		self.bFiles = wx.Button(self, wx.ID_ANY, "Files", size=(120, 120), pos=(50, 20))
-		self.bFiles.SetFont(fontButton)
+		self.bFiles = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBfiles, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
-
-		txt = "Current file:"
-		w,h = self.dc.GetTextExtent(txt)
-		st = wx.StaticText(self, wx.ID_ANY, "Current file:", pos=(200, 30), size=(w, h))
-		st.SetFont(fontText)
 
 		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 80))
 		self.stFileName.SetFont(fontText)
 
-		self.bCheckSize = wx.Button(self, wx.ID_ANY, "Check\nSize", size=(120, 120), pos=(50, 160))
-		self.bCheckSize.SetFont(fontButton)
+		self.bCheckSize = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBchecksize, size=(120, 120), pos=(50, 160))
 		self.Bind(wx.EVT_BUTTON, self.onBCheckSize, self.bCheckSize)
 
-		self.bPlay = wx.Button(self, wx.ID_ANY, "Play", size=(120, 120), pos=(50, 300))
-		self.bPlay.SetFont(fontButton)
+		self.bPlay = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBplay, size=(120, 120), pos=(50, 300))
 		self.Bind(wx.EVT_BUTTON, self.onBPlay, self.bPlay)
 
-		self.bPause = wx.Button(self, wx.ID_ANY, "Pause", size=(120, 120), pos=(200, 300))
-		self.bPause.SetFont(fontButton)
+		self.bPause = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBpause, size=(120, 120), pos=(200, 300))
 		self.Bind(wx.EVT_BUTTON, self.onBPause, self.bPause)
 
 		self.enableBasedOnFile()
 
 	def enableBasedOnFile(self):
 		self.bCheckSize.Enable(self.currentFile is not None)
-		self.bPlay.Enable(self.currentFile is not None)
-		self.bPause.Enable(self.currentFile is not None)
+		self.bPlay.Enable(self.currentFile is not None and not self.playing)
+		self.bPause.Enable(self.currentFile is not None and self.playing)
 
 	def onBFiles(self, evt):
 		dlg = FilesDlg(self, self.settings.datadir)
-		#dlg.CenterOnParent()
-		dlg.SetPosition((0,0))
+		dlg.Center()
 		rc = dlg.ShowModal()
 
 		if rc == wx.ID_OK:
@@ -67,26 +62,31 @@ class JobPanel(wx.Panel):
 
 		if action == ACTION_LOAD:
 			self.currentFile = flist[0]
-			self.displayCurrentFileName()
-			self.fullFileName = os.path.join(self.settings.datadir, flist[0])
-			print(self.fullFileName)
+			self.fullFileName = os.path.join(self.settings.datadir, self.currentFile)
+			self.displayCurrentFileInfo()
+		
 		elif action == ACTION_DELETE:
 			for f in flist:
 				if f == self.currentFile:
 					self.currentFile = None
-					self.displayCurrentFileName()
+					self.fullFileName = None
+					self.displayCurrentFileInfo()
 
 				fqn = os.path.join(self.settings.datadir, f)
 				os.unlink(fqn)
+
+		self.enableBasedOnFile()
 
 	def onBCheckSize(self, evt):
 		print("check size")
 
 	def onBPlay(self, evt):
-		print("play")
+		self.playing = True
+		self.enableBasedOnFile()
 
 	def onBPause(self, evt):
-		print("pause")
+		self.playing = False
+		self.enableBasedOnFile()
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -97,11 +97,11 @@ class JobPanel(wx.Panel):
 		self.settings = settings
 
 		self.currentFile = None
-		self.displayCurrentFileName()
+		self.displayCurrentFileInfo()
 
-	def displayCurrentFileName(self):
+	def displayCurrentFileInfo(self):
 		if self.currentFile is None:
-			txt = "<none>"
+			txt = "<no file chosen>"
 		else:
 			txt = self.currentFile
 
@@ -109,16 +109,25 @@ class JobPanel(wx.Panel):
 		self.stFileName.SetLabel(txt)
 		self.stFileName.SetSize((w, h))
 
+		if self.currentFile is None:
+			print("clear file info")
+		else:
+			fi = os.stat(self.fullFileName)
+			print("file size: %d" % fi.st_size)
+			print("mtime: %s" % time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.localtime(fi.st_mtime)))
+
 class FilesDlg(wx.Dialog):
 	def __init__(self, parent, datadir):
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(500, 440))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
-		font = wx.Font(28, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
-		fontbutton = wx.Font(18, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Monospace")
+		font = wx.Font(28, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+		fontbutton = wx.Font(18, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 
+		self.action = None
 		self.parent = parent
 		self.datadir = datadir
+		images = self.parent.images
 		self.loadFileNames()
 
 		self.lbFiles = wx.CheckListBox(self, wx.ID_ANY, size=(400, 220), pos=(50, 30), choices=self.flist)
@@ -127,29 +136,27 @@ class FilesDlg(wx.Dialog):
 		self.Bind(wx.EVT_CHECKLISTBOX, self.onLbFiles, self.lbFiles)
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
 
-		self.bLoad = wx.Button(self, wx.ID_ANY, "Load", size=(100, 100), pos=(20, 300))
+		self.bLoad = wx.BitmapButton(self, wx.ID_ANY, images.pngBload, size=(100, 60), pos=(20, 270))
 		self.bLoad.Enable(False)
-		self.bLoad.SetFont(fontbutton)
 		self.Bind(wx.EVT_BUTTON, self.onBLoad, self.bLoad)
 
-		self.bDelete = wx.Button(self, wx.ID_ANY, "Delete", size=(100, 100), pos=(130, 300))
+		self.bDelete = wx.BitmapButton(self, wx.ID_ANY, images.pngBdelete, size=(100, 60), pos=(130, 270))
 		self.bDelete.Enable(False)
-		self.bDelete.SetFont(fontbutton)
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 
-		self.bRefresh = wx.Button(self, wx.ID_ANY, "Refresh", size=(100, 100), pos=(240, 300))
-		self.bRefresh.SetFont(fontbutton)
+		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, images.pngBrefresh, size=(100, 60), pos=(240, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
-		self.bCancel = wx.Button(self, wx.ID_ANY, "Cancel", size=(100, 100), pos=(350, 300))
-		self.bCancel.SetFont(fontbutton)
+		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(350, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBCancel, self.bCancel)
 
 	def loadFileNames(self):
-		self.flist = []
+		fl = []
 		for ext in [ "nc", "gcode" ]:
 			fspec = os.path.join(self.datadir, "*.%s" % ext)
-			self.flist.extend([os.path.basename(f) for f in glob.glob(fspec)])
+			fl.extend([os.path.basename(f) for f in glob.glob(fspec)])
+
+		self.flist = ["  %s" % f for f in sorted(fl)]
 
 	def onBRefresh(self, _):
 		self.loadFileNames()
@@ -157,11 +164,20 @@ class FilesDlg(wx.Dialog):
 		self.lbFiles.Refresh()
 
 	def onLbFilesList(self, evt):
+		ix = self.lbFiles.GetSelection()
+		if ix == wx.NOT_FOUND:
+			return
+
+		self.lbFiles.Check(ix, not self.lbFiles.IsChecked(ix))
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
+		self.countCheckedItems()
 
 	def onLbFiles(self, evt):
-		ci = self.lbFiles.GetCheckedItems()
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
+		self.countCheckedItems()
+
+	def countCheckedItems(self):
+		ci = self.lbFiles.GetCheckedItems()
 		self.bDelete.Enable(len(ci) > 0)
 		self.bLoad.Enable(len(ci) == 1)
 
@@ -183,5 +199,8 @@ class FilesDlg(wx.Dialog):
 		self.EndModal(wx.ID_CANCEL)
 
 	def getResults(self):
-		fnames = [self.flist[x] for x in self.lbFiles.GetCheckedItems()]
+		if self.action is None:
+			fnames = []
+		else:
+			fnames = [self.flist[x].strip() for x in self.lbFiles.GetCheckedItems()]
 		return fnames, self.action
