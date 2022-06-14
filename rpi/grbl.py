@@ -224,6 +224,15 @@ class Grbl:
 		print("stop jog immediate")
 		return self.sendImmediate(chr(0x85))
 
+	def holdFeed(self):
+		return self.sendImmediate("!")
+
+	def resume(self):
+		return self.sendImmediate("~")
+
+	def softReset(self):
+		return self.sendImmediate(chr(0x18))
+
 	def startPoll(self):
 		if not self.connected:
 			return False
@@ -270,6 +279,9 @@ class Grbl:
 
 		self.gcodeQ.put({"cmd": "END", "name": fn})
 		return True
+
+	def getPosition(self):
+		return self.sender.getPosition()
 
 	def nextAsyncMessage(self, wait=False):
 		if not self.connected:

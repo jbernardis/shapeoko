@@ -16,10 +16,12 @@ class MainFrame(wx.Frame):
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
 		self.SetClientSize((800, 480))
 
+		self.initialized = False
 		self.shapeoko = None
 		self.settings = Settings()
 
 		self.images = Images("images")
+		self.registeredTickers = []
 
 		self.lb = wx.Listbook(self, wx.ID_ANY, style=wx.BK_RIGHT)
 		il = wx.ImageList(32, 32)
@@ -49,23 +51,37 @@ class MainFrame(wx.Frame):
 		self.ExitPanel = ExitPanel(self.lb, self)
 		self.lb.AddPage(self.ExitPanel, "EXIT", imageId=4)
 
+
+		self.timer = wx.Timer(self)
+
 		wx.CallAfter(self.initialize)
 
 	def initialize(self):
 		try:
-			self.shapeoko = Shapeoko(self.settings.ttyshapeoko, self.settings.ttypendant)
+			self.shapeoko = Shapeoko(self.settings)
 		except Exception as e:
 			print("exception (%s)" % str(e))
 			self.shapeoko = None
-			return True #False
+			#return
 
 		self.DROPanel.initialize(self.shapeoko, self.settings)
 		self.StatPanel.initialize(self.shapeoko, self.settings)
 		self.JobPanel.initialize(self.shapeoko, self.settings)
 		self.JogPanel.initialize(self.shapeoko, self.settings)
 
+		self.timer.Start(1000)
+		self.Bind(wx.EVT_TIMER, self.ticker)
+
 		self.ExitPanel.initialize(self)
-		return True
+		
+		self.initialized = True
+
+	def registerTicker(self, cbTicker):
+		self.registeredTickers.append(cbTicker)
+
+	def ticker(self, evt):
+		for cb in self.registeredTickers:
+			cb()
 
 	def onClose(self, _):
 		self.settings.save()

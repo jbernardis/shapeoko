@@ -18,7 +18,6 @@ class JobPanel(wx.Panel):
 
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
-		fontButton = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		fontText = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		self.dc = wx.ScreenDC()
 		self.dc.SetFont(fontText)
@@ -27,6 +26,8 @@ class JobPanel(wx.Panel):
 		self.fullFileName = None
 
 		self.playing = False
+		self.paused = False
+		self.status = ""
 
 		self.bFiles = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBfiles, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
@@ -55,6 +56,19 @@ class JobPanel(wx.Panel):
 
 		self.currentFile = None
 		self.displayCurrentFileInfo()
+
+		self.parentFrame.registerTicker(self.ticker)
+		self.shapeoko.registerNewStatus(self.statusChange)
+
+	def statusChange(self, ns):
+		self.status = ns
+		print("Job: new status: %s" % ns)
+		if self.status == "IDLE" and self.playing:
+			self.finishRun()
+
+	def ticker(self):
+		if self.playing:
+			print("ticker: %d" % self.shapeoko.getPosition())
 
 	def enableBasedOnFile(self):
 		self.bCheckSize.Enable(self.currentFile is not None)
@@ -126,10 +140,18 @@ class JobPanel(wx.Panel):
 		self.enableBasedOnFile()
 		self.shapeoko.sendGCodeFile(self.fullFileName)
 
-
-	def onBPause(self, evt):
+	def finishRun(self):
+		self.paused = False
 		self.playing = False
 		self.enableBasedOnFile()
+
+	def onBPause(self, evt):
+		if self.paused:
+			self.shaproko.resume()
+			self.paused = False
+		else:
+			self.shapeoko.holdFeed()
+			self.paused = True
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -160,7 +182,6 @@ class FilesDlg(wx.Dialog):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
 		font = wx.Font(28, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-		fontbutton = wx.Font(18, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 
 		self.action = None
 		self.parent = parent
@@ -212,7 +233,7 @@ class FilesDlg(wx.Dialog):
 		self.countCheckedItems()
 
 	def onLbFilesClick(self, evt):
-		self.lbFiles.SetSelection(wx.NOT_FOUND)
+		evt.Skip()
 
 	def onLbFiles(self, evt):
 		self.lbFiles.SetSelection(wx.NOT_FOUND)

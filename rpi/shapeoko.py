@@ -8,8 +8,9 @@ from common import XAXIS, YAXIS, ZAXIS
 
 # <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
 class Shapeoko(threading.Thread):
-	def __init__(self, ttyShapeoko, ttyPendant):
+	def __init__(self, settings):
 		threading.Thread.__init__(self)
+		self.settings = settings
 		self.status = None
 		self.x = None
 		self.y = None
@@ -29,30 +30,33 @@ class Shapeoko(threading.Thread):
 		self.running = False
 		self.endOfLife = False
 
-		self.cbNewStatus = None
-		self.cbNewPosition = None
+		self.cbNewStatus = []
+		self.cbNewPosition = []
 
-		self.grbl = Grbl(tty=ttyShapeoko)
+		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
 		self.grbl.startPoll()
 
-		self.pendant = Pendant(tty=ttyPendant)
+		self.pendant = Pendant(tty=self.settings.ttypendant)
 
 	def go(self):
 		self.start()
 
+	def getPosition(self):
+		return self.grbl.getPosition()
+
 	def registerNewStatus(self, cbNewStatus):
-		self.cbNewStatus = cbNewStatus
+		self.cbNewStatus.append(cbNewStatus)
 
 	def registerNewPosition(self, cbNewPosition):
-		self.cbNewPosition = cbNewPosition
+		self.cbNewPosition.append(cbNewPosition)
 
 	def parseStatus(self, msg):
 		terms = msg.split("|")
 		ns = terms[0][1:]
 		if ns != self.status:
 			self.status = ns
-			if callable(self.cbNewStatus):
-				self.cbNewStatus(self.status)
+			for cb in self.cbNewStatus:
+				cb(self.status)
 
 		posChanged = False
 		for term in terms[1:]:
@@ -114,8 +118,8 @@ class Shapeoko(threading.Thread):
 					print("invalid WCO term (%s)" % term)
 
 		if posChanged:
-			if callable(self.cbNewPosition):
-				self.cbNewPosition({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
+			for cb in self.cbNewPosition:
+				cb({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
 
 	def getDistance(self, dx):
 		if dx < 0:
@@ -138,6 +142,15 @@ class Shapeoko(threading.Thread):
 
 	def sendGcodeLines(self, lines):
 		return self.grbl.sendGCodeLines(lines)
+
+	def holdFeed(self):
+		return self.grbl.holdFeed()
+
+	def resume(self):
+		return self.grbl.resume()
+
+	def softReset(self):
+		return self.grbl.softReset()
 
 	def jog(self, cmd):
 		terms = cmd.split(" ")
@@ -171,17 +184,20 @@ class Shapeoko(threading.Thread):
 
 			pcmd = self.pendant.getCommand()
 			if pcmd is not None:
-				print("Pendant: (%s)" % pcmd)
-				if pcmd.startswith("JOG "):
-					self.jog(pcmd)
-				elif pcmd.startswith("RESET "):
-					axis = pcmd.split(" ")[1]
-					if axis == "X":
-						self.grbl.resetAxis(0, None, None);
-					elif axis == "Y":
-						self.grbl.resetAxis(None, 0, None);
-					elif axis == "Z":
-						self.grbl.resetAxis(None, None, 0);
+				if self.status not in ["JOG", "IDLE"]:
+					print("ignoring pendant commands when in %s state" % self.status)
+				else:
+					print("Pendant: (%s)" % pcmd)
+					if pcmd.startswith("JOG "):
+						self.jog(pcmd)
+					elif pcmd.startswith("RESET "):
+						axis = pcmd.split(" ")[1]
+						if axis == "X":
+							self.grbl.resetAxis(0, None, None);
+						elif axis == "Y":
+							self.grbl.resetAxis(None, 0, None);
+						elif axis == "Z":
+							self.grbl.resetAxis(None, None, 0);
 
 		self.endOfLife = True
 
