@@ -9,6 +9,7 @@ class Settings:
 		self.ttyshapeoko = "/dev/ttyACM0"
 		self.ttypendant = "/dev/ttyUSB0"
 		self.datadir = os.path.join(os.getcwd(), "shapeokodata")
+		self.pollinterval = 0.5
 
 		self.inifile = os.path.join(os.getcwd(), INIFILE)
 		self.section = "shapeoko"
@@ -30,6 +31,13 @@ class Settings:
 					self.ttypendant = value
 				elif opt == 'datadir':
 					self.datadir = value
+				elif opt == "pollinterval":
+					try:
+						pi = float(value)
+					except:
+						pi = self.pollinterval
+					self.pollinterval = pi
+					print("poll interval: %f" % self.pollinterval)
 				else:
 					print("Unknown option in ini file: %s - ignoring" % opt)
 		else:
@@ -56,6 +64,7 @@ class Settings:
 		self.cfg.set(self.section, "ttyshapeoko", str(self.ttyshapeoko))
 		self.cfg.set(self.section, "ttypendant", str(self.ttypendant))
 		self.cfg.set(self.section, "datadir", str(self.datadir))
+		self.cfg.set(self.section, "pollinterval", "%.3f" % self.pollinterval)
 
 		try:		
 			cfp = open(self.inifile, 'w')
