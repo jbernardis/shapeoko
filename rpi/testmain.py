@@ -57,14 +57,15 @@ class MainFrame(wx.Frame):
 		except Exception as e:
 			print("exception (%s)" % str(e))
 			self.shapeoko = None
+			return True #False
 
 		self.DROPanel.initialize(self.shapeoko, self.settings)
 		self.StatPanel.initialize(self.shapeoko, self.settings)
 		self.JobPanel.initialize(self.shapeoko, self.settings)
 		self.JogPanel.initialize(self.shapeoko, self.settings)
 
-
 		self.ExitPanel.initialize(self)
+		return True
 
 	def onClose(self, _):
 		self.settings.save()
@@ -94,6 +95,10 @@ class App(wx.App):
 	def OnInit(self):
 
 		self.frame = MainFrame()
+		#if not self.frame.initialize():
+			#print("Failed to initialize with shapeoko")
+			#return False
+
 		self.frame.Show()
 		#self.frame.ShowFullScreen(True)
 #		self.frame.Maximize(True)

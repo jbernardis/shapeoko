@@ -111,7 +111,6 @@ class DROPanel(wx.Panel):
 			self.displayPosition()
 
 	def displayPosition(self):
-		#print("new position: [%f %f %f] [%f %f %f]" % (evt.mpos[XAXIS], evt.mpos[YAXIS], evt.mpos[ZAXIS], evt.wco[XAXIS], evt.wco[YAXIS], evt.wco[ZAXIS]))
 		for a in AxisList:
 			if self.showMPos:
 				newValue = self.shapeokoMPos[a]

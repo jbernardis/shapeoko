@@ -66,15 +66,12 @@ class Shapeoko(threading.Thread):
 					if self.x != nx:
 						self.x = nx
 						posChanged = True
-						#print("new x: %f" % nx)
 					if self.y != ny:
 						self.y = ny
 						posChanged = True
-						#print("new y: %f" % ny)
 					if self.z != nz:
 						self.z = nz
 						posChanged = True
-						#print("new z: %f" % nz)
 				else:
 					print("invalid MPos term (%s)" % term)
 
@@ -88,15 +85,12 @@ class Shapeoko(threading.Thread):
 					if self.x != nx - self.offx:
 						self.x = nx - self.offx
 						posChanged = True
-						#print("new WC x: %f, MP: %f" % (nx, self.x))
 					if self.y != ny - self.offy:
 						self.y = ny - self.offy
 						posChanged = True
-						#print("new WC y: %f, MP: %f" % (ny, self.y))
 					if self.z != nz - self.offz:
 						self.z = nz - self.offz
 						posChanged = True
-						#print("new WC z: %f, MP: %f" % (nz, self.z))
 				else:
 					print("invalid MPos term (%s)" % term)
 
@@ -110,15 +104,12 @@ class Shapeoko(threading.Thread):
 					if self.offx != nx:
 						self.offx = nx
 						posChanged = True
-						#print("new offx: %f" % nx)
 					if self.offy != ny:
 						self.offy = ny
 						posChanged = True
-						#print("new offy: %f" % ny)
 					if self.offz != nz:
 						self.offz = nz
 						posChanged = True
-					#print("new offz: %f" % nz)
 				else:
 					print("invalid WCO term (%s)" % term)
 
@@ -173,9 +164,10 @@ class Shapeoko(threading.Thread):
 			msg = self.grbl.nextAsyncMessage()
 			if msg is not None:
 				if msg["data"].startswith("<"):
+					#print("status")
 					self.parseStatus(msg["data"])
 				else:
-					print("Async: (%s)" % str(msg))
+					pass#print("Async: (%s)" % str(msg))
 
 			pcmd = self.pendant.getCommand()
 			if pcmd is not None:

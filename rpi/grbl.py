@@ -41,20 +41,20 @@ class SendThread(threading.Thread):
 	def run(self):
 		self.isRunning = True
 		while self.isRunning:
-			if not self.immedQ.empty():
+			while not self.immedQ.empty():
 				string = self.immedQ.get(False)
 				self.sendMessage(string)
 				
-			elif not self.waitOKQ.empty():
+			while not self.waitOKQ.empty() and self.immedQ.empty():
 				self.checkForOK()
 
-			elif not self.commandQ.empty():
+			while not self.commandQ.empty() and self.waitOKQ.empty() and self.immedQ.empty():
 				string = self.commandQ.get(False)
 				self.waitOKQ.put({"seq": self.sequence, "data": string.rstrip()})
 				self.sendMessage(string)
 				self.sequence += 1
 				
-			elif not self.gcodeQ.empty():
+			while not self.gcodeQ.empty() and self.waitOKQ.empty() and self.immedQ.empty() and self.commandQ.empty():
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "START":
 					self.lineCt = 0
@@ -63,23 +63,18 @@ class SendThread(threading.Thread):
 				elif msg["cmd"] == "DATA":
 					if self.inFile:
 						self.lineCt += 1
-					#print("(%s)" % msg["data"])
 					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
 					self.sendMessage(msg["data"])
 					self.sequence += 1
 
 				elif msg["cmd"] == "END":
 					self.inFile = False
-					self.asyncQ.put({"event": "EOF", "file": msg["name"], "lines": self.lineCt})
-					#print("EOF: %d lines" % self.lineCt)
+					self.asyncQ.put({"event": "EOF", "file": msg["name"], "lines": self.lineCt, "data": ""})
 
 				elif msg["cmd"] == "LINE":
 					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
 					self.sendMessage(msg["data"])
 					self.sequence += 1
-
-			else:
-				time.sleep(0.001)
 
 		self.endOfLife = True
 
@@ -90,7 +85,6 @@ class SendThread(threading.Thread):
 		response = self.responseQ.get(False)
 		message = self.waitOKQ.get(False)
 		outMsg = {"event": "response", "type": response, "data": message["data"], "sequence": message["seq"]}
-		#print(outMsg)
 		self.asyncQ.put(outMsg)
 		return False
 
@@ -99,9 +93,9 @@ class SendThread(threading.Thread):
 				
 	def sendMessage(self, string):
 		try:
-			#print("sending (%s)" % string)
 			bmsg = bytes(string, 'UTF-8')
 			self.port.write(bmsg)
+			self.port.flush()
 		except:
 			print("write failure sending (%s)" % string)
 			self.killJob()
@@ -115,7 +109,6 @@ class SendThread(threading.Thread):
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "END":
 					self.asyncQ.put({"event": "ABORT", "file": msg["name"]})
-					#print("ABORT: %d lines" % self.lineCt)
 			except queue.Empty:
 				break
 	
@@ -142,14 +135,12 @@ class ListenThread(threading.Thread):
 			line=self.port.readline().decode("UTF-8").strip()
 
 			if (len(line)>=1):
-				#print("input (%s)" % line)
 				llow = line.lower()
 				
 				if self.isResponse(llow):
 					self.responseQ.put(llow)
 	
 				else:
-					#print("got async (%s)" % line)
 					self.asyncQ.put({"event": "message", "data": line})
 
 		self.endOfLife = True
@@ -163,7 +154,7 @@ class ListenThread(threading.Thread):
 		return False
 		
 class Grbl:
-	def __init__(self, tty="/dev/ttyACM0", baud=115200, pollInterval=0.2):
+	def __init__(self, tty="/dev/ttyACM0", baud=115200, pollInterval=0.5):
 		try:
 			self.port = Serial(tty, baud, timeout=0.02)
 			self.connected = True

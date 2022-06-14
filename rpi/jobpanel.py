@@ -62,7 +62,7 @@ class JobPanel(wx.Panel):
 		self.bPause.Enable(self.currentFile is not None and self.playing)
 
 	def onBFiles(self, evt):
-		dlg = FilesDlg(self, self.settings.datadir)
+		dlg = FilesDlg(self.parentFrame, self.settings.datadir)
 		dlg.Center()
 		rc = dlg.ShowModal()
 
@@ -170,7 +170,8 @@ class FilesDlg(wx.Dialog):
 
 		self.lbFiles = wx.CheckListBox(self, wx.ID_ANY, size=(400, 220), pos=(50, 30), choices=self.flist)
 		self.lbFiles.SetFont(font)
-		self.Bind(wx.EVT_LISTBOX, self.onLbFilesList, self.lbFiles)
+		self.Bind(wx.EVT_LISTBOX, self.onLbFilesClick, self.lbFiles)
+		self.Bind(wx.EVT_LISTBOX_DCLICK, self.onLbFilesDClick, self.lbFiles)
 		self.Bind(wx.EVT_CHECKLISTBOX, self.onLbFiles, self.lbFiles)
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
 
@@ -201,14 +202,17 @@ class FilesDlg(wx.Dialog):
 		self.lbFiles.SetItems(self.flist)
 		self.lbFiles.Refresh()
 
-	def onLbFilesList(self, evt):
-		ix = self.lbFiles.GetSelection()
+	def onLbFilesDClick(self, evt):
+		ix = evt.GetSelection()
 		if ix == wx.NOT_FOUND:
 			return
 
 		self.lbFiles.Check(ix, not self.lbFiles.IsChecked(ix))
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
 		self.countCheckedItems()
+
+	def onLbFilesClick(self, evt):
+		self.lbFiles.SetSelection(wx.NOT_FOUND)
 
 	def onLbFiles(self, evt):
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
