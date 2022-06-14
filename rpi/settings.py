@@ -37,7 +37,6 @@ class Settings:
 					except:
 						pi = self.pollinterval
 					self.pollinterval = pi
-					print("poll interval: %f" % self.pollinterval)
 				else:
 					print("Unknown option in ini file: %s - ignoring" % opt)
 		else:

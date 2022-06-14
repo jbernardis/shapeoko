@@ -1,9 +1,13 @@
 import wx
+from wx.lib import newevent
+
 import glob
 import os
 import time
 import queue
 from gparser import Scanner
+
+(StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 
 ACTION_LOAD = 0
 ACTION_DELETE = 1
@@ -28,15 +32,20 @@ class JobPanel(wx.Panel):
 		self.playing = False
 		self.paused = False
 		self.status = ""
+		self.filePosition = 0
 
 		self.bFiles = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBfiles, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
 
-		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 40))
+		self.stMachineState = wx.StaticText(self, wx.ID_ANY, "Idle", pos=(300, 20))
+		self.stMachineState.SetFont(fontText)
+		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 80))
 		self.stFileName.SetFont(fontText)
-		self.stFileSize = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 80))
+		self.stFileSize = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 120))
 		self.stFileSize.SetFont(fontText)
-		self.stFileDate = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 120))
+		self.stFileLines = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 160))
+		self.stFileLines.SetFont(fontText)
+		self.stFileDate = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 200))
 		self.stFileDate.SetFont(fontText)
 
 		self.bCheckSize = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBchecksize, size=(120, 120), pos=(50, 160))
@@ -59,16 +68,30 @@ class JobPanel(wx.Panel):
 
 		self.parentFrame.registerTicker(self.ticker)
 		self.shapeoko.registerNewStatus(self.statusChange)
+		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 
-	def statusChange(self, ns):
-		self.status = ns
-		print("Job: new status: %s" % ns)
+	def statusUpdate(self, newStatus): # Thread context
+		evt = StatusEvent(status=newStatus)
+		wx.PostEvent(self, evt)
+
+	def setStatusEvent(self, evt):
+		self.status = evt.status
+		w,h = self.dc.GetTextExtent(self.status)
+		self.stMachineState.SetSize((w, h))
+		self.stMachineState.SetLabel(self.status)
+
 		if self.status.lower() == "idle" and self.playing:
 			self.finishRun()
 
 	def ticker(self):
 		if self.playing:
-			print("ticker: %d" % self.shapeoko.getPosition())
+			np = self.shapeoko.getPosition()
+			if np != self.filePosition:
+				self.filePosition = np
+				txt = "%d / %d lines" % (np, self.fileLines)
+				w,h = self.dc.GetTextExtent(txt)
+				self.stFileLines.SetLabel(txt)
+				self.stFileLines.SetSize((w, h))
 
 	def enableBasedOnFile(self):
 		self.bCheckSize.Enable(self.currentFile is not None)
@@ -77,11 +100,8 @@ class JobPanel(wx.Panel):
 
 	def onBFiles(self, evt):
 		dlg = FilesDlg(self, self.settings.datadir)
-		print(dlg.GetPosition())
-		dlg.CenterOnParent()
-		print(dlg.GetPosition())
+		dlg.Center()
 		rc = dlg.ShowModal()
-		print(dlg.GetPosition())
 
 		if rc == wx.ID_OK:
 			flist, action = dlg.getResults()
@@ -93,6 +113,10 @@ class JobPanel(wx.Panel):
 		if action == ACTION_LOAD:
 			self.currentFile = flist[0]
 			self.fullFileName = os.path.join(self.settings.datadir, self.currentFile)
+			with open(self.fullFileName, 'r') as fp:
+				for count, line in enumerate(fp):
+					pass
+			self.fileLines = count + 1
 			self.displayCurrentFileInfo()
 		
 		elif action == ACTION_DELETE:
@@ -140,13 +164,20 @@ class JobPanel(wx.Panel):
 
 	def onBPlay(self, evt):
 		self.playing = True
+		self.filePosition = 0
 		self.enableBasedOnFile()
 		self.shapeoko.sendGCodeFile(self.fullFileName)
 
 	def finishRun(self):
 		self.paused = False
 		self.playing = False
+		self.filePosition = 0
 		self.enableBasedOnFile()
+
+		txt = "%d lines" % self.fileLines
+		w,h = self.dc.GetTextExtent(txt)
+		self.stFileLines.SetLabel(txt)
+		self.stFileLines.SetSize((w, h))
 
 	def onBPause(self, evt):
 		if self.paused:
@@ -173,6 +204,11 @@ class JobPanel(wx.Panel):
 		w,h = self.dc.GetTextExtent(txt)
 		self.stFileSize.SetLabel(txt)
 		self.stFileSize.SetSize((w, h))
+
+		txt = " " if self.currentFile is None else "%d lines" % self.fileLines
+		w,h = self.dc.GetTextExtent(txt)
+		self.stFileLines.SetLabel(txt)
+		self.stFileLines.SetSize((w, h))
 
 		txt = " " if self.currentFile is None else time.strftime("%d %b %Y %H:%M:%S", time.localtime(fi.st_mtime))
 		w,h = self.dc.GetTextExtent(txt)
@@ -256,7 +292,6 @@ class FilesDlg(wx.Dialog):
 		self.EndModal(wx.ID_OK)
 		
 	def onBCancel(self, _):
-		print(self.GetPosition())
 		self.doCancel()
 		
 	def onClose(self, _):

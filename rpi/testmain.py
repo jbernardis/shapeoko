@@ -47,7 +47,7 @@ class MainFrame(wx.Frame):
 
 
 
-
+		# these 2 lines can be deleted at end of dev, as can the ExitPanel class and png file
 		self.ExitPanel = ExitPanel(self.lb, self)
 		self.lb.AddPage(self.ExitPanel, "EXIT", imageId=4)
 
@@ -109,16 +109,9 @@ class ExitPanel(wx.Panel):
 
 class App(wx.App):
 	def OnInit(self):
-
 		self.frame = MainFrame()
-		#if not self.frame.initialize():
-			#print("Failed to initialize with shapeoko")
-			#return False
-
 		self.frame.Show()
 		#self.frame.ShowFullScreen(True)
-#		self.frame.Maximize(True)
-#		self.SetTopWindow(self.frame)
 		return True
 
 app = App(False)

@@ -94,15 +94,9 @@ class SendThread(threading.Thread):
 				
 	def sendMessage(self, string):
 		try:
-			if string[0] != "?":
-				print(self.port.out_waiting)
 			bmsg = bytes(string, 'UTF-8')
 			self.port.write(bmsg)
-			if string[0] != "?":
-				print(self.port.out_waiting)
 			self.port.flush()
-			if string[0] != "?":
-				print(self.port.out_waiting)
 		except:
 			print("write failure sending (%s)" % string)
 			self.killJob()

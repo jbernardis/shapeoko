@@ -89,7 +89,6 @@ class DROPanel(wx.Panel):
 		wx.PostEvent(self, evt)
 
 	def setStatusEvent(self, evt):
-		print("new status = (%s)" % evt.status)
 		self.shapeokoStatus = evt.status
 		self.status.SetLabel(evt.status)
 
