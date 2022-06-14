@@ -57,6 +57,9 @@ class JobPanel(wx.Panel):
 		self.bPause = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBpause, size=(120, 120), pos=(200, 300))
 		self.Bind(wx.EVT_BUTTON, self.onBPause, self.bPause)
 
+		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(350, 300))
+		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
+
 		self.enableBasedOnFile()
 
 	def initialize(self, shapeoko, settings):
@@ -67,7 +70,7 @@ class JobPanel(wx.Panel):
 		self.displayCurrentFileInfo()
 
 		self.parentFrame.registerTicker(self.ticker)
-		self.shapeoko.registerNewStatus(self.statusChange)
+		self.shapeoko.registerNewStatus(self.statusUpdate)
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 
 	def statusUpdate(self, newStatus): # Thread context
@@ -94,9 +97,10 @@ class JobPanel(wx.Panel):
 				self.stFileLines.SetSize((w, h))
 
 	def enableBasedOnFile(self):
-		self.bCheckSize.Enable(self.currentFile is not None)
-		self.bPlay.Enable(self.currentFile is not None and not self.playing)
+		self.bCheckSize.Enable(self.currentFile is not None and not self.playing and self.status.lower() == "idle")
+		self.bPlay.Enable(self.currentFile is not None and not self.playing and self.status.lower() == "idle")
 		self.bPause.Enable(self.currentFile is not None and self.playing)
+		self.bReset.Enable(self.currentFile is not None and self.playing)
 
 	def onBFiles(self, evt):
 		dlg = FilesDlg(self, self.settings.datadir)
@@ -186,6 +190,10 @@ class JobPanel(wx.Panel):
 		else:
 			self.shapeoko.holdFeed()
 			self.paused = True
+
+	def onBReset(self, evt):
+		self.shapeoko.softReset()
+		self.finishRun()
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))

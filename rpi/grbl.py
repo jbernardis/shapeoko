@@ -44,6 +44,10 @@ class SendThread(threading.Thread):
 			while not self.immedQ.empty():
 				string = self.immedQ.get(False)
 				self.sendMessage(string)
+				if string == chr(0x18): # soft reset
+					self.drainQueue()
+					self.inFile = False
+					self.lineCt = 0
 				
 			if not self.waitOKQ.empty():
 				self.checkForOK()
@@ -109,7 +113,7 @@ class SendThread(threading.Thread):
 			try:
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "END":
-					self.asyncQ.put({"event": "ABORT", "file": msg["name"]})
+					self.asyncQ.put({"event": "ABORT", "file": msg["name"], "data": ""})
 			except queue.Empty:
 				break
 	
@@ -277,11 +281,13 @@ class Grbl:
 
 		self.gcodeQ.put({"cmd": "START", "name": fn})
 
+		print("start sending file")
 		with open(fn,'r') as fp:
 			for ln in fp:
 				self.gcodeQ.put({"cmd": "DATA", "data": ln.strip() + '\n'})
 
 		self.gcodeQ.put({"cmd": "END", "name": fn})
+		print("finished sending file")
 		return True
 
 	def getPosition(self):

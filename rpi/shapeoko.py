@@ -180,7 +180,7 @@ class Shapeoko(threading.Thread):
 					#print("status")
 					self.parseStatus(msg["data"])
 				else:
-					pass#print("Async: (%s)" % str(msg))
+					print("Async: (%s)" % str(msg))
 
 			pcmd = self.pendant.getCommand()
 			if pcmd is not None:
