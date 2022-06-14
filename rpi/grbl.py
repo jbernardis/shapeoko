@@ -45,16 +45,16 @@ class SendThread(threading.Thread):
 				string = self.immedQ.get(False)
 				self.sendMessage(string)
 				
-			while not self.waitOKQ.empty() and self.immedQ.empty():
+			if not self.waitOKQ.empty():
 				self.checkForOK()
 
-			while not self.commandQ.empty() and self.waitOKQ.empty() and self.immedQ.empty():
+			elif not self.commandQ.empty():
 				string = self.commandQ.get(False)
 				self.waitOKQ.put({"seq": self.sequence, "data": string.rstrip()})
 				self.sendMessage(string)
 				self.sequence += 1
 				
-			while not self.gcodeQ.empty() and self.waitOKQ.empty() and self.immedQ.empty() and self.commandQ.empty():
+			elif not self.gcodeQ.empty():
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "START":
 					self.lineCt = 0
@@ -75,6 +75,7 @@ class SendThread(threading.Thread):
 					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
 					self.sendMessage(msg["data"])
 					self.sequence += 1
+			time.sleep(0.01)
 
 		self.endOfLife = True
 
@@ -93,9 +94,15 @@ class SendThread(threading.Thread):
 				
 	def sendMessage(self, string):
 		try:
+			if string[0] != "?":
+				print(self.port.out_waiting)
 			bmsg = bytes(string, 'UTF-8')
 			self.port.write(bmsg)
+			if string[0] != "?":
+				print(self.port.out_waiting)
 			self.port.flush()
+			if string[0] != "?":
+				print(self.port.out_waiting)
 		except:
 			print("write failure sending (%s)" % string)
 			self.killJob()
@@ -132,16 +139,19 @@ class ListenThread(threading.Thread):
 	def run(self):
 		self.isRunning = True
 		while self.isRunning:
-			line=self.port.readline().decode("UTF-8").strip()
+			if self.port.in_waiting > 0:
+				line=self.port.read_until().decode("UTF-8").strip()
 
-			if (len(line)>=1):
-				llow = line.lower()
-				
-				if self.isResponse(llow):
-					self.responseQ.put(llow)
-	
-				else:
-					self.asyncQ.put({"event": "message", "data": line})
+				if (len(line)>=1):
+					#print("rcvd: (%s)" % line.strip())
+					llow = line.lower()
+					
+					if self.isResponse(llow):
+						self.responseQ.put(llow)
+		
+					else:
+						self.asyncQ.put({"event": "message", "data": line})
+			time.sleep(0.01)
 
 		self.endOfLife = True
 
@@ -156,7 +166,7 @@ class ListenThread(threading.Thread):
 class Grbl:
 	def __init__(self, tty="/dev/ttyACM0", baud=115200, pollInterval=0.5):
 		try:
-			self.port = Serial(tty, baud, timeout=0.02)
+			self.port = Serial(tty, baud, timeout=None)  #0.02)
 			self.connected = True
 		except Exception as e:
 			self.connected = False

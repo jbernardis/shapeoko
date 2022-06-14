@@ -184,7 +184,7 @@ class Shapeoko(threading.Thread):
 
 			pcmd = self.pendant.getCommand()
 			if pcmd is not None:
-				if self.status not in ["JOG", "IDLE"]:
+				if self.status.lower() not in ["jog", "idle"]:
 					print("ignoring pendant commands when in %s state" % self.status)
 				else:
 					print("Pendant: (%s)" % pcmd)
@@ -198,6 +198,7 @@ class Shapeoko(threading.Thread):
 							self.grbl.resetAxis(None, 0, None);
 						elif axis == "Z":
 							self.grbl.resetAxis(None, None, 0);
+			time.sleep(0.01)
 
 		self.endOfLife = True
 

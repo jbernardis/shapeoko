@@ -63,7 +63,7 @@ class JobPanel(wx.Panel):
 	def statusChange(self, ns):
 		self.status = ns
 		print("Job: new status: %s" % ns)
-		if self.status == "IDLE" and self.playing:
+		if self.status.lower() == "idle" and self.playing:
 			self.finishRun()
 
 	def ticker(self):
@@ -76,9 +76,12 @@ class JobPanel(wx.Panel):
 		self.bPause.Enable(self.currentFile is not None and self.playing)
 
 	def onBFiles(self, evt):
-		dlg = FilesDlg(self.parentFrame, self.settings.datadir)
-		dlg.Center()
+		dlg = FilesDlg(self, self.settings.datadir)
+		print(dlg.GetPosition())
+		dlg.CenterOnParent()
+		print(dlg.GetPosition())
 		rc = dlg.ShowModal()
+		print(dlg.GetPosition())
 
 		if rc == wx.ID_OK:
 			flist, action = dlg.getResults()
@@ -147,7 +150,7 @@ class JobPanel(wx.Panel):
 
 	def onBPause(self, evt):
 		if self.paused:
-			self.shaproko.resume()
+			self.shapeoko.resume()
 			self.paused = False
 		else:
 			self.shapeoko.holdFeed()
@@ -178,7 +181,7 @@ class JobPanel(wx.Panel):
 
 class FilesDlg(wx.Dialog):
 	def __init__(self, parent, datadir):
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(500, 440))
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(500, 440), style=wx.CENTER | wx.CAPTION)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
 		font = wx.Font(28, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
@@ -253,6 +256,7 @@ class FilesDlg(wx.Dialog):
 		self.EndModal(wx.ID_OK)
 		
 	def onBCancel(self, _):
+		print(self.GetPosition())
 		self.doCancel()
 		
 	def onClose(self, _):
