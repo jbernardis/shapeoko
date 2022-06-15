@@ -1,5 +1,6 @@
 import wx
 from wx.lib import newevent
+from common import StateColors, devMode
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 (ParserStateEvent, EVT_NEWPARSERSTATE) = newevent.NewEvent()  
@@ -30,29 +31,39 @@ class StatPanel(wx.Panel):
 		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBrefresh, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
-		self.bClearAlarm = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBrefresh, size=(120, 120), pos=(50, 140))
+		self.bClearAlarm = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBclearalarm, size=(120, 120), pos=(50, 160))
 		self.Bind(wx.EVT_BUTTON, self.onBClearAlarm, self.bClearAlarm)
 
-		self.bCheck = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBrefresh, size=(120, 120), pos=(50, 260))
+		self.bCheck = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBcheck, size=(120, 120), pos=(50, 300))
 		self.Bind(wx.EVT_BUTTON, self.onBCheck, self.bCheck)
 
 		self.enableBasedOnStatus()
 
-	def enableBasedOnStatus(self):
-		self.bClearAlarm.Enable(self.status == "Alarm")
-
-
-	def OnPanelSize(self, evt):
-		self.SetPosition((0,0))
-		self.SetSize(evt.GetSize())
-
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
+		if devMode:
+			if shapeoko is None:
+				return
+
 		self.shapeoko.registerNewStatus(self.statusUpdate)
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 		self.shapeoko.registerNewParserState(self.parserStateUpdate)
 		self.Bind(EVT_NEWPARSERSTATE, self.setParserStateEvent)
+
+	def enableBasedOnStatus(self):
+		self.bClearAlarm.Enable(self.status == "Alarm")
+
+	def switchToPage(self):
+		print("trying to refresh parser state")
+		try:
+			self.shapeoko.getParserState()
+		except Exception as e:
+			print("Exception (%s)" % str(e))
+
+	def OnPanelSize(self, evt):
+		self.SetPosition((0,0))
+		self.SetSize(evt.GetSize())
 
 	def statusUpdate(self, newStatus): # Thread context
 		evt = StatusEvent(status=newStatus)
@@ -63,6 +74,12 @@ class StatPanel(wx.Panel):
 		w,h = self.dc.GetTextExtent(self.status)
 		self.stMachineState.SetLabel(self.status)
 		self.stMachineState.SetSize((w, h))
+		try:
+			cx = StateColors[evt.status.lower()]
+		except:
+			cx = [0, 0, 0]
+		self.stMachineState.SetForegroundColour(wx.Colour(cx))
+
 		self.enableBasedOnStatus()
 
 	def parserStateUpdate(self, newState): # Thread context

@@ -6,6 +6,7 @@ import os
 import time
 import queue
 from gparser import Scanner
+from common import StateColors, devMode
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 
@@ -52,6 +53,7 @@ class JobPanel(wx.Panel):
 		self.Bind(wx.EVT_BUTTON, self.onBCheckSize, self.bCheckSize)
 
 		self.bPlay = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBplay, size=(120, 120), pos=(50, 300))
+		self.bPlay.SetBitmapDisabled(self.images.pngBplaydis)
 		self.Bind(wx.EVT_BUTTON, self.onBPlay, self.bPlay)
 
 		self.bPause = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBpause, size=(120, 120), pos=(200, 300))
@@ -69,6 +71,10 @@ class JobPanel(wx.Panel):
 		self.currentFile = None
 		self.displayCurrentFileInfo()
 
+		if devMode:
+			if self.shapeoko is None:
+				return
+
 		self.parentFrame.registerTicker(self.ticker)
 		self.shapeoko.registerNewStatus(self.statusUpdate)
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
@@ -82,6 +88,11 @@ class JobPanel(wx.Panel):
 		w,h = self.dc.GetTextExtent(self.status)
 		self.stMachineState.SetLabel(self.status)
 		self.stMachineState.SetSize((w, h))
+		try:
+			cx = StateColors[evt.status.lower()]
+		except:
+			cx = [0, 0, 0]
+		self.stMachineState.SetForegroundColour(wx.Colour(cx))
 
 		if self.status.lower() == "idle" and self.playing:
 			self.finishRun()

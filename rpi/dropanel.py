@@ -1,14 +1,7 @@
 import wx
 from wx.lib import newevent
 
-from common import XAXIS, YAXIS, ZAXIS, AxisList, StateColors
-
-colorValues = [
-	wx.Colour(0, 0, 0),
-	wx.Colour(1, 1, 1),
-	wx.Colour(2, 2, 2),
-	wx.Colour(3, 3, 3)
-]
+from common import XAXIS, YAXIS, ZAXIS, AxisList, StateColors, devMode
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 (PositionEvent, EVT_NEWPOSITION) = newevent.NewEvent()  
@@ -44,8 +37,8 @@ class DROPanel(wx.Panel):
 
 		lblw, lblh = dc.GetTextExtent("X:")
 		valw, valh = dc.GetTextExtent("-0000.000")
-		lblPosX = 10;
-		valPosX = lblPosX + lblw + 20;
+		lblPosX = 10
+		valPosX = lblPosX + lblw + 20
 
 		self.addPositionLine(XAXIS, lblPosX, valPosX, 120, lblw, valw, valh, font, fontCoords)
 		self.addPositionLine(YAXIS, lblPosX, valPosX, 240, lblw, valw, valh, font, fontCoords)
@@ -59,8 +52,9 @@ class DROPanel(wx.Panel):
 		self.shapeoko = shapeoko
 		self.settings = settings
 		self.displayPosition()
-		if shapeoko is None:
-			return
+		if devMode:
+			if shapeoko is None:
+				return
 
 
 		self.shapeoko.registerNewStatus(self.statusUpdate)
@@ -100,9 +94,9 @@ class DROPanel(wx.Panel):
 		try:
 			cx = StateColors[evt.status.lower()]
 		except:
-			cx = 0
-		self.status.SetForegroundColour(colorValues[cx])
-
+			cx = [0, 0, 0]
+		self.status.SetForegroundColour(wx.Colour(cx))
+		
 	def positionChange(self, pos, off): # thread context
 		evt = PositionEvent(mpos=pos, wco=off)
 		wx.PostEvent(self, evt)

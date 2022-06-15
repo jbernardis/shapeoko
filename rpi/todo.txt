@@ -1,21 +1,23 @@
-abort job
 
 unlock alarm
 tool on
 tool off
 tool speed
 
-check size
-open/load file
-start job
-stop job
-resume job
-
 goto 0  (G90 G0 X0 Y0; G90 G0 Z0)
-feed hold
 
-get state ($G)
 
-soft reset
+refresh parser state when changing to panel
 
-check mode ($c) ??
+icons - greyed when disabled
+
+icons for soft reset
+
+figure out why files dialog box won't center - figure out better control operations
+
+
+Things to do to finalize:
+
+remove "if shapeoko is None" tests in each panel
+remove exit panel
+remove show vs showfullscreen

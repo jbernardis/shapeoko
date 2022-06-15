@@ -7,6 +7,7 @@ from statpanel import StatPanel
 from jobpanel import JobPanel
 from jogpanel import JogPanel 
 from settings import Settings
+from common import devMode
 
 
 class MainFrame(wx.Frame):
@@ -30,31 +31,42 @@ class MainFrame(wx.Frame):
 		il.Add(self.images.pngStatpanel)
 		il.Add(self.images.pngJobpanel)
 		il.Add(self.images.pngJogpanel)
-		il.Add(self.images.pngExitpanel)
+		if devMode:
+			il.Add(self.images.pngExitpanel)
 		self.lb.AssignImageList(il)
 
 		self.DROPanel = DROPanel(self.lb, self)
-		self.lb.AddPage(self.DROPanel, "DRO", imageId=0)
-
 		self.StatPanel = StatPanel(self.lb, self, self.images)
-		self.lb.AddPage(self.StatPanel, "Status", imageId=1)
-
 		self.JobPanel = JobPanel(self.lb, self, self.images)
-		self.lb.AddPage(self.JobPanel, "Job", imageId=2)
+		self.JogPanel = JogPanel(self.lb, self, self.images)
+		if devMode:
+			self.ExitPanel = ExitPanel(self.lb, self)
 
-		self.JogPanel = JogPanel(self.lb, self)
-		self.lb.AddPage(self.JogPanel, "Jog", imageId=3)
+		self.pages = [
+			[ self.DROPanel, "DRO", 0 ],
+			[ self.StatPanel, "Status", 1 ],
+			[ self.JobPanel, "Job", 2 ],
+			[ self.JogPanel, "Jog", 3 ]
+		]
 
+		if devMode:
+			self.pages.append([ self.ExitPanel, "EXIT", 4 ])
 
+		for pg in self.pages:
+			self.lb.AddPage(pg[0], pg[1], imageId=pg[2])
 
-		# these 2 lines can be deleted at end of dev, as can the ExitPanel class and png file
-		self.ExitPanel = ExitPanel(self.lb, self)
-		self.lb.AddPage(self.ExitPanel, "EXIT", imageId=4)
-
+		self.lb.Bind(wx.EVT_LISTBOOK_PAGE_CHANGED, self.onPageChanged)
 
 		self.timer = wx.Timer(self)
 
 		wx.CallAfter(self.initialize)
+
+	def onPageChanged(self, evt):
+		page = evt.GetSelection()
+		try:
+			self.pages[page][0].switchToPage()
+		except AttributeError:
+			pass
 
 	def initialize(self):
 		try:
@@ -113,8 +125,10 @@ class ExitPanel(wx.Panel):
 class App(wx.App):
 	def OnInit(self):
 		self.frame = MainFrame()
-		self.frame.Show()
-		#self.frame.ShowFullScreen(True)
+		if devMode:
+			self.frame.Show()
+		else:
+			self.frame.ShowFullScreen(True)
 		return True
 
 app = App(False)
