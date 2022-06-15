@@ -190,9 +190,11 @@ class Shapeoko(threading.Thread):
 			msg = self.grbl.nextAsyncMessage()
 			if msg is not None:
 				if msg["data"].startswith("<"):
+					#print("status: (%s)" % str(msg))
 					#print("status")
 					self.parseStatus(msg["data"])
 				elif msg["data"].startswith("[GC:"):
+					print("parser: (%s)" % str(msg))
 					for cb in self.cbNewParserState:
 						cb(msg["data"][4:-1])
 				else:
@@ -200,7 +202,7 @@ class Shapeoko(threading.Thread):
 
 			pcmd = self.pendant.getCommand()
 			if pcmd is not None:
-				if self.status.lower() not in ["jog", "idle"]:
+				if self.status.lower() not in ["jog", "idle", "check"]:
 					print("ignoring pendant commands when in %s state" % self.status)
 				else:
 					print("Pendant: (%s)" % pcmd)

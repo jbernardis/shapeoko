@@ -31,16 +31,17 @@ class MainFrame(wx.Frame):
 		il.Add(self.images.pngStatpanel)
 		il.Add(self.images.pngJobpanel)
 		il.Add(self.images.pngJogpanel)
-		if devMode:
-			il.Add(self.images.pngExitpanel)
+
+		il.Add(self.images.pngExitpanel)
+
 		self.lb.AssignImageList(il)
 
 		self.DROPanel = DROPanel(self.lb, self)
 		self.StatPanel = StatPanel(self.lb, self, self.images)
 		self.JobPanel = JobPanel(self.lb, self, self.images)
 		self.JogPanel = JogPanel(self.lb, self, self.images)
-		if devMode:
-			self.ExitPanel = ExitPanel(self.lb, self)
+
+		self.ExitPanel = ExitPanel(self.lb, self)
 
 		self.pages = [
 			[ self.DROPanel, "DRO", 0 ],
@@ -49,8 +50,7 @@ class MainFrame(wx.Frame):
 			[ self.JogPanel, "Jog", 3 ]
 		]
 
-		if devMode:
-			self.pages.append([ self.ExitPanel, "EXIT", 4 ])
+		self.pages.append([ self.ExitPanel, "EXIT", 4 ])
 
 		for pg in self.pages:
 			self.lb.AddPage(pg[0], pg[1], imageId=pg[2])
