@@ -32,6 +32,7 @@ class StatPanel(wx.Panel):
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
 		self.bClearAlarm = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBclearalarm, size=(120, 120), pos=(50, 160))
+		self.bClearAlarm.SetBitmapDisabled(self.images.pngBclearalarmdis)
 		self.Bind(wx.EVT_BUTTON, self.onBClearAlarm, self.bClearAlarm)
 		
 		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(50, 300))

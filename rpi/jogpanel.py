@@ -87,12 +87,14 @@ class JogPanel(wx.Panel):
 		self.bResetZ.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, ZAXIS))
 
 
-		self.bGoToX = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx, size=(54, 54), pos=(basex+12*bdim, basey+50))
-		self.bGoToY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy, size=(54, 54), pos=(basex+12*bdim, basey+50+70))
-		self.bGoToZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz, size=(54, 54), pos=(basex+12*bdim, basey+50+70*2))
+		self.bGoToX =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx,  size=(54, 54), pos=(basex+12*bdim, basey+50))
+		self.bGoToY =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy,  size=(54, 54), pos=(basex+12*bdim, basey+50+70))
+		self.bGoToZ =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz,  size=(54, 54), pos=(basex+12*bdim, basey+50+70*3))
+		self.bGoToXY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisxy, size=(66, 54), pos=(basex+12*bdim-6, basey+50+70*2))
 		self.bGoToX.Bind(wx.EVT_BUTTON,  lambda event: self.onGoToButton(event, XAXIS))
 		self.bGoToY.Bind(wx.EVT_BUTTON,  lambda event: self.onGoToButton(event, YAXIS))
 		self.bGoToZ.Bind(wx.EVT_BUTTON,  lambda event: self.onGoToButton(event, ZAXIS))
+		self.bGoToXY.Bind(wx.EVT_BUTTON,  self.onGoToXYButton)
 
 		txt = "RESET    GO TO"
 		w,h = dc.GetTextExtent(txt)
@@ -122,6 +124,9 @@ class JogPanel(wx.Panel):
 			self.shapeoko.goto(y=0)
 		elif axis == ZAXIS:
 			self.shapeoko.goto(z=0)
+
+	def onGoToXYButton(self, evt):
+		self.shapeoko.goto(x=0, y=0)
 
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko

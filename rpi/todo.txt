@@ -1,17 +1,9 @@
-
-unlock alarm
 tool on
 tool off
 tool speed
 
-goto 0  (G90 G0 X0 Y0; G90 G0 Z0)
-
 
 show alarm information in status screen
-
-icons - greyed when disabled
-
-figure out why files dialog box won't center - figure out better control operations
 
 do a better job of constructing and the parsing async messages - shouldn't have to add blank "data" field
 

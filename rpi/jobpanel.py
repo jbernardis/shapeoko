@@ -50,6 +50,7 @@ class JobPanel(wx.Panel):
 		self.stFileDate.SetFont(fontText)
 
 		self.bCheckSize = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBchecksize, size=(120, 120), pos=(50, 160))
+		self.bCheckSize.SetBitmapDisabled(self.images.pngBchecksizedis)
 		self.Bind(wx.EVT_BUTTON, self.onBCheckSize, self.bCheckSize)
 
 		self.bPlay = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBplay, size=(120, 120), pos=(50, 300))
@@ -57,12 +58,15 @@ class JobPanel(wx.Panel):
 		self.Bind(wx.EVT_BUTTON, self.onBPlay, self.bPlay)
 
 		self.bPause = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBpause, size=(120, 120), pos=(200, 300))
+		self.bPause.SetBitmapDisabled(self.images.pngBpausedis)
 		self.Bind(wx.EVT_BUTTON, self.onBPause, self.bPause)
 
 		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(350, 300))
+		self.bReset.SetBitmapDisabled(self.images.pngBresetdis)
 		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
 
 		self.bCheck = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBcheck, size=(120, 120), pos=(500, 300))
+		self.bCheck.SetBitmapDisabled(self.images.pngBcheckdis)
 		self.Bind(wx.EVT_BUTTON, self.onBCheck, self.bCheck)
 
 		self.enableBasedOnFile()
@@ -115,16 +119,11 @@ class JobPanel(wx.Panel):
 		self.bPlay.Enable(self.currentFile is not None and not self.playing and self.status.lower() in [ "idle", "check" ])
 		self.bPause.Enable(self.currentFile is not None and self.playing)
 		self.bReset.Enable(self.currentFile is not None and self.playing)
+		self.bCheck.Enable(self.status.lower() not in ["run"])
 
 	def onBFiles(self, evt):
 		dlg = FilesDlg(self, self.settings.datadir)
-		#dlg.Center()
-		dlg.SetPosition((0, 26))
-		print("size = ", dlg.GetSize())
-		print(dlg.GetPosition())
 		rc = dlg.ShowModal()
-		print("size = ", dlg.GetSize())
-		print(dlg.GetPosition())
 
 		if rc == wx.ID_OK:
 			flist, action = dlg.getResults()
@@ -246,7 +245,7 @@ class JobPanel(wx.Panel):
 
 class FilesDlg(wx.Dialog):
 	def __init__(self, parent, datadir):
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(500, 440), style=wx.CAPTION | wx.STAY_ON_TOP)
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(560, 440), style=wx.CAPTION | wx.STAY_ON_TOP)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.Bind(wx.EVT_ACTIVATE, self.activate)
 
@@ -260,27 +259,36 @@ class FilesDlg(wx.Dialog):
 
 		self.lbFiles = wx.CheckListBox(self, wx.ID_ANY, size=(400, 220), pos=(50, 30), choices=self.flist)
 		self.lbFiles.SetFont(font)
-		self.Bind(wx.EVT_LISTBOX, self.onLbFilesClick, self.lbFiles)
-		self.Bind(wx.EVT_LISTBOX_DCLICK, self.onLbFilesDClick, self.lbFiles)
 		self.Bind(wx.EVT_CHECKLISTBOX, self.onLbFiles, self.lbFiles)
 		self.lbFiles.SetSelection(wx.NOT_FOUND)
 
-		self.bLoad = wx.BitmapButton(self, wx.ID_ANY, images.pngBload, size=(100, 60), pos=(20, 270))
+		self.bCheckAll = wx.BitmapButton(self, wx.ID_ANY, images.pngBcheckall, size=(54, 54), pos=(470, 30))
+		self.Bind(wx.EVT_BUTTON, self.onBCheckAll, self.bCheckAll)
+
+		self.bCheckOne = wx.BitmapButton(self, wx.ID_ANY, images.pngBcheckone, size=(54, 54), pos=(470, 110))
+		self.Bind(wx.EVT_BUTTON, self.onBCheckOne, self.bCheckOne)
+
+		self.bCheckNone = wx.BitmapButton(self, wx.ID_ANY, images.pngBchecknone, size=(54, 54), pos=(470, 190))
+		self.Bind(wx.EVT_BUTTON, self.onBCheckNone, self.bCheckNone)
+
+		self.bLoad = wx.BitmapButton(self, wx.ID_ANY, images.pngBload, size=(100, 60), pos=(40, 270))
+		self.bLoad.SetBitmapDisabled(images.pngBloaddis)
 		self.bLoad.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBLoad, self.bLoad)
 
-		self.bDelete = wx.BitmapButton(self, wx.ID_ANY, images.pngBdelete, size=(100, 60), pos=(130, 270))
+		self.bDelete = wx.BitmapButton(self, wx.ID_ANY, images.pngBdelete, size=(100, 60), pos=(150, 270))
+		self.bDelete.SetBitmapDisabled(images.pngBdeletedis)
 		self.bDelete.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 
-		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, images.pngBrefresh, size=(100, 60), pos=(240, 270))
+		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, images.pngBrefresh, size=(100, 60), pos=(260, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
-		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(350, 270))
+		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(370, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBCancel, self.bCancel)
 
 	def activate(self, evt):
-		self.SetPosition((150, 20))
+		self.SetPosition((120, 20))
 		evt.Skip()
 
 	def loadFileNames(self):
@@ -295,21 +303,26 @@ class FilesDlg(wx.Dialog):
 		self.loadFileNames()
 		self.lbFiles.SetItems(self.flist)
 		self.lbFiles.Refresh()
-
-	def onLbFilesDClick(self, evt):
-		ix = evt.GetSelection()
-		if ix == wx.NOT_FOUND:
-			return
-
-		self.lbFiles.Check(ix, not self.lbFiles.IsChecked(ix))
-		self.lbFiles.SetSelection(wx.NOT_FOUND)
 		self.countCheckedItems()
 
-	def onLbFilesClick(self, evt):
-		evt.Skip()
+	def onBCheckOne(self, evt):
+		ix = self.lbFiles.GetSelection()
+		if ix == wx.NOT_FOUND:
+			return
+		self.lbFiles.Check(ix, not self.lbFiles.IsChecked(ix))
+		self.countCheckedItems()
+
+	def onBCheckAll(self, evt):
+		for i in range(len(self.flist)):
+			self.lbFiles.Check(i, True)
+		self.countCheckedItems()
+
+	def onBCheckNone(self, evt):
+		for i in range(len(self.flist)):
+			self.lbFiles.Check(i, False)
+		self.countCheckedItems()
 
 	def onLbFiles(self, evt):
-		self.lbFiles.SetSelection(wx.NOT_FOUND)
 		self.countCheckedItems()
 
 	def countCheckedItems(self):
