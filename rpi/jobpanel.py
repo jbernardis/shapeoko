@@ -37,7 +37,7 @@ class JobPanel(wx.Panel):
 		self.bFiles = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBfiles, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
 
-		self.stMachineState = wx.StaticText(self, wx.ID_ANY, "Idle", pos=(300, 20))
+		self.stMachineState = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 20))
 		self.stMachineState.SetFont(fontText)
 		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 80))
 		self.stFileName.SetFont(fontText)

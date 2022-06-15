@@ -152,6 +152,9 @@ class Shapeoko(threading.Thread):
 	def softReset(self):
 		return self.grbl.softReset()
 
+	def getParserState(self):
+		return self.grbl.getParserState()
+
 	def jog(self, cmd):
 		terms = cmd.split(" ")
 		if len(terms) == 2:

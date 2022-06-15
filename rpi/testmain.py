@@ -36,7 +36,7 @@ class MainFrame(wx.Frame):
 		self.DROPanel = DROPanel(self.lb, self)
 		self.lb.AddPage(self.DROPanel, "DRO", imageId=0)
 
-		self.StatPanel = StatPanel(self.lb, self)
+		self.StatPanel = StatPanel(self.lb, self, self.images)
 		self.lb.AddPage(self.StatPanel, "Status", imageId=1)
 
 		self.JobPanel = JobPanel(self.lb, self, self.images)
@@ -73,6 +73,9 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_TIMER, self.ticker)
 
 		self.ExitPanel.initialize(self)
+
+		if self.shapeoko is not None:
+			self.shapeoko.go()
 		
 		self.initialized = True
 
