@@ -217,6 +217,26 @@ class Grbl:
 		print(jogcmd)
 		return self.sendCommand(jogcmd)
 
+	def goto(self, x, y, z):
+		gotocmd = "G90 G0"
+		if x is not None or y is not None:
+			if x is not None:
+				gotocmd += " X%.3f" % x
+			if y is not None:
+				gotocmd += " Y%.3f" % y
+			print(gotocmd)
+			if not self.sendCommand(gotocmd):
+				return False
+
+		gotocmd = "G90 G0"
+		if z is not None:
+			gotocmd += " Z%.3f" % z
+			print(gotocmd)
+			if not self.sendCommand(gotocmd):
+				return False
+		
+		return True
+
 	def resetAxis(self, x, y, z):
 		resetCmd = "G10 P0 L20 "
 		if x is not None:

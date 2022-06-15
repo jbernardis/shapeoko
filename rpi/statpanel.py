@@ -33,9 +33,9 @@ class StatPanel(wx.Panel):
 
 		self.bClearAlarm = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBclearalarm, size=(120, 120), pos=(50, 160))
 		self.Bind(wx.EVT_BUTTON, self.onBClearAlarm, self.bClearAlarm)
-
-		self.bCheck = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBcheck, size=(120, 120), pos=(50, 300))
-		self.Bind(wx.EVT_BUTTON, self.onBCheck, self.bCheck)
+		
+		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(50, 300))
+		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
 
 		self.enableBasedOnStatus()
 
@@ -95,8 +95,8 @@ class StatPanel(wx.Panel):
 	def onBClearAlarm(self, evt):
 		self.shapeoko.clearAlarm()
 
-	def onBCheck(self, evt):
-		self.shapeoko.checkMode()
+	def onBReset(self, evt):
+		self.shapeoko.softReset()
 
 	def refreshParserState(self, state):
 		self.parserState = state

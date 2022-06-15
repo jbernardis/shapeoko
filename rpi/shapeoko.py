@@ -56,7 +56,7 @@ class Shapeoko(threading.Thread):
 
 	def parseStatus(self, msg):
 		terms = msg.split("|")
-		ns = terms[0][1:]
+		ns = terms[0][1:].split(":")[0]
 		if ns != self.status:
 			self.status = ns
 			for cb in self.cbNewStatus:
@@ -183,6 +183,12 @@ class Shapeoko(threading.Thread):
 
 	def kill(self):
 		self.isRunning = False
+
+	def resetAxis(self, x=None, y=None, z=None):
+		return self.grbl.resetAxis(x, y, z)
+
+	def goto(self, x=None, y=None, z=None):
+		return self.grbl.goto(x, y, z)
 
 	def run(self):
 		self.isRunning = True

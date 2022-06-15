@@ -7,13 +7,13 @@ tool speed
 goto 0  (G90 G0 X0 Y0; G90 G0 Z0)
 
 
-refresh parser state when changing to panel
+show alarm information in status screen
 
 icons - greyed when disabled
 
-icons for soft reset
-
 figure out why files dialog box won't center - figure out better control operations
+
+do a better job of constructing and the parsing async messages - shouldn't have to add blank "data" field
 
 
 Things to do to finalize:

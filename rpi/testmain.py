@@ -41,7 +41,7 @@ class MainFrame(wx.Frame):
 		self.JobPanel = JobPanel(self.lb, self, self.images)
 		self.JogPanel = JogPanel(self.lb, self, self.images)
 
-		self.ExitPanel = ExitPanel(self.lb, self)
+		self.ExitPanel = ExitPanel(self.lb, self)  #######REMOVE
 
 		self.pages = [
 			[ self.DROPanel, "DRO", 0 ],
@@ -50,7 +50,7 @@ class MainFrame(wx.Frame):
 			[ self.JogPanel, "Jog", 3 ]
 		]
 
-		self.pages.append([ self.ExitPanel, "EXIT", 4 ])
+		self.pages.append([ self.ExitPanel, "EXIT", 4 ])  #######Remove
 
 		for pg in self.pages:
 			self.lb.AddPage(pg[0], pg[1], imageId=pg[2])
@@ -84,7 +84,7 @@ class MainFrame(wx.Frame):
 		self.timer.Start(1000)
 		self.Bind(wx.EVT_TIMER, self.ticker)
 
-		self.ExitPanel.initialize(self)
+		self.ExitPanel.initialize(self)  ######REMOVE
 
 		if self.shapeoko is not None:
 			self.shapeoko.go()

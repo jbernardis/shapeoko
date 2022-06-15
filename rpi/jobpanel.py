@@ -62,6 +62,9 @@ class JobPanel(wx.Panel):
 		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(350, 300))
 		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
 
+		self.bCheck = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBcheck, size=(120, 120), pos=(500, 300))
+		self.Bind(wx.EVT_BUTTON, self.onBCheck, self.bCheck)
+
 		self.enableBasedOnFile()
 
 	def initialize(self, shapeoko, settings):
@@ -204,6 +207,9 @@ class JobPanel(wx.Panel):
 
 	def onBReset(self, evt):
 		self.shapeoko.softReset()
+
+	def onBCheck(self, evt):
+		self.shapeoko.checkMode()
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
