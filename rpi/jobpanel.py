@@ -118,8 +118,13 @@ class JobPanel(wx.Panel):
 
 	def onBFiles(self, evt):
 		dlg = FilesDlg(self, self.settings.datadir)
-		dlg.Center()
+		#dlg.Center()
+		dlg.SetPosition((0, 26))
+		print("size = ", dlg.GetSize())
+		print(dlg.GetPosition())
 		rc = dlg.ShowModal()
+		print("size = ", dlg.GetSize())
+		print(dlg.GetPosition())
 
 		if rc == wx.ID_OK:
 			flist, action = dlg.getResults()
@@ -241,8 +246,9 @@ class JobPanel(wx.Panel):
 
 class FilesDlg(wx.Dialog):
 	def __init__(self, parent, datadir):
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(500, 440), style=wx.CENTER | wx.CAPTION)
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, "", size=(500, 440), style=wx.CAPTION | wx.STAY_ON_TOP)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
+		self.Bind(wx.EVT_ACTIVATE, self.activate)
 
 		font = wx.Font(28, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 
@@ -272,6 +278,10 @@ class FilesDlg(wx.Dialog):
 
 		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(350, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBCancel, self.bCancel)
+
+	def activate(self, evt):
+		self.SetPosition((150, 20))
+		evt.Skip()
 
 	def loadFileNames(self):
 		fl = []
