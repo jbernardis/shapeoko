@@ -32,6 +32,7 @@ class Shapeoko(threading.Thread):
 
 		self.cbNewStatus = []
 		self.cbNewPosition = []
+		self.cbNewParserState = []
 
 		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
 		self.grbl.startPoll()
@@ -49,6 +50,9 @@ class Shapeoko(threading.Thread):
 
 	def registerNewPosition(self, cbNewPosition):
 		self.cbNewPosition.append(cbNewPosition)
+
+	def registerNewParserState(self, cbNewParserState):
+		self.cbNewParserState.append(cbNewParserState)
 
 	def parseStatus(self, msg):
 		terms = msg.split("|")
@@ -155,6 +159,12 @@ class Shapeoko(threading.Thread):
 	def getParserState(self):
 		return self.grbl.getParserState()
 
+	def clearAlarm(self):
+		return self.grbl.clearAlarm()
+
+	def checkMode(self):
+		return self.grbl.checkMode()
+
 	def jog(self, cmd):
 		terms = cmd.split(" ")
 		if len(terms) == 2:
@@ -182,6 +192,9 @@ class Shapeoko(threading.Thread):
 				if msg["data"].startswith("<"):
 					#print("status")
 					self.parseStatus(msg["data"])
+				elif msg["data"].startswith("[GC:"):
+					for cb in self.cbNewParserState:
+						cb(msg["data"][4:-1])
 				else:
 					print("Async: (%s)" % str(msg))
 

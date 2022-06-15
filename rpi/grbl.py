@@ -241,6 +241,15 @@ class Grbl:
 	def softReset(self):
 		return self.sendImmediate(chr(0x18))
 
+	def getParserState(self):
+		return self.sendCommand("$G")
+
+	def clearAlarm(self):
+		return self.sendCommand("$X")
+
+	def checkMode(self):
+		return self.sendCommand("$C")
+
 	def startPoll(self):
 		if not self.connected:
 			return False

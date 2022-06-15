@@ -80,8 +80,8 @@ class JobPanel(wx.Panel):
 	def setStatusEvent(self, evt):
 		self.status = evt.status
 		w,h = self.dc.GetTextExtent(self.status)
-		self.stMachineState.SetSize((w, h))
 		self.stMachineState.SetLabel(self.status)
+		self.stMachineState.SetSize((w, h))
 
 		if self.status.lower() == "idle" and self.playing:
 			self.finishRun()
@@ -98,7 +98,7 @@ class JobPanel(wx.Panel):
 
 	def enableBasedOnFile(self):
 		self.bCheckSize.Enable(self.currentFile is not None and not self.playing and self.status.lower() == "idle")
-		self.bPlay.Enable(self.currentFile is not None and not self.playing and self.status.lower() == "idle")
+		self.bPlay.Enable(self.currentFile is not None and not self.playing and self.status.lower() in [ "idle", "check" ])
 		self.bPause.Enable(self.currentFile is not None and self.playing)
 		self.bReset.Enable(self.currentFile is not None and self.playing)
 
@@ -193,7 +193,6 @@ class JobPanel(wx.Panel):
 
 	def onBReset(self, evt):
 		self.shapeoko.softReset()
-		self.finishRun()
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
