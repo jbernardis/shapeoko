@@ -73,7 +73,7 @@ class SendThread(threading.Thread):
 
 				elif msg["cmd"] == "END":
 					self.inFile = False
-					self.asyncQ.put({"event": "EOF", "file": msg["name"], "lines": self.lineCt, "data": ""})
+					self.asyncQ.put({"type": "eof", "file": msg["name"], "lines": self.lineCt})
 
 				elif msg["cmd"] == "LINE":
 					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
@@ -89,7 +89,7 @@ class SendThread(threading.Thread):
 
 		response = self.responseQ.get(False)
 		message = self.waitOKQ.get(False)
-		outMsg = {"event": "response", "type": response, "data": message["data"], "sequence": message["seq"]}
+		outMsg = {"type": "response", "status": response, "data": message["data"], "sequence": message["seq"]}
 		self.asyncQ.put(outMsg)
 		return False
 
@@ -113,7 +113,7 @@ class SendThread(threading.Thread):
 			try:
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "END":
-					self.asyncQ.put({"event": "ABORT", "file": msg["name"], "data": ""})
+					self.asyncQ.put({"type": "abort", "file": msg["name"]})
 			except queue.Empty:
 				break
 	
@@ -148,7 +148,16 @@ class ListenThread(threading.Thread):
 						self.responseQ.put(llow)
 		
 					else:
-						self.asyncQ.put({"event": "message", "data": line})
+						if line.startswith("<"):
+							msg = {"type": "status", "data": line}
+						elif line.startswith("[GC:"):
+							msg = {"type": "parserstate", "data": line}
+						elif line.startswith("ALARM"):
+							msg = {"type": "alarm", "data": line}
+						else:
+							msg = {"type": "message", "data": line}
+
+						self.asyncQ.put(msg)
 			time.sleep(0.01)
 
 		self.endOfLife = True

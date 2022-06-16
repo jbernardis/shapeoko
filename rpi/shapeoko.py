@@ -195,16 +195,26 @@ class Shapeoko(threading.Thread):
 		while self.isRunning:
 			msg = self.grbl.nextAsyncMessage()
 			if msg is not None:
-				if msg["data"].startswith("<"):
-					#print("status: (%s)" % str(msg))
-					#print("status")
+				if msg["type"] == "status":
 					self.parseStatus(msg["data"])
-				elif msg["data"].startswith("[GC:"):
-					print("parser: (%s)" % str(msg))
+				elif msg["type"] == "parserstate":
 					for cb in self.cbNewParserState:
 						cb(msg["data"][4:-1])
+				elif msg["type"] == "response":
+					if msg["status"] != "ok":
+						print("Error %s response for message (%s)" % (msg["type"], msg["data"]))
+					else:
+						print("ok received for message (%s)" % msg["data"])
+				elif msg["type"] == "alarm":
+					print("Alarm: (%s)" % msg["data"])
+				elif msg["type"] == "abort":
+					print("File (%s) aborted" % msg["file"])
+				elif msg["type"] == "eof":
+					print("File (%s) EOF reached" % msg["file"])
+				elif msg["type"] == "message":
+					print("message: (%s)" % msg["data"])
 				else:
-					print("Async: (%s)" % str(msg))
+					print("catchAll: %s" % str(msg))
 
 			pcmd = self.pendant.getCommand()
 			if pcmd is not None:
