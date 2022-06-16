@@ -27,12 +27,15 @@ class Shapeoko(threading.Thread):
 		self.inveryYJog = True
 		self.invertZJog = False
 
-		self.running = False
+		self.isRunning = False
 		self.endOfLife = False
 
 		self.cbNewStatus = []
 		self.cbNewPosition = []
 		self.cbNewParserState = []
+
+		self.cbAlarmHandlers = []
+		self.cbErrorHandlers = []
 
 		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
 		self.grbl.startPoll()
@@ -53,6 +56,12 @@ class Shapeoko(threading.Thread):
 
 	def registerNewParserState(self, cbNewParserState):
 		self.cbNewParserState.append(cbNewParserState)
+
+	def registerAlarmHandler(self, cbAlarmHandler):
+		self.cbAlarmHandlers.append(cbAlarmHandler)
+
+	def registerErrorHandler(self, cbErrorHandler):
+		self.cbErrorHandlerss.append(cbErrorHandler)
 
 	def parseStatus(self, msg):
 		terms = msg.split("|")
@@ -202,11 +211,16 @@ class Shapeoko(threading.Thread):
 						cb(msg["data"][4:-1])
 				elif msg["type"] == "response":
 					if msg["status"] != "ok":
-						print("Error %s response for message (%s)" % (msg["type"], msg["data"]))
+						print("Error %s response for message (%s)" % (msg["status"], msg["data"]))
+						for cb in self.cbErrorHandlers:
+							cb(msg["status"], msg["data"])
 					else:
 						print("ok received for message (%s)" % msg["data"])
 				elif msg["type"] == "alarm":
 					print("Alarm: (%s)" % msg["data"])
+					for cb in self.cbAlarmHandlers:
+						cb(msg["data"])
+
 				elif msg["type"] == "abort":
 					print("File (%s) aborted" % msg["file"])
 				elif msg["type"] == "eof":

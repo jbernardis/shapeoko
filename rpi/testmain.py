@@ -1,4 +1,5 @@
 import wx
+import sys
 
 from shapeoko import Shapeoko
 from images import Images
@@ -6,6 +7,8 @@ from dropanel import DROPanel
 from statpanel import StatPanel
 from jobpanel import JobPanel
 from jogpanel import JogPanel 
+from configpanel import ConfigPanel
+from logpanel import LogPanel
 from settings import Settings
 from common import devMode
 
@@ -31,6 +34,8 @@ class MainFrame(wx.Frame):
 		il.Add(self.images.pngStatpanel)
 		il.Add(self.images.pngJobpanel)
 		il.Add(self.images.pngJogpanel)
+		il.Add(self.images.pngCfgpanel)
+		il.Add(self.images.pngLogpanel)
 
 		il.Add(self.images.pngExitpanel)
 
@@ -40,6 +45,8 @@ class MainFrame(wx.Frame):
 		self.StatPanel = StatPanel(self.lb, self, self.images)
 		self.JobPanel = JobPanel(self.lb, self, self.images)
 		self.JogPanel = JogPanel(self.lb, self, self.images)
+		self.CfgPanel = ConfigPanel(self.lb, self, self.images)
+		self.LogPanel = LogPanel(self.lb, self, self.images)
 
 		self.ExitPanel = ExitPanel(self.lb, self)  #######REMOVE
 
@@ -47,10 +54,12 @@ class MainFrame(wx.Frame):
 			[ self.DROPanel, "DRO", 0 ],
 			[ self.StatPanel, "Status", 1 ],
 			[ self.JobPanel, "Job", 2 ],
-			[ self.JogPanel, "Jog", 3 ]
+			[ self.JogPanel, "Jog", 3 ],
+			[ self.CfgPanel, "Config", 4 ],
+			[ self.LogPanel, "Log", 5 ]
 		]
 
-		self.pages.append([ self.ExitPanel, "EXIT", 4 ])  #######Remove
+		self.pages.append([ self.ExitPanel, "EXIT", 6 ])  #######Remove
 
 		for pg in self.pages:
 			self.lb.AddPage(pg[0], pg[1], imageId=pg[2])
@@ -99,6 +108,9 @@ class MainFrame(wx.Frame):
 			cb()
 
 	def onClose(self, _):
+		self.doClose()
+
+	def doClose(self):
 		self.settings.save()
 		
 		if self.shapeoko is not None:
@@ -109,6 +121,7 @@ class MainFrame(wx.Frame):
 class ExitPanel(wx.Panel):
 	def __init__(self, parent, win):		
 		wx.Panel.__init__(self, parent, wx.ID_ANY)
+		self.win = win
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
 
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
@@ -130,6 +143,13 @@ class App(wx.App):
 		else:
 			self.frame.ShowFullScreen(True)
 		return True
+
+
+if not devMode:
+	ofp = open("shapeoko.out", "w")
+	efp = open("shapeoko.err", "w")
+	sys.stdout = ofp
+	sys.stderr = efp
 
 app = App(False)
 app.MainLoop()

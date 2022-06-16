@@ -69,7 +69,7 @@ class JobPanel(wx.Panel):
 		self.bCheck.SetBitmapDisabled(self.images.pngBcheckdis)
 		self.Bind(wx.EVT_BUTTON, self.onBCheck, self.bCheck)
 
-		self.enableBasedOnFile()
+		self.enableButtons()
 
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
@@ -100,6 +100,7 @@ class JobPanel(wx.Panel):
 		except:
 			cx = [0, 0, 0]
 		self.stMachineState.SetForegroundColour(wx.Colour(cx))
+		self.enableButtons()
 
 		if self.status.lower() == "idle" and self.playing:
 			self.finishRun()
@@ -114,7 +115,7 @@ class JobPanel(wx.Panel):
 				self.stFileLines.SetLabel(txt)
 				self.stFileLines.SetSize((w, h))
 
-	def enableBasedOnFile(self):
+	def enableButtons(self):
 		self.bCheckSize.Enable(self.currentFile is not None and not self.playing and self.status.lower() == "idle")
 		self.bPlay.Enable(self.currentFile is not None and not self.playing and self.status.lower() in [ "idle", "check" ])
 		self.bPause.Enable(self.currentFile is not None and self.playing)
@@ -151,7 +152,7 @@ class JobPanel(wx.Panel):
 				fqn = os.path.join(self.settings.datadir, f)
 				os.unlink(fqn)
 
-		self.enableBasedOnFile()
+		self.enableButtons()
 
 	def onBCheckSize(self, evt):
 		scanq = queue.Queue()
@@ -187,14 +188,14 @@ class JobPanel(wx.Panel):
 	def onBPlay(self, evt):
 		self.playing = True
 		self.filePosition = 0
-		self.enableBasedOnFile()
+		self.enableButtons()
 		self.shapeoko.sendGCodeFile(self.fullFileName)
 
 	def finishRun(self):
 		self.paused = False
 		self.playing = False
 		self.filePosition = 0
-		self.enableBasedOnFile()
+		self.enableButtons()
 
 		txt = "%d lines" % self.fileLines
 		w,h = self.dc.GetTextExtent(txt)

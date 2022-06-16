@@ -1,11 +1,14 @@
 tool on
 tool off
 tool speed
+feed speed, overrides
 
 
 show alarm information in status screen
 
-do a better job of constructing and the parsing async messages - shouldn't have to add blank "data" field
+config panel
+
+log panel - to show errors and alarms
 
 
 Things to do to finalize:

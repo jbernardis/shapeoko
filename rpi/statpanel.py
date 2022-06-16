@@ -4,6 +4,7 @@ from common import StateColors, devMode
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 (ParserStateEvent, EVT_NEWPARSERSTATE) = newevent.NewEvent()  
+(AlarmEvent, EVT_ALARM) = newevent.NewEvent()  
 
 class StatPanel(wx.Panel):
 	def __init__(self, parent, win, images):		
@@ -38,7 +39,7 @@ class StatPanel(wx.Panel):
 		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(50, 300))
 		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
 
-		self.enableBasedOnStatus()
+		self.enableButtons()
 
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
@@ -49,14 +50,17 @@ class StatPanel(wx.Panel):
 
 		self.shapeoko.registerNewStatus(self.statusUpdate)
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
+
 		self.shapeoko.registerNewParserState(self.parserStateUpdate)
 		self.Bind(EVT_NEWPARSERSTATE, self.setParserStateEvent)
 
-	def enableBasedOnStatus(self):
+		self.shapeoko.registerAlarmHandler(self.alarmHandler)
+		self.Bind(EVT_ALARM, self.showAlarm)
+
+	def enableButtons(self):
 		self.bClearAlarm.Enable(self.status == "Alarm")
 
 	def switchToPage(self):
-		print("trying to refresh parser state")
 		try:
 			self.shapeoko.getParserState()
 		except Exception as e:
@@ -81,7 +85,7 @@ class StatPanel(wx.Panel):
 			cx = [0, 0, 0]
 		self.stMachineState.SetForegroundColour(wx.Colour(cx))
 
-		self.enableBasedOnStatus()
+		self.enableButtons()
 
 	def parserStateUpdate(self, newState): # Thread context
 		evt = ParserStateEvent(state=newState)
@@ -89,6 +93,14 @@ class StatPanel(wx.Panel):
 
 	def setParserStateEvent(self, evt):
 		self.refreshParserState(evt.state)
+
+	def alarmHandler(self, msg):  # thread context
+		evt = AlarmEvent(msg=msg)
+		wx.PostEvent(self, evt)
+
+	def showAlarm(self, evt):
+		msg = evt.msg
+		print("stat showAlarm: (%s)" % msg)
 
 	def onBRefresh(self, evt):
 		self.shapeoko.getParserState()
