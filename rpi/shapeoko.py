@@ -30,12 +30,12 @@ class Shapeoko(threading.Thread):
 		self.isRunning = False
 		self.endOfLife = False
 
-		self.cbNewStatus = []
-		self.cbNewPosition = []
-		self.cbNewParserState = []
-
+		self.cbStatusHandlers = []
+		self.cbPositionHandlers = []
+		self.cbParserStateHandlers = []
 		self.cbAlarmHandlers = []
 		self.cbErrorHandlers = []
+		self.cbMessageHandlers = []
 
 		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
 		self.grbl.startPoll()
@@ -48,28 +48,54 @@ class Shapeoko(threading.Thread):
 	def getPosition(self):
 		return self.grbl.getPosition()
 
-	def registerNewStatus(self, cbNewStatus):
-		self.cbNewStatus.append(cbNewStatus)
+	def registerStatusHandler(self, cbStatusHandler):
+		self.cbStatusHandlers.append(cbStatusHandler)
 
-	def registerNewPosition(self, cbNewPosition):
-		self.cbNewPosition.append(cbNewPosition)
+	def sendStatus(self, stat):
+		for cb in self.cbStatusHandlers:
+			cb(stat)
 
-	def registerNewParserState(self, cbNewParserState):
-		self.cbNewParserState.append(cbNewParserState)
+	def registerPositionHandler(self, cbPositionHandler):
+		self.cbPositionHandlers.append(cbPositionHandler)
+
+	def sendPosition(self, position):
+		for cb in self.cbPositionHandlers:
+			cb(position)
+
+	def registerParserStateHandler(self, cbParserStateHandler):
+		self.cbParserStateHandlers.append(cbParserStateHandler)
+
+	def sendParserState(self, pstate):
+		for cb in self.cbParserStateHandlers:
+			cb(pstate)
 
 	def registerAlarmHandler(self, cbAlarmHandler):
 		self.cbAlarmHandlers.append(cbAlarmHandler)
 
+	def sendAlarm(self, msg):
+		for cb in self.cbAlarmHandlers:
+			cb(msg)
+
 	def registerErrorHandler(self, cbErrorHandler):
 		self.cbErrorHandlers.append(cbErrorHandler)
+
+	def sendError(self, status, msg):
+		for cb in self.cbErrorHandlers:
+			cb(status, msg)
+
+	def registerMessageHandler(self, cbMessageHandler):
+		self.cbMessageHandlers.append(cbMessageHandler)
+
+	def sendMessage(self, msg):
+		for cb in self.cbMessageHandlers:
+			cb(msg)
 
 	def parseStatus(self, msg):
 		terms = msg.split("|")
 		ns = terms[0][1:].split(":")[0]
 		if ns != self.status:
 			self.status = ns
-			for cb in self.cbNewStatus:
-				cb(self.status)
+			self.sendStatus(self.status)
 
 		posChanged = False
 		for term in terms[1:]:
@@ -125,8 +151,7 @@ class Shapeoko(threading.Thread):
 						posChanged = True
 
 		if posChanged:
-			for cb in self.cbNewPosition:
-				cb({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
+			self.sendPosition({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
 
 	def getDistance(self, dx):
 		if dx < 0:
@@ -200,32 +225,36 @@ class Shapeoko(threading.Thread):
 			if msg is not None:
 				if msg["type"] == "status":
 					self.parseStatus(msg["data"])
+
 				elif msg["type"] == "parserstate":
-					for cb in self.cbNewParserState:
-						cb(msg["data"][4:-1])
+					self.sendParserState(msg["data"][4:-1])
+
 				elif msg["type"] == "response":
 					if msg["status"] != "ok":
-						for cb in self.cbErrorHandlers:
-							cb(msg["status"], msg["data"])
+						self.sendError(msg["status"], msg["data"])
+
 					else:
-						print("ok received for message (%s)" % msg["data"])
+						self.sendMessage("%s (ok)" % msg["data"])
+
 				elif msg["type"] == "alarm":
-					for cb in self.cbAlarmHandlers:
-						cb(msg["data"])
+					self.sendAlarm(msg["data"])
 
 				elif msg["type"] == "abort":
-					print("File (%s) aborted" % msg["file"])
+					self.sendMessage("File aborted: (%s)" % msg["file"])
+
 				elif msg["type"] == "eof":
-					print("File (%s) EOF reached" % msg["file"])
+					self.sendMessage("File (%s) processing successfully completed" % msg["file"])
+
 				elif msg["type"] == "message":
-					print("message: (%s)" % msg["data"])
+					self.sendMessage(msg["data"])
+
 				else:
-					print("catchAll: %s" % str(msg))
+					self.sendMessage("Unknown Message Type: (%s)" % str(msg))
 
 			pcmd = self.pendant.getCommand()
 			if pcmd is not None:
 				if self.status.lower() not in ["jog", "idle", "check"]:
-					print("ignoring pendant commands when in %s state" % self.status)
+					self.sendMessage("Ignoring pendant commands when in %s state" % self.status)
 				else:
 					if pcmd.startswith("JOG "):
 						self.jog(pcmd)

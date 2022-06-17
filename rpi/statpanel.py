@@ -52,10 +52,10 @@ class StatPanel(wx.Panel):
 			if shapeoko is None:
 				return
 
-		self.shapeoko.registerNewStatus(self.statusUpdate)
+		self.shapeoko.registerStatusHandler(self.statusUpdate)
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 
-		self.shapeoko.registerNewParserState(self.parserStateUpdate)
+		self.shapeoko.registerParserStateHandler(self.parserStateUpdate)
 		self.Bind(EVT_NEWPARSERSTATE, self.setParserStateEvent)
 
 		self.shapeoko.registerAlarmHandler(self.alarmHandler)

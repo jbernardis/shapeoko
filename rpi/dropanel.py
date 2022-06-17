@@ -57,8 +57,8 @@ class DROPanel(wx.Panel):
 				return
 
 
-		self.shapeoko.registerNewStatus(self.statusUpdate)
-		self.shapeoko.registerNewPosition(self.positionChange)
+		self.shapeoko.registerStatusHandler(self.statusUpdate)
+		self.shapeoko.registerPositionHandler(self.positionChange)
 
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 		self.Bind(EVT_NEWPOSITION, self.setPositionEvent)

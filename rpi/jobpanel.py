@@ -83,7 +83,7 @@ class JobPanel(wx.Panel):
 				return
 
 		self.parentFrame.registerTicker(self.ticker)
-		self.shapeoko.registerNewStatus(self.statusUpdate)
+		self.shapeoko.registerStatusHandler(self.statusUpdate)
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)
 
 	def statusUpdate(self, newStatus): # Thread context
