@@ -34,7 +34,7 @@ class LogPanel(wx.Panel):
 		print("log showAlarm: (%s)" % msg)
 
 	def errorHandler(self, status, msg):  # thread context
-		evt = AlarmEvent(status=status, msg=msg)
+		evt = ErrorEvent(status=status, msg=msg)
 		wx.PostEvent(self, evt)
 
 	def showError(self, evt):

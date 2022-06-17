@@ -85,15 +85,14 @@ class MainFrame(wx.Frame):
 			self.shapeoko = None
 			#return
 
-		self.DROPanel.initialize(self.shapeoko, self.settings)
-		self.StatPanel.initialize(self.shapeoko, self.settings)
-		self.JobPanel.initialize(self.shapeoko, self.settings)
-		self.JogPanel.initialize(self.shapeoko, self.settings)
+		for pg in self.pages:
+			try:
+				pg[0].initialize(self.shapeoko, self.settings)
+			except AttributeError:
+				pass
 
 		self.timer.Start(1000)
 		self.Bind(wx.EVT_TIMER, self.ticker)
-
-		self.ExitPanel.initialize(self)  ######REMOVE
 
 		if self.shapeoko is not None:
 			self.shapeoko.go()
@@ -127,13 +126,11 @@ class ExitPanel(wx.Panel):
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
 		self.b = wx.Button(self, wx.ID_ANY, "exit", pos=(50, 50), size=(120, 120))
+		self.Bind(wx.EVT_BUTTON, win.onClose, self.b)
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
 		self.SetSize(evt.GetSize())
-
-	def initialize(self, win):
-		self.Bind(wx.EVT_BUTTON, win.onClose, self.b)
 
 class App(wx.App):
 	def OnInit(self):

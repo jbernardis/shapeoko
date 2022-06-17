@@ -61,7 +61,7 @@ class Shapeoko(threading.Thread):
 		self.cbAlarmHandlers.append(cbAlarmHandler)
 
 	def registerErrorHandler(self, cbErrorHandler):
-		self.cbErrorHandlerss.append(cbErrorHandler)
+		self.cbErrorHandlers.append(cbErrorHandler)
 
 	def parseStatus(self, msg):
 		terms = msg.split("|")
@@ -89,8 +89,6 @@ class Shapeoko(threading.Thread):
 					if self.z != nz:
 						self.z = nz
 						posChanged = True
-				else:
-					print("invalid MPos term (%s)" % term)
 
 			elif term.startswith("WPos:"):
 				posterm = term[5:].replace(">", "")
@@ -108,8 +106,6 @@ class Shapeoko(threading.Thread):
 					if self.z != nz - self.offz:
 						self.z = nz - self.offz
 						posChanged = True
-				else:
-					print("invalid MPos term (%s)" % term)
 
 			elif term.startswith("WCO:"):
 				posterm = term[4:].replace(">", "")
@@ -127,8 +123,6 @@ class Shapeoko(threading.Thread):
 					if self.offz != nz:
 						self.offz = nz
 						posChanged = True
-				else:
-					print("invalid WCO term (%s)" % term)
 
 		if posChanged:
 			for cb in self.cbNewPosition:
@@ -211,13 +205,11 @@ class Shapeoko(threading.Thread):
 						cb(msg["data"][4:-1])
 				elif msg["type"] == "response":
 					if msg["status"] != "ok":
-						print("Error %s response for message (%s)" % (msg["status"], msg["data"]))
 						for cb in self.cbErrorHandlers:
 							cb(msg["status"], msg["data"])
 					else:
 						print("ok received for message (%s)" % msg["data"])
 				elif msg["type"] == "alarm":
-					print("Alarm: (%s)" % msg["data"])
 					for cb in self.cbAlarmHandlers:
 						cb(msg["data"])
 
@@ -235,7 +227,6 @@ class Shapeoko(threading.Thread):
 				if self.status.lower() not in ["jog", "idle", "check"]:
 					print("ignoring pendant commands when in %s state" % self.status)
 				else:
-					print("Pendant: (%s)" % pcmd)
 					if pcmd.startswith("JOG "):
 						self.jog(pcmd)
 					elif pcmd.startswith("RESET "):

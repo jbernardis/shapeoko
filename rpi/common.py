@@ -23,3 +23,15 @@ StateColors = {
 	"home": __bk,
 	"sleep": __bk,
 }
+
+AlarmText = {
+	1: "Hard Limit",
+	2: "Soft Limit",
+	3: "Abort during cycle",
+	4: "Probe Fail(4)",
+	5: "Probe Fail(5)",
+	6: "Homing Fail(6)",
+	7: "Homing Fail(7)",
+	8: "Homing Fail(8)",
+	9: "Homing Fail(9)"
+}

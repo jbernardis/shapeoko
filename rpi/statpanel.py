@@ -1,6 +1,6 @@
 import wx
 from wx.lib import newevent
-from common import StateColors, devMode
+from common import StateColors, AlarmText, devMode
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 (ParserStateEvent, EVT_NEWPARSERSTATE) = newevent.NewEvent()  
@@ -28,6 +28,10 @@ class StatPanel(wx.Panel):
 		self.stParserState1.SetFont(fontText)
 		self.stParserState2 = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 120))
 		self.stParserState2.SetFont(fontText)
+
+		self.stAlarmText = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 200))
+		self.stAlarmText.SetFont(fontText)
+		self.stAlarmText.SetForegroundColour(wx.Colour(StateColors["alarm"]))
 
 		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBrefresh, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
@@ -63,8 +67,8 @@ class StatPanel(wx.Panel):
 	def switchToPage(self):
 		try:
 			self.shapeoko.getParserState()
-		except Exception as e:
-			print("Exception (%s)" % str(e))
+		except:
+			pass
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -85,6 +89,9 @@ class StatPanel(wx.Panel):
 			cx = [0, 0, 0]
 		self.stMachineState.SetForegroundColour(wx.Colour(cx))
 
+		if evt.status.lower() != "alarm":
+			self.showAlarmText("")
+
 		self.enableButtons()
 
 	def parserStateUpdate(self, newState): # Thread context
@@ -100,7 +107,17 @@ class StatPanel(wx.Panel):
 
 	def showAlarm(self, evt):
 		msg = evt.msg
-		print("stat showAlarm: (%s)" % msg)
+		try:
+			ax = int(msg.split(":")[1])
+			txt = AlarmText[ax]
+		except:
+			txt = "Unknown Alarm: %s" % msg
+		self.showAlarmText(txt)
+
+	def showAlarmText(self, txt):
+		w,h = self.dc.GetTextExtent(txt)
+		self.stAlarmText.SetLabel(txt)
+		self.stAlarmText.SetSize((w, h))
 
 	def onBRefresh(self, evt):
 		self.shapeoko.getParserState()
