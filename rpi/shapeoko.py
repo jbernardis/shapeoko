@@ -58,14 +58,15 @@ class Shapeoko(threading.Thread):
 	def registerPositionHandler(self, cbPositionHandler):
 		self.cbPositionHandlers.append(cbPositionHandler)
 
-	def sendPosition(self, position):
+	def sendPosition(self, position, offset):
 		for cb in self.cbPositionHandlers:
-			cb(position)
+			cb(position, offset)
 
 	def registerParserStateHandler(self, cbParserStateHandler):
 		self.cbParserStateHandlers.append(cbParserStateHandler)
 
-	def sendParserState(self, pstate):
+	def sendParserState(self, parserState):
+		pstate = parserState[4:-1]
 		for cb in self.cbParserStateHandlers:
 			cb(pstate)
 
@@ -86,9 +87,9 @@ class Shapeoko(threading.Thread):
 	def registerMessageHandler(self, cbMessageHandler):
 		self.cbMessageHandlers.append(cbMessageHandler)
 
-	def sendMessage(self, msg):
+	def sendMessage(self, msg, verbose=False, status=False):
 		for cb in self.cbMessageHandlers:
-			cb(msg)
+			cb(msg, verbose=verbose, status=status)
 
 	def parseStatus(self, msg):
 		terms = msg.split("|")
@@ -224,17 +225,19 @@ class Shapeoko(threading.Thread):
 			msg = self.grbl.nextAsyncMessage()
 			if msg is not None:
 				if msg["type"] == "status":
+					self.sendMessage(msg["data"], verbose=True, status=True)
 					self.parseStatus(msg["data"])
 
 				elif msg["type"] == "parserstate":
-					self.sendParserState(msg["data"][4:-1])
+					self.sendMessage(msg["data"])
+					self.sendParserState(msg["data"])
 
 				elif msg["type"] == "response":
 					if msg["status"] != "ok":
 						self.sendError(msg["status"], msg["data"])
 
 					else:
-						self.sendMessage("%s (ok)" % msg["data"])
+						self.sendMessage("%s (ok)" % msg["data"], verbose=True)
 
 				elif msg["type"] == "alarm":
 					self.sendAlarm(msg["data"])

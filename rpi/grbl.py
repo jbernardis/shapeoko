@@ -319,13 +319,11 @@ class Grbl:
 
 		self.gcodeQ.put({"cmd": "START", "name": fn})
 
-		print("start sending file")
 		with open(fn,'r') as fp:
 			for ln in fp:
 				self.gcodeQ.put({"cmd": "DATA", "data": ln.strip() + '\n'})
 
 		self.gcodeQ.put({"cmd": "END", "name": fn})
-		print("finished sending file")
 		return True
 
 	def getPosition(self):

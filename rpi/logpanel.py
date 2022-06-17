@@ -15,6 +15,8 @@ class LogPanel(wx.Panel):
 
 		self.parentFrame = win
 		self.images = images
+		self.verboseOutput = True
+		self.showStatusOutput = False
 
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
@@ -69,7 +71,13 @@ class LogPanel(wx.Panel):
 
 		self.teLog.AppendText("ERROR (%s) (%s)\n" % (txt, msg))
 
-	def messageHandler(self, msg):  # thread context
+	def messageHandler(self, msg, verbose=False, status=False):  # thread context
+		if verbose and not self.verboseOutput:
+			return
+
+		if status and not self.showStatusOutput:
+			return
+
 		evt = MessageEvent(msg=msg)
 		wx.PostEvent(self, evt)
 

@@ -3,12 +3,12 @@ tool off
 tool speed
 feed speed, overrides
 
-
-show alarm information in status screen
-
 config panel
 
-log panel - to show errors and alarms
+log panel - buttons to clear, show verbose output
+
+do I need to do a drainqueue after soft reset?
+
 
 
 Things to do to finalize:
