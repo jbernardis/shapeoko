@@ -5,8 +5,6 @@ feed speed, overrides
 
 config panel
 
-log panel - button to clear, checkboxes to show verbose output, show status output
-
 do I need to do a drainqueue after soft reset?
 
 
