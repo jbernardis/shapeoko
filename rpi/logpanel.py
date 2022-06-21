@@ -41,7 +41,6 @@ class LogPanel(wx.Panel):
 		self.shapeoko.registerMessageHandler(self.messageHandler)
 		self.Bind(EVT_MESSAGE, self.showMessage)
 
-
 	def alarmHandler(self, msg):  # thread context
 		evt = AlarmEvent(msg=msg)
 		wx.PostEvent(self, evt)

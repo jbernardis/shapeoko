@@ -150,6 +150,8 @@ class ListenThread(threading.Thread):
 					else:
 						if line.startswith("<"):
 							msg = {"type": "status", "data": line}
+						elif line.startswith("$"):
+							msg = {"type": "config", "data": line}
 						elif line.startswith("[GC:"):
 							msg = {"type": "parserstate", "data": line}
 						elif line.startswith("ALARM"):
@@ -196,6 +198,7 @@ class Grbl:
 			self.sendImmediate("\r\n") # wake up grbl
 			self.sendImmediate("\r\n")
 			time.sleep(2)
+			self.getConfig()
 
 		else:
 			self.listener = None
@@ -272,6 +275,9 @@ class Grbl:
 
 	def getParserState(self):
 		return self.sendCommand("$G")
+
+	def getConfig(self):
+		return self.sendCommand("$$")
 
 	def clearAlarm(self):
 		return self.sendCommand("$X")

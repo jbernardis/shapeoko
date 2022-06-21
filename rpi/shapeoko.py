@@ -36,6 +36,7 @@ class Shapeoko(threading.Thread):
 		self.cbAlarmHandlers = []
 		self.cbErrorHandlers = []
 		self.cbMessageHandlers = []
+		self.cbConfigHandlers = []
 
 		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
 		self.grbl.startPoll()
@@ -53,6 +54,13 @@ class Shapeoko(threading.Thread):
 
 	def sendStatus(self, stat):
 		for cb in self.cbStatusHandlers:
+			cb(stat)
+
+	def registerConfigHandler(self, cbConfigHandler):
+		self.cbConfigHandlers.append(cbConfigHandler)
+
+	def sendConfigData(self, stat):
+		for cb in self.cbConfigHandlers:
 			cb(stat)
 
 	def registerPositionHandler(self, cbPositionHandler):
@@ -188,6 +196,9 @@ class Shapeoko(threading.Thread):
 	def getParserState(self):
 		return self.grbl.getParserState()
 
+	def getConfig(self):
+		return self.grbl.getConfig()
+
 	def clearAlarm(self):
 		return self.grbl.clearAlarm()
 
@@ -227,6 +238,10 @@ class Shapeoko(threading.Thread):
 				if msg["type"] == "status":
 					self.sendMessage(msg["data"], verbose=True, status=True)
 					self.parseStatus(msg["data"])
+
+				elif msg["type"] == "config":
+					self.sendMessage(msg["data"])
+					self.sendConfigData(msg["data"])
 
 				elif msg["type"] == "parserstate":
 					self.sendMessage(msg["data"])
