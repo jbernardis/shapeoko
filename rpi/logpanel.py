@@ -33,7 +33,7 @@ class LogPanel(wx.Panel):
 		self.cbStatus.SetFont(font)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbStatus, self.cbStatus)
 
-		self.bClear = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(500, 410))
+		self.bClear = wx.BitmapButton(self, wx.ID_ANY, images.pngBclearlog, size=(100, 60), pos=(500, 410))
 		self.Bind(wx.EVT_BUTTON, self.onBClear, self.bClear)
 
 	def onCbVerbose(self, _):
