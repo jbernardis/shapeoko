@@ -24,13 +24,33 @@ class LogPanel(wx.Panel):
 		font = wx.Font(16, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		self.teLog.SetFont(font)
 
+		self.cbVerbose = wx.CheckBox(self, wx.ID_ANY, "Verbose", pos=(40, 420), size=(120, 21))
+		self.cbVerbose.SetFont(font)
+		self.cbVerbose.SetValue(True)
+		self.Bind(wx.EVT_CHECKBOX, self.onCbVerbose, self.cbVerbose)
+
+		self.cbStatus = wx.CheckBox(self, wx.ID_ANY, "Status", pos=(200, 420), size=(120, 21))
+		self.cbStatus.SetFont(font)
+		self.Bind(wx.EVT_CHECKBOX, self.onCbStatus, self.cbStatus)
+
+		self.bClear = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(500, 410))
+		self.Bind(wx.EVT_BUTTON, self.onBClear, self.bClear)
+
+	def onCbVerbose(self, _):
+		self.verboseOutput = self.cbVerbose.GetValue()
+
+	def onCbStatus(self, _):
+		self.showStatusOutput = self.cbStatus.GetValue()
+
+	def onBClear(self, _):
+		self.teLog.Clear()
 
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
 
 		h, v = self.GetClientSize()
-		self.teLog.SetSize((h, v))
+		self.teLog.SetSize((h, v-80))
 
 		self.shapeoko.registerAlarmHandler(self.alarmHandler)
 		self.Bind(EVT_ALARM, self.showAlarm)
