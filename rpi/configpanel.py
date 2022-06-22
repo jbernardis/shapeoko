@@ -40,7 +40,6 @@ class ConfigPanel(wx.Panel):
 
 	def showConfig(self, evt):
 		msg = evt.msg
-		print("Config data rcvd: (%s)" % msg)
 
 		cx, val = msg[1:].split("=", 1)
 
@@ -49,9 +48,8 @@ class ConfigPanel(wx.Panel):
 		except:
 			icx = None
 		if icx is not None:
-			print("cfg index: %d  value: (%s)" % (int(cx), val))
-			self.values[cx] = val
-			self.lcConfig.refreshItem(cx)
+			self.values[icx] = val
+			self.lcConfig.refreshItem(icx)
 
 	def switchToPage(self):
 		try:
