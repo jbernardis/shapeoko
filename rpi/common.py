@@ -1,4 +1,4 @@
-devMode = True
+HTTPPORT = 9000
 
 XAXIS = "X"
 YAXIS = "Y"

@@ -1,6 +1,6 @@
 import wx
 from wx.lib import newevent
-from common import StateColors, AlarmText, devMode
+from common import StateColors, AlarmText
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 (ParserStateEvent, EVT_NEWPARSERSTATE) = newevent.NewEvent()  
@@ -48,9 +48,6 @@ class StatPanel(wx.Panel):
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
-		if devMode:
-			if shapeoko is None:
-				return
 
 		self.shapeoko.registerStatusHandler(self.statusUpdate)
 		self.Bind(EVT_NEWSTATUS, self.setStatusEvent)

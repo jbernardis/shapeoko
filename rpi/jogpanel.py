@@ -1,6 +1,6 @@
 
 import wx
-from common import devMode, XAXIS, YAXIS, ZAXIS
+from common import XAXIS, YAXIS, ZAXIS
 
 class JogPanel(wx.Panel):
 	def __init__(self, parent, win, images):		
@@ -131,6 +131,3 @@ class JogPanel(wx.Panel):
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
-		if devMode:
-			if shapeoko is None:
-				return

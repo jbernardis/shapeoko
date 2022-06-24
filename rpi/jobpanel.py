@@ -6,7 +6,7 @@ import os
 import time
 import queue
 from gparser import Scanner
-from common import StateColors, devMode
+from common import StateColors
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 
@@ -77,10 +77,6 @@ class JobPanel(wx.Panel):
 
 		self.currentFile = None
 		self.displayCurrentFileInfo()
-
-		if devMode:
-			if self.shapeoko is None:
-				return
 
 		self.parentFrame.registerTicker(self.ticker)
 		self.shapeoko.registerStatusHandler(self.statusUpdate)

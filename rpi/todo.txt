@@ -3,7 +3,9 @@ tool off
 tool speed
 feed speed, overrides
 
-config panel
+http server for reconfig
+
+orderly shutdown os.system("sudo poweroff")
 
 do I need to do a drainqueue after soft reset?
 

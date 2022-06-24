@@ -1,7 +1,7 @@
 import wx
 from wx.lib import newevent
 
-from common import XAXIS, YAXIS, ZAXIS, AxisList, StateColors, devMode
+from common import XAXIS, YAXIS, ZAXIS, AxisList, StateColors
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 (PositionEvent, EVT_NEWPOSITION) = newevent.NewEvent()  
@@ -52,10 +52,6 @@ class DROPanel(wx.Panel):
 		self.shapeoko = shapeoko
 		self.settings = settings
 		self.displayPosition()
-		if devMode:
-			if shapeoko is None:
-				return
-
 
 		self.shapeoko.registerStatusHandler(self.statusUpdate)
 		self.shapeoko.registerPositionHandler(self.positionChange)

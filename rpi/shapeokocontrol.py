@@ -1,6 +1,8 @@
 import wx
 import sys
 
+DEPLOYED = False
+
 from shapeoko import Shapeoko
 from images import Images
 from dropanel import DROPanel
@@ -10,8 +12,6 @@ from jogpanel import JogPanel
 from configpanel import ConfigPanel
 from logpanel import LogPanel
 from settings import Settings
-from common import devMode
-
 
 class MainFrame(wx.Frame):
 	def __init__(self):		
@@ -48,7 +48,8 @@ class MainFrame(wx.Frame):
 		self.CfgPanel = ConfigPanel(self.lb, self, self.images)
 		self.LogPanel = LogPanel(self.lb, self, self.images)
 
-		self.ExitPanel = ExitPanel(self.lb, self)  #######REMOVE
+		if not DEPLOYED:
+			self.ExitPanel = ExitPanel(self.lb, self)
 
 		self.pages = [
 			[ self.DROPanel, "DRO", 0 ],
@@ -59,7 +60,8 @@ class MainFrame(wx.Frame):
 			[ self.LogPanel, "Log", 5 ]
 		]
 
-		self.pages.append([ self.ExitPanel, "EXIT", 6 ])  #######Remove
+		if not DEPLOYED:
+			self.pages.append([ self.ExitPanel, "EXIT", 6 ]) 
 
 		for pg in self.pages:
 			self.lb.AddPage(pg[0], pg[1], imageId=pg[2])
@@ -77,13 +79,16 @@ class MainFrame(wx.Frame):
 		except AttributeError:
 			pass
 
+	def isDeployed(self):
+		return DEPLOYED
+
 	def initialize(self):
 		try:
 			self.shapeoko = Shapeoko(self.settings)
 		except Exception as e:
 			print("exception (%s)" % str(e))
 			self.shapeoko = None
-			#return
+			return
 
 		for pg in self.pages:
 			try:
@@ -135,14 +140,11 @@ class ExitPanel(wx.Panel):
 class App(wx.App):
 	def OnInit(self):
 		self.frame = MainFrame()
-		if devMode:
-			self.frame.Show()
-		else:
-			self.frame.ShowFullScreen(True)
+		self.frame.ShowFullScreen(True)
 		return True
 
 
-if not devMode:
+if DEPLOYED:
 	ofp = open("shapeoko.out", "w")
 	efp = open("shapeoko.err", "w")
 	sys.stdout = ofp

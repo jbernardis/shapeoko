@@ -141,7 +141,6 @@ class ListenThread(threading.Thread):
 				line=self.port.read_until().decode("UTF-8").strip()
 
 				if (len(line)>=1):
-					#print("rcvd: (%s)" % line.strip())
 					llow = line.lower()
 					
 					if self.isResponse(llow):
@@ -216,7 +215,6 @@ class Grbl:
 		if y is not None:
 			jogcmd += "Y%.3f" % y
 		jogcmd += "F%d" % speed
-		print(jogcmd)
 		return self.sendCommand(jogcmd)
 
 	def jogz(self, z, speed, absolute=False, metric=True):
@@ -226,7 +224,6 @@ class Grbl:
 		if z is not None:
 			jogcmd += "Z%.3f" % z
 		jogcmd += "F%d" % speed
-		print(jogcmd)
 		return self.sendCommand(jogcmd)
 
 	def goto(self, x, y, z):
@@ -236,14 +233,12 @@ class Grbl:
 				gotocmd += " X%.3f" % x
 			if y is not None:
 				gotocmd += " Y%.3f" % y
-			print(gotocmd)
 			if not self.sendCommand(gotocmd):
 				return False
 
 		gotocmd = "G90 G0"
 		if z is not None:
 			gotocmd += " Z%.3f" % z
-			print(gotocmd)
 			if not self.sendCommand(gotocmd):
 				return False
 		
@@ -257,11 +252,9 @@ class Grbl:
 			resetCmd += "Y%.3f " % y
 		if z is not None:
 			resetCmd += "Z%.3f " % z
-		print(resetCmd)
 		return self.sendCommand(resetCmd)
 
 	def stopJog(self):
-		print("stop jog immediate")
 		return self.sendImmediate(chr(0x85))
 
 	def holdFeed(self):

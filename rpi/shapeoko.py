@@ -1,10 +1,15 @@
 import time
 import threading
+import queue
+import socket   
+
+import pprint
 
 from grbl import Grbl
 from pendant import Pendant
+from httpserver import ShapeokoHTTPServer
 
-from common import XAXIS, YAXIS, ZAXIS
+from common import XAXIS, YAXIS, ZAXIS, HTTPPORT
 
 # <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
 class Shapeoko(threading.Thread):
@@ -38,10 +43,16 @@ class Shapeoko(threading.Thread):
 		self.cbMessageHandlers = []
 		self.cbConfigHandlers = []
 
+		self.shapeokoserver = None
+
 		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
 		self.grbl.startPoll()
 
 		self.pendant = Pendant(tty=self.settings.ttypendant)
+		
+		hostname=socket.gethostname()   
+		IPAddr=socket.gethostbyname(hostname)
+		self.startHttpServer(IPAddr, HTTPPORT)
 
 	def go(self):
 		self.start()
@@ -230,9 +241,43 @@ class Shapeoko(threading.Thread):
 	def goto(self, x=None, y=None, z=None):
 		return self.grbl.goto(x, y, z)
 
+	def startHttpServer(self, ip, port):
+		self.HttpCmdQ = queue.Queue(0)
+		self.HttpRespQ = queue.Queue(0)
+		self.serving = True
+		self.shapeokoserver = ShapeokoHTTPServer(ip, port, self.HttpCmdQ, self.HttpRespQ)
+
+	def HTTPProcess(self):
+		if self.HttpCmdQ.empty():
+			return
+
+		try:
+			cmd = self.HttpCmdQ.get(False)
+		except queue.Empty:
+			return
+
+		if cmd is None:
+			return
+
+		pprint.pprint(cmd)
+
+		try:
+			verb = cmd["cmd"][0]
+		except KeyError:
+			self.HttpRespQ.put((400, b'missing verb'))
+			return
+		except:
+			self.HttpRespQ.put((400, b'unexpected error retrieving command'))
+			return
+
+		self.HttpRespQ.put((200, b'command accepted'))
+
+
 	def run(self):
 		self.isRunning = True
 		while self.isRunning:
+			self.HTTPProcess()
+
 			msg = self.grbl.nextAsyncMessage()
 			if msg is not None:
 				if msg["type"] == "status":
@@ -295,4 +340,7 @@ class Shapeoko(threading.Thread):
 
 		if self.grbl is not None:
 			self.grbl.terminate()
+
+		if self.shapeokoserver is not None:
+			self.shapeokoserver.close()
 
