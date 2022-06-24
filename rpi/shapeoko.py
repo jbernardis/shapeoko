@@ -9,7 +9,7 @@ from grbl import Grbl
 from pendant import Pendant
 from httpserver import ShapeokoHTTPServer
 
-from common import XAXIS, YAXIS, ZAXIS
+from common import XAXIS, YAXIS, ZAXIS, Settings
 
 # <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
 class Shapeoko(threading.Thread):
@@ -49,6 +49,9 @@ class Shapeoko(threading.Thread):
 		self.grbl.startPoll()
 
 		self.pendant = Pendant(tty=self.settings.ttypendant)
+		self.config = {}
+		for k in Settings.keys():
+			self.config[k] = None
 		
 		self.startHttpServer(self.settings.ipaddr, self.settings.port)
 
@@ -68,9 +71,18 @@ class Shapeoko(threading.Thread):
 	def registerConfigHandler(self, cbConfigHandler):
 		self.cbConfigHandlers.append(cbConfigHandler)
 
-	def sendConfigData(self, stat):
+	def sendConfigData(self, cfg):
+		# record the configuration locally
+		cx, val = cfg[1:].split("=", 1)
+		try:
+			icx = int(cx)
+		except:
+			icx = None
+		if icx is not None and icx in Settings.keys():
+			self.config[icx] = val
+
 		for cb in self.cbConfigHandlers:
-			cb(stat)
+			cb(cfg)
 
 	def registerPositionHandler(self, cbPositionHandler):
 		self.cbPositionHandlers.append(cbPositionHandler)
@@ -268,7 +280,12 @@ class Shapeoko(threading.Thread):
 			self.HttpRespQ.put((400, b'unexpected error retrieving command'))
 			return
 
-		self.HttpRespQ.put((200, b'command accepted'))
+		if verb == "config":
+			resp = str(self.config)
+			self.HttpRespQ.put((200, resp.encode()))
+		else:
+			msg = "Unknown command: %s" % cmd
+			self.HttpRespQ.put((400, msg.encode()))
 
 
 	def run(self):

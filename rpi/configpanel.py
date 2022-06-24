@@ -47,7 +47,7 @@ class ConfigPanel(wx.Panel):
 			icx = int(cx)
 		except:
 			icx = None
-		if icx is not None:
+		if icx is not None and icx in Settings.keys():
 			self.values[icx] = val
 			self.lcConfig.refreshItem(icx)
 
