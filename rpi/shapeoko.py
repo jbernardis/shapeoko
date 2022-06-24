@@ -11,9 +11,12 @@ from common import XAXIS, YAXIS, ZAXIS, Settings
 
 # <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
 class Shapeoko(threading.Thread):
-	def __init__(self, settings):
+	def __init__(self, parent, settings):
 		threading.Thread.__init__(self)
+
+		self.parent = parent
 		self.settings = settings
+
 		self.status = None
 		self.x = None
 		self.y = None
@@ -305,6 +308,14 @@ class Shapeoko(threading.Thread):
 					self.grbl.getConfig()
 				resp = "%d action(s) performed" % len(cmds)
 				self.HttpRespQ.put((400, resp.encode()))
+		elif verb == "exit":
+			self.parent.requestClose(shutdown=False)
+			resp = "exit pending"
+			self.HttpRespQ.put((200, resp.encode()))
+		elif verb == "shutdown":
+			self.parent.requestClose(shutdown=True)
+			resp = "shutdown pending"
+			self.HttpRespQ.put((200, resp.encode()))
 		else:
 			msg = "Unknown command: %s" % cmd
 			self.HttpRespQ.put((400, msg.encode()))

@@ -1,5 +1,9 @@
+import os
 import wx
+from wx.lib import newevent
 import sys
+
+ShutDownFlag = False
 
 DEPLOYED = False
 
@@ -12,6 +16,8 @@ from jogpanel import JogPanel
 from configpanel import ConfigPanel
 from logpanel import LogPanel
 from settings import Settings
+
+(CloseRequest, EVT_CLOSEREQUEST) = newevent.NewEvent()
 
 class MainFrame(wx.Frame):
 	def __init__(self):		
@@ -68,6 +74,8 @@ class MainFrame(wx.Frame):
 
 		self.lb.Bind(wx.EVT_LISTBOOK_PAGE_CHANGED, self.onPageChanged)
 
+		self.Bind(EVT_CLOSEREQUEST, self.onCloseRequest)
+
 		self.timer = wx.Timer(self)
 
 		wx.CallAfter(self.initialize)
@@ -84,7 +92,7 @@ class MainFrame(wx.Frame):
 
 	def initialize(self):
 		try:
-			self.shapeoko = Shapeoko(self.settings)
+			self.shapeoko = Shapeoko(self, self.settings)
 		except Exception as e:
 			print("exception (%s)" % str(e))
 			self.shapeoko = None
@@ -111,7 +119,23 @@ class MainFrame(wx.Frame):
 		for cb in self.registeredTickers:
 			cb()
 
-	def onClose(self, _):
+	def requestClose(self, shutdown=False):
+		evt = CloseRequest(shutdown=shutdown)
+		wx.PostEvent(self, evt)
+
+	def onCloseRequest(self, evt):
+		global ShutDownFlag
+		ShutDownFlag = evt.shutdown
+		
+		try:
+			ShutDownFlag = evt.shutdown
+			
+		except:
+			ShutDownFlag = False
+
+		self.doClose()
+
+	def onClose(self, evt):
 		self.doClose()
 
 	def doClose(self):
@@ -152,3 +176,6 @@ if DEPLOYED:
 
 app = App(False)
 app.MainLoop()
+
+if ShutDownFlag:
+	os.system("sudo poweroff")
