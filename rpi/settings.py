@@ -11,6 +11,9 @@ class Settings:
 		self.datadir = os.path.join(os.getcwd(), "shapeokodata")
 		self.pollinterval = 0.5
 
+		self.ipaddr = "shapeoko.local"
+		self.port = 9000
+
 		self.inifile = os.path.join(os.getcwd(), INIFILE)
 		self.section = "shapeoko"
 
@@ -36,6 +39,14 @@ class Settings:
 						pi = float(value)
 					except:
 						pi = self.pollinterval
+					self.pollinterval = pi
+				elif opt == 'ipaddr':
+					self.ipaddr = value
+				elif opt == "port":
+					try:
+						p = float(value)
+					except:
+						p = self.port
 					self.pollinterval = pi
 				else:
 					print("Unknown option in ini file: %s - ignoring" % opt)
@@ -64,6 +75,8 @@ class Settings:
 		self.cfg.set(self.section, "ttypendant", str(self.ttypendant))
 		self.cfg.set(self.section, "datadir", str(self.datadir))
 		self.cfg.set(self.section, "pollinterval", "%.3f" % self.pollinterval)
+		self.cfg.set(self.section, "ipaddr", str(self.ipaddr))
+		self.cfg.set(self.section, "port", "%d" % self.port)
 
 		try:		
 			cfp = open(self.inifile, 'w')

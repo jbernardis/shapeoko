@@ -4,7 +4,6 @@ from threading import Thread
 from socketserver import ThreadingMixIn 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-import logging
 
 class Handler(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -20,7 +19,6 @@ class Handler(BaseHTTPRequestHandler):
 		cmdDict['cmd'] = [cmd]
 		rc, b = app.dispatch(cmdDict)
 		req += (" - %d" % rc)
-		logging.info(req)
 		try:
 			body = b.encode()
 		except:
@@ -32,7 +30,6 @@ class Handler(BaseHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write(body)
 		else:
-			logging.error(body)
 			self.send_response(400)
 			self.send_header("Content-type", "text/plain")
 			self.end_headers()
@@ -57,6 +54,7 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
 
 class ShapeokoHTTPServer:
 	def __init__(self, ip, port, httpcmdq, httprespq):
+		print("creating server at (%s) (%d)" % (ip, port))
 		self.server = ThreadingHTTPServer((ip, port), Handler)
 		self.server.setApp(self)
 		self.httpcmdq = httpcmdq

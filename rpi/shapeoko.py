@@ -9,7 +9,7 @@ from grbl import Grbl
 from pendant import Pendant
 from httpserver import ShapeokoHTTPServer
 
-from common import XAXIS, YAXIS, ZAXIS, HTTPPORT
+from common import XAXIS, YAXIS, ZAXIS
 
 # <Run|MPos:91.863,0.000,-2.000|FS:330,0|Ov:100,100,100>
 class Shapeoko(threading.Thread):
@@ -50,9 +50,7 @@ class Shapeoko(threading.Thread):
 
 		self.pendant = Pendant(tty=self.settings.ttypendant)
 		
-		hostname=socket.gethostname()   
-		IPAddr=socket.gethostbyname(hostname)
-		self.startHttpServer(IPAddr, HTTPPORT)
+		self.startHttpServer(self.settings.ipaddr, self.settings.port)
 
 	def go(self):
 		self.start()
