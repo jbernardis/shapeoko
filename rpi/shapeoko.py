@@ -3,8 +3,6 @@ import threading
 import queue
 import socket   
 
-import pprint
-
 from grbl import Grbl
 from pendant import Pendant
 from httpserver import ShapeokoHTTPServer
@@ -269,8 +267,6 @@ class Shapeoko(threading.Thread):
 		if cmd is None:
 			return
 
-		pprint.pprint(cmd)
-
 		try:
 			verb = cmd["cmd"][0]
 		except KeyError:
@@ -280,9 +276,35 @@ class Shapeoko(threading.Thread):
 			self.HttpRespQ.put((400, b'unexpected error retrieving command'))
 			return
 
-		if verb == "config":
+		if verb == "getcfg":
 			resp = str(self.config)
 			self.HttpRespQ.put((200, resp.encode()))
+		elif verb == "setcfg":
+			errKeys = []
+			cmds = []
+			for k in cmd.keys():
+				if k in [ "cmd" ]:
+					continue
+				try:
+					ik = int(k)
+				except:
+					ik = None
+				if ik is None or ik not in Settings.keys():
+					errKeys.append(k)
+					continue
+
+				cmds.append("$%s=%s" % (k, cmd[k][0]))
+
+			if len(errKeys) > 0:
+				resp = "action(s) not performed due to badkeys: (" + ", ".join([str(x) for x in errKeys]) + ")"
+				self.HttpRespQ.put((200, resp.encode()))
+			else:
+				if len(cmds) > 0:
+					for c in cmds:
+						self.grbl.sendCommand(c)
+					self.grbl.getConfig()
+				resp = "%d action(s) performed" % len(cmds)
+				self.HttpRespQ.put((400, resp.encode()))
 		else:
 			msg = "Unknown command: %s" % cmd
 			self.HttpRespQ.put((400, msg.encode()))
