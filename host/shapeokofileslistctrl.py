@@ -45,6 +45,8 @@ class ShapeokoFilesListCtrl(wx.ListCtrl):
 		self.Bind(wx.EVT_LIST_CACHE_HINT, self.OnItemHint)
 
 	def checkAll(self):
+		if self.fl is None:
+			return
 		self.selected = [True for _ in range(self.fl.count())]
 		self.refreshAll(preserveSelection=True)
 		self.notifyParent()
@@ -58,6 +60,8 @@ class ShapeokoFilesListCtrl(wx.ListCtrl):
 		self.notifyParent()
 
 	def checkNone(self):
+		if self.fl is None:
+			return
 		self.selected = [False for _ in range(self.fl.count())]
 		self.refreshAll()
 		self.notifyParent()

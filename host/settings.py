@@ -5,12 +5,11 @@ INIFILE = "shapeoko.ini"
 
 def getPasswordFromFile(fn):
 	if not os.path.exists(fn):
-		print("Unable to determine password")
+		print("Unable to determine password - cannot open .password file")
 		exit(1)
 
 	with open(fn, "r") as pfp:
 		pw = pfp.readline().strip()
-		print("(%s)" % pw)
 
 	return pw
 
@@ -23,7 +22,6 @@ class Settings:
 		self.password = None
 
 		self.inifile = os.path.join(os.getcwd(), INIFILE)
-		print(self.inifile)
 		self.section = "shapeoko"
 
 		self.cfg = configparser.ConfigParser()
