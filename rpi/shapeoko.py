@@ -309,7 +309,7 @@ class Shapeoko(threading.Thread):
 				resp = "%d action(s) performed" % len(cmds)
 				self.HttpRespQ.put((400, resp.encode()))
 		elif verb == "getjob":
-			resp = self.parent.getJobInfo()
+			resp = str(self.parent.getJobInfo())
 			self.HttpRespQ.put((200, resp.encode()))
 		elif verb == "exit":
 			self.parent.requestClose(shutdown=False)

@@ -120,7 +120,7 @@ class MainFrame(wx.Frame):
 			cb()
 
 	def getJobInfo(self):
-		return self.jobPanel.getJobInfo()
+		return self.JobPanel.getJobInfo()
 
 	def requestClose(self, shutdown=False):
 		evt = CloseRequest(shutdown=shutdown)

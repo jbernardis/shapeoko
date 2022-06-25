@@ -28,6 +28,7 @@ class JobPanel(wx.Panel):
 		self.dc.SetFont(fontText)
 
 		self.currentFile = None
+		self.fileLines = 0
 		self.fullFileName = None
 
 		self.playing = False
@@ -89,6 +90,7 @@ class JobPanel(wx.Panel):
 	def getJobInfo(self):
 		resp = {}
 		resp["file"] = "" if self.currentFile is None else self.currentFile
+		resp["lines"] = self.fileLines
 		resp["state"] = "running" if self.playing else "idle"
 		resp["position"] = self.filePosition
 		return resp		
