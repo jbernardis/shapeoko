@@ -308,9 +308,8 @@ class Shapeoko(threading.Thread):
 					self.grbl.getConfig()
 				resp = "%d action(s) performed" % len(cmds)
 				self.HttpRespQ.put((400, resp.encode()))
-		elif verb == "getpos":
-			p = self.grbl.getPosition()
-			resp = "{\"pos\": %d}" % p
+		elif verb == "getjob":
+			resp = self.parent.getJobInfo()
 			self.HttpRespQ.put((200, resp.encode()))
 		elif verb == "exit":
 			self.parent.requestClose(shutdown=False)

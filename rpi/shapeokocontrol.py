@@ -119,6 +119,9 @@ class MainFrame(wx.Frame):
 		for cb in self.registeredTickers:
 			cb()
 
+	def getJobInfo(self):
+		return self.jobPanel.getJobInfo()
+
 	def requestClose(self, shutdown=False):
 		evt = CloseRequest(shutdown=shutdown)
 		wx.PostEvent(self, evt)

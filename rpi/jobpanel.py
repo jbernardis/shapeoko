@@ -86,6 +86,13 @@ class JobPanel(wx.Panel):
 		evt = StatusEvent(status=newStatus)
 		wx.PostEvent(self, evt)
 
+	def getJobInfo(self):
+		resp = {}
+		resp["file"] = "" if self.currentFile is None else self.currentFile
+		resp["state"] = "running" if self.playing else "idle"
+		resp["position"] = self.filePosition
+		return resp		
+
 	def setStatusEvent(self, evt):
 		self.status = evt.status
 		w,h = self.dc.GetTextExtent(self.status)
