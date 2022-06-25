@@ -2,10 +2,9 @@ import wx
 import os
 
 from images import Images
+from settings import Settings
 from filelist import FileList
 from shapeokofileslistctrl import ShapeokoFilesListCtrl
-
-import pprint
 
 BUTTONSIZE = (48, 48)
 
@@ -17,35 +16,40 @@ class MainFrame(wx.Frame):
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
 		self.SetClientSize((800, 480))
 
+		self.settings = Settings()
 		self.images = Images("images")
 
 		self.flc = ShapeokoFilesListCtrl(self, self.images)
-		self.flc.SetPosition((50, 50))
+		self.flc.SetPosition((35, 50))
 
 		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRefresh, size=(BUTTONSIZE))
 		self.bRefresh.SetPosition((50, 400))
+		self.bRefresh.SetToolTip("Refresh File List")
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
 		self.bCheckAll = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCheckall, size=(BUTTONSIZE))
 		self.bCheckAll.SetPosition((120, 400))
+		self.bCheckAll.SetToolTip("Check All Files")
 		self.Bind(wx.EVT_BUTTON, self.onBCheckAll, self.bCheckAll)
 
 		self.bCheckOne = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCheckone, size=(BUTTONSIZE))
 		self.bCheckOne.SetPosition((190, 400))
+		self.bCheckOne.SetToolTip("Check/Uncheck selected file")
 		self.Bind(wx.EVT_BUTTON, self.onBCheckOne, self.bCheckOne)
 
 		self.bCheckNone = wx.BitmapButton(self, wx.ID_ANY, self.images.pngChecknone, size=(BUTTONSIZE))
 		self.bCheckNone.SetPosition((260, 400))
+		self.bCheckNone.SetToolTip("Uncheck All Files")
 		self.Bind(wx.EVT_BUTTON, self.onBCheckNone, self.bCheckNone)
-
-
 
 		self.bUpload = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUpload, size=(BUTTONSIZE))
 		self.bUpload.SetPosition((400, 400))
+		self.bUpload.SetToolTip("Upload file(s) to shapeoko")
 		self.Bind(wx.EVT_BUTTON, self.onBUpload, self.bUpload)
 
 		self.bDelete = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDelete, size=(BUTTONSIZE))
 		self.bDelete.SetPosition((470, 400))
+		self.bDelete.SetToolTip("Delete checked file(s)")
 		self.bDelete.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 
@@ -54,9 +58,8 @@ class MainFrame(wx.Frame):
 		wx.CallAfter(self.initialize)
 
 	def initialize(self):
-		self.fileList = FileList(self, "shapeoko.local", "jeff", "5braxton")
+		self.fileList = FileList(self, self.settings.ipaddr, self.settings.user, self.settings.derivedPassword)
 		self.flc.setFl(self.fileList)
-		self.flc.SetPosition((50, 50))
 		self.initialized = True
 
 	def onBRefresh(self, _):

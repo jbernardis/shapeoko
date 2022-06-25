@@ -3,16 +3,6 @@ tool off
 tool speed
 feed speed, overrides
 
-http server for reconfig
-
-orderly shutdown os.system("sudo poweroff")
 
 do I need to do a drainqueue after soft reset?
 
-
-
-Things to do to finalize:
-
-remove "if shapeoko is None" tests in each panel
-remove exit panel
-remove show vs showfullscreen

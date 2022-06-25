@@ -48,7 +48,8 @@ fullback();
 *resettunnel();
 *translate([-70, 0, 0])ztunnel();
 *backbox();
-lid();
+*lid();
+backplate();
 
 module lid() {
     mirror([0, 0, 0])
@@ -76,6 +77,76 @@ module lid() {
                     cylinder(r=2, h=10, center=true);
 
          }
+     }
+}
+
+module backplate() {
+    mirror([0, 1, 0])
+     union() {
+        difference() {
+            union() {
+                hull() for(i=[-1, 1], j=[-1, 1])
+                    translate([i*(93/2+4), j*(50/2+4), 0])
+                        cylinder(r=4, h=5, center=true);
+                translate([46, 0, 0])
+                    hull() for (i=[-1, 1])
+                        translate([0, i*15-30, 0])
+                            cylinder(r=8, h=5, center=true);
+                translate([-50, -20, 0])
+                    cylinder(r=15, h=5, center=true);
+                translate([-13, 18, 0])
+                    cylinder(r=30, h=5, center=true);
+            }
+            translate([0, 0, 2])
+                cube([93, 50, 5], true);
+            translate([46, 0, 0])
+                hull() for (i=[-1, 1])
+                    translate([0, i*15-30, -1.9])
+                        cylinder(r=6, h=5, center=true);
+            translate([-50, -20, -1.9])
+                cylinder(r=13, h=5, center=true);
+            translate([-13, 18, 2]) {
+                cylinder(r=8, h=50, center=true);
+                for(i=[-1, 1], j=[-1, 1])
+                    translate([i*15, j*15, 0]) {
+                        cylinder(r=1.9, h=50, center=true);
+                    }
+                for(i=[-1, 1])
+                    translate([i*15, 15, 0]) {
+                        cylinder(r=3.4, h=5, center=true);
+                    }
+            }
+             
+             
+             
+            for(i=[-1, 1])
+                translate([i*(93/2+4), (50/2+4), 0]) {
+                   translate([0, 0, 3.25])
+                        cylinder(r=1.9, h=5, center=true);
+                   translate([0, 0, -2])
+                        cylinder(r=3.2, h=5, center=true, $fn=6);
+                }
+                
+            for(i=[-1, 1])
+                translate([i*(60/2+4), -(50/2+4), 0]) {
+                   translate([0, 0, 3.25])
+                        cylinder(r=1.9, h=5, center=true);
+                   translate([0, 0, -2])
+                        cylinder(r=3.2, h=5, center=true, $fn=6);
+                }
+
+         }
+         translate([41.5, 14.75, 1.5])
+            difference() {
+                cylinder(r=4, h=8, center=true);
+                cylinder(r=2.6, h=11, center=true);
+            }
+         translate([-37.5, -14., 1.5])
+            difference() {
+                cylinder(r=4, h=8, center=true);
+                translate([0, 0, 2])
+                    cylinder(r=2.6, h=10, center=true);
+            }
      }
 }
 

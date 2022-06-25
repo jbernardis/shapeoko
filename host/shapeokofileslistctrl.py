@@ -66,7 +66,6 @@ class ShapeokoFilesListCtrl(wx.ListCtrl):
 		self.fl = fl
 		self.selected = [False for _ in range(self.fl.count())]
 		self.refreshItemCount()
-		self.SetSize((690, 280))
 		self.notifyParent()
 		
 	def refreshItemCount(self):
