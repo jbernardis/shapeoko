@@ -4,7 +4,7 @@ import wx
 class ShapeokoFilesListCtrl(wx.ListCtrl):
 	def __init__(self, parent, images):
 		wx.ListCtrl.__init__(
-			self, parent, wx.ID_ANY, size=(730, 280),
+			self, parent, wx.ID_ANY, size=(750, 280),
 			style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_VRULES|wx.LC_SINGLE_SEL
 			)
 
@@ -22,7 +22,7 @@ class ShapeokoFilesListCtrl(wx.ListCtrl):
 		self.InsertColumn(2, "Mode")
 		self.InsertColumn(3, "Size")
 		self.SetColumnWidth(0, 240)
-		self.SetColumnWidth(1, 240)
+		self.SetColumnWidth(1, 260)
 		self.SetColumnWidth(2, 160)
 		self.SetColumnWidth(3, 90)
 		

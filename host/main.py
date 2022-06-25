@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import wx
 import os
 
@@ -6,7 +8,7 @@ from settings import Settings
 from filelist import FileList
 from shapeokofileslistctrl import ShapeokoFilesListCtrl
 
-BUTTONSIZE = (48, 48)
+BUTTONSIZE = (64, 64)
 
 class MainFrame(wx.Frame):
 	def __init__(self):		
@@ -67,7 +69,6 @@ class MainFrame(wx.Frame):
 		btnsz.AddSpacer(50)
 
 		self.bUpload = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUpload, size=(BUTTONSIZE))
-		self.bUpload.SetPosition((400, 400))
 		self.bUpload.SetToolTip("Upload file(s) to shapeoko")
 		self.Bind(wx.EVT_BUTTON, self.onBUpload, self.bUpload)
 		btnsz.Add(self.bUpload)
@@ -75,7 +76,6 @@ class MainFrame(wx.Frame):
 		btnsz.AddSpacer(10)
 
 		self.bDelete = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDelete, size=(BUTTONSIZE))
-		self.bDelete.SetPosition((470, 400))
 		self.bDelete.SetToolTip("Delete checked file(s)")
 		self.bDelete.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
