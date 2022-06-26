@@ -1,7 +1,8 @@
 import os
 import configparser
+import socket
 
-INIFILE = "shapeoko.ini"
+INIFILE = "skmonitor.ini"
 
 def getPasswordFromFile(fn):
 	if not os.path.exists(fn):
@@ -17,12 +18,14 @@ def getPasswordFromFile(fn):
 class Settings:
 	def __init__(self):
 		# first assign default values
-		self.ipaddr = "shapeoko.local"
+		self.iniipaddr = "shapeoko.local"
+		self.port = 9000
 		self.user = "jeff"
-		self.password = None
+		self.inipassword = None
+		self.localgcdir = os.getcwd()
 
 		self.inifile = os.path.join(os.getcwd(), INIFILE)
-		self.section = "shapeoko"
+		self.section = "skmonitor"
 
 		self.cfg = configparser.ConfigParser()
 		self.cfg.optionxform = str
@@ -38,14 +41,23 @@ class Settings:
 			if self.cfg.has_section(self.section):
 				for opt, value in self.cfg.items(self.section):
 					if opt == 'ipaddr':
-						self.ipaddr = value
+						self.iniipaddr = value
+					elif opt == "port":
+						try:
+							p = int(value)
+						except:
+							print("unable to parse %s as port number - using default" % str(value))
+							p = self.port		
+						self.port = p
 					elif opt == 'user':
 						self.user = value
+					elif opt == "localgcdir":
+						self.localgcdir = value
 					elif opt == 'password':
 						if value == "None":
-							self.password == None
+							self.inipassword == None
 						else:
-							self.password = value
+							self.inipassword = value
 					else:
 						print("Unknown option in ini file: %s - ignoring" % opt)
 			else:
@@ -53,11 +65,12 @@ class Settings:
 				self.modified = True
 				self.save()
 
-		if self.password is None:
-			self.derivedPassword = getPasswordFromFile(".password")
+		if self.inipassword is None:
+			self.password = getPasswordFromFile(".password")
 		else:
-			self.derivedPassword = self.password
+			self.password = self.inipassword
 
+		self.ipaddr = socket.gethostbyname(self.iniipaddr)
 	
 	def setModified(self):
 		self.modified = True
@@ -75,14 +88,17 @@ class Settings:
 		except configparser.DuplicateSectionError:
 			pass
 		
-		self.cfg.set(self.section, "ipaddr", str(self.ipaddr))
+		self.cfg.set(self.section, "ipaddr", str(self.iniipaddr))
+		self.cfg.set(self.section, "port", "%d" % self.port)
 		self.cfg.set(self.section, "user", str(self.user))
 
-		if self.password is None:
+		if self.inipassword is None:
 			pval = "None"
 		else:
-			pval = self.password
+			pval = self.inipassword
 		self.cfg.set(self.section, "password", pval)
+
+		self.cfg.set(self.section, "localgcdir", str(self.localgcdir))
 
 		try:		
 			cfp = open(self.inifile, 'w')
