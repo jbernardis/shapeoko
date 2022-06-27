@@ -49,7 +49,11 @@ class Shapeoko(threading.Thread):
 		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
 		self.grbl.startPoll()
 
-		self.pendant = Pendant(tty=self.settings.ttypendant)
+		try:
+			self.pendant = Pendant(tty=self.settings.ttypendant)
+		except:
+			self.pendant = None  # allow operation without pendant
+
 		self.config = {}
 		for k in Settings.keys():
 			self.config[k] = None
@@ -365,21 +369,22 @@ class Shapeoko(threading.Thread):
 				else:
 					self.sendMessage("Unknown Message Type: (%s)" % str(msg))
 
-			pcmd = self.pendant.getCommand()
-			if pcmd is not None:
-				if self.status.lower() not in ["jog", "idle", "check"]:
-					self.sendMessage("Ignoring pendant commands when in %s state" % self.status)
-				else:
-					if pcmd.startswith("JOG "):
-						self.jog(pcmd)
-					elif pcmd.startswith("RESET "):
-						axis = pcmd.split(" ")[1]
-						if axis == "X":
-							self.grbl.resetAxis(0, None, None);
-						elif axis == "Y":
-							self.grbl.resetAxis(None, 0, None);
-						elif axis == "Z":
-							self.grbl.resetAxis(None, None, 0);
+			if self.pendant is not None:
+				pcmd = self.pendant.getCommand()
+				if pcmd is not None:
+					if self.status.lower() not in ["jog", "idle", "check"]:
+						self.sendMessage("Ignoring pendant commands when in %s state" % self.status)
+					else:
+						if pcmd.startswith("JOG "):
+							self.jog(pcmd)
+						elif pcmd.startswith("RESET "):
+							axis = pcmd.split(" ")[1]
+							if axis == "X":
+								self.grbl.resetAxis(0, None, None);
+							elif axis == "Y":
+								self.grbl.resetAxis(None, 0, None);
+							elif axis == "Z":
+								self.grbl.resetAxis(None, None, 0);
 			time.sleep(0.01)
 
 		self.endOfLife = True
