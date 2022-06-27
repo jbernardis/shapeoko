@@ -30,6 +30,13 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.dataPoints = []
 		self.currentLine = 0
 
+		self.minx = -100
+		self.miny = -100
+		self.maxx = 100
+		self.maxy = 100
+		self.midx = 0
+		self.midy = 0
+
 		# initial mouse position
 		self.lastx = self.x = 0
 		self.lasty = self.y = 0
@@ -218,6 +225,24 @@ class ViewCanvas(glcanvas.GLCanvas):
 			
 	def setPoints(self, pts):
 		self.dataPoints = pts[:]
+		self.minx = 9999
+		self.miny = 9999
+		self.maxx = -9999
+		self.maxy = -9999
+		for p in self.dataPoints:
+			if p[0] < self.minx:
+				self.minx = p[0]
+			if p[0] > self.maxx:
+				self.maxx = p[0]
+			if p[1] < self.miny:
+				self.miny = p[1]
+			if p[1] > self.maxy:
+				self.maxy = p[1]
+		self.midx = (self.minx + self.maxx)/2.0
+		self.midy = (self.miny + self.maxy)/2.0
+
+		self.resetView = True
+		self.setZoom(1.0)
 		self.Refresh(True)
 
 	def setPosition(self, p):
@@ -228,7 +253,13 @@ class ViewCanvas(glcanvas.GLCanvas):
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		glFrustum(-50.0*self.zoom, 50.0*self.zoom, -50.0*self.zoom, 50.0*self.zoom, 200, 800.0)
-		gluLookAt (200.0, -200.0, 400.0, 0.0, 0.0, 0.0, -1.0, 1.0, 0.0)
+		#gluLookAt (200.0, -200.0, 400.0, 0.0, 0.0, 0.0, -1.0, 1.0, 0.0)
+		distance = 5 * max(self.maxx - self.minx, self.maxy - self.miny)
+		if distance > 500:
+			distance = 500
+		if distance < 200:
+			distance = 200
+		gluLookAt (self.midx, self.midy-100, distance,    self.midx, self.midy, 0.0,    0.0, 0.0, 1.0)
 
 		glMatrixMode(GL_MODELVIEW)
 		if self.resetView:
@@ -244,8 +275,8 @@ class ViewCanvas(glcanvas.GLCanvas):
 		w, h = self.size
 		w = max(w, 1.0)
 		h = max(h, 1.0)
-		xScale = 360.0 / w #180.0 / w
-		yScale = 360.0 / h #180.0 / h
+		xScale = 180.0 / w
+		yScale = 180.0 / h
 		glRotatef(self.angley * yScale, 1.0, 0.0, 0.0)
 		glRotatef(self.anglex * xScale, 0.0, 1.0, 0.0)
 		glRotatef(self.anglez, 0.0, 0.0, 1.0)

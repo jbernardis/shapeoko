@@ -4,7 +4,7 @@ import wx
 import os
 
 from controller import Controller
-#from images import Images
+from images import Images
 from settings import Settings
 from viewcanvas import ViewCanvas
 from cnc import CNC
@@ -25,7 +25,7 @@ class MainFrame(wx.Frame):
 		self.SetClientSize((800, 480))
 
 		self.settings = Settings()
-		#self.images = Images("images")
+		self.images = Images("images")
 
 		self.showGrid = True
 		self.showZGrid = False
@@ -101,27 +101,30 @@ class MainFrame(wx.Frame):
 
 		btnsz = wx.BoxSizer(wx.HORIZONTAL)
 
-		self.bRetrieveJob = wx.Button(self, wx.ID_ANY, "Job", size=(BUTTONSIZE))
+		self.bRetrieveJob = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJob, size=(BUTTONSIZE))
 		self.Bind(wx.EVT_BUTTON, self.onBRetrieveJob, self.bRetrieveJob)
+		self.bRetrieveJob.SetToolTip("Retrieve current job from the shapeoko")
 		btnsz.Add(self.bRetrieveJob)
 
 		btnsz.AddSpacer(20)
 
-		self.bFollow = wx.Button(self, wx.ID_ANY, "Follow", size=(BUTTONSIZE))
+		self.bFollow = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFollow, size=(BUTTONSIZE))
 		self.Bind(wx.EVT_BUTTON, self.onBFollow, self.bFollow)
+		self.bFollow.SetToolTip("Follow/Unfollow the current job as it runs")
 		btnsz.Add(self.bFollow)
-		#self.bFollow.Enable(False)
 
 		btnsz.AddSpacer(50)
 
-		self.bLocalFile = wx.Button(self, wx.ID_ANY, "Local", size=(BUTTONSIZE))
+		self.bLocalFile = wx.BitmapButton(self, wx.ID_ANY, self.images.pngLocalfile, size=(BUTTONSIZE))
 		self.Bind(wx.EVT_BUTTON, self.onBLocalFile, self.bLocalFile)
+		self.bLocalFile.SetToolTip("Load a local file for viewing only")
 		btnsz.Add(self.bLocalFile)
 
 		btnsz.AddSpacer(20)
 
-		self.bShapeokoFile = wx.Button(self, wx.ID_ANY, "Shapeoko", size=(BUTTONSIZE))
+		self.bShapeokoFile = wx.BitmapButton(self, wx.ID_ANY, self.images.pngShapeokofile, size=(BUTTONSIZE))
 		self.Bind(wx.EVT_BUTTON, self.onBShapeokoFile, self.bShapeokoFile)
+		self.bShapeokoFile.SetToolTip("Select and download a shapeoko file for viewing only")
 		btnsz.Add(self.bShapeokoFile)
 
 		vsz.Add(btnsz, 0, wx.ALIGN_CENTER_HORIZONTAL)

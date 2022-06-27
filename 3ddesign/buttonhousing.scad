@@ -49,7 +49,76 @@ fullback();
 *translate([-70, 0, 0])ztunnel();
 *backbox();
 *lid();
-backplate();
+*backplate();
+backbox2();
+
+module backbox2() {
+    union() {
+        translate([0, 0, 38/2])
+        difference() {
+            union() {
+                cube([98.5, 56, 38], true);
+            }
+            translate([0, 56/2, 38/2])
+                rotate([45, 0, 0])
+                    cube([200, 10, 40], true);
+             translate([0, -56/2, 38/2])
+                rotate([-45, 0, 0])
+                    cube([200, 10, 40], true);
+            
+            translate([0, 0, -1.51])
+                backboxvoid();
+            
+            for (i=[-1, 1]) {
+                translate([i*101/2, 29, 0])
+                    cylinder(r=3, h=200, center=true);
+                translate([i*37, -29, 0])
+                    cylinder(r=3, h=200, center=true);
+            }
+
+            
+         }
+         mounttabs();
+         translate([31.5, -3, 35.115])
+            color("red") cube([30, 30, 0.25], true);
+     }
+}
+
+module mounttabs() {
+    translate([0, 0, 1])
+    difference() {
+        for(i=[-1, 1]) {
+            translate([0, i*58/2, 0])
+                hull() {
+                    for (j=[-1, 1])
+                        translate([j*101/2, 0, 0])
+                            cylinder(r=4, h=2, center=true);
+                }
+        }
+        for (i=[-1, 1]) {
+            translate([i*101/2, 29, 0])
+                cylinder(r=2, h=20, center=true);
+            translate([i*37, -29, 0])
+                cylinder(r=2, h=20, center=true);
+        }
+    }
+}
+
+module backboxvoid() {
+    difference() {
+        union() {
+            cube([92.5, 50, 35], true);
+            translate([92.5/2-26/2+3, -50/2+14/2+15, 35/2-10/2+3])
+                cube([30, 14, 14], true);
+        }
+        translate([0, 50/2+1, 35/2+1])
+            rotate([45, 0, 0])
+                cube([200, 10, 40], true);
+         translate([0, -50/2-1, 35/2+1])
+            rotate([-45, 0, 0])
+                cube([200, 10, 40], true);
+    }
+}
 
 module lid() {
     mirror([0, 0, 0])

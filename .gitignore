@@ -1,4 +1,10 @@
 kicad/3 byte input simple/3 byte input simple-backups/*
 rpi/__pycache__/*
 rpi/shapeoko.ini
-host/__pycache__/*
+monitor/__pycache__/*
+monitor/.password
+monitor/skmonitor.ini
+filemanager/.password
+filemanager/shapeoko.ini
+filemanager/__pycache__/*
+
