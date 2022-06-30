@@ -46,7 +46,13 @@ class Shapeoko(threading.Thread):
 
 		self.shapeokoserver = None
 
-		self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
+		try:
+			self.grbl = Grbl(tty=self.settings.ttyshapeoko, pollInterval=self.settings.pollinterval)
+		except:
+			print("unable to connect to GRBL - exiting")
+			self.parent.requestClose(shutdown=False)
+			return
+			
 		self.grbl.startPoll()
 
 		try:

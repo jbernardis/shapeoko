@@ -2,7 +2,3 @@ tool on
 tool off
 tool speed
 feed speed, overrides
-
-
-do I need to do a drainqueue after soft reset?
-

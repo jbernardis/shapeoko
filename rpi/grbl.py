@@ -31,7 +31,7 @@ class SendThread(threading.Thread):
 		self.inFile = False
 
 		self.start()
-		
+	
 	def kill(self):
 		self.isRunning = False
 
@@ -338,6 +338,9 @@ class Grbl:
 			if self.asyncQ.empty():
 				return None
 			response = self.asyncQ.get(False)
+
+		if response["type"] == "alarm":
+			self.softReset()
 		return response
 		
 	def terminate(self):
