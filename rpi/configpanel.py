@@ -13,7 +13,15 @@ class ConfigPanel(wx.Panel):
 		self.parentFrame = win
 		self.images = images
 
+		fontText = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+		self.dc = wx.ScreenDC()
+		self.dc.SetFont(fontText)
+
+		self.stVersion = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 20))
+		self.stVersion.SetFont(fontText)
+
 		self.lcConfig = ConfigListCtrl(self)
+		self.lcConfig.SetPosition(0, 60)
 
 		self.values = {}
 		for k in Settings.keys():
@@ -41,15 +49,19 @@ class ConfigPanel(wx.Panel):
 	def showConfig(self, evt):
 		msg = evt.msg
 
-		cx, val = msg[1:].split("=", 1)
-
-		try:
-			icx = int(cx)
-		except:
-			icx = None
-		if icx is not None and icx in Settings.keys():
-			self.values[icx] = val
-			self.lcConfig.refreshItem(icx)
+		if msg.startswith("Grbl"):
+			l = msg.split()
+			versionString = "%s %s" % (l[0], l[1])
+			self.stVersion.SetLabel(versionString)
+		else:
+			cx, val = msg[1:].split("=", 1)
+			try:
+				icx = int(cx)
+			except:
+				icx = None
+			if icx is not None and icx in Settings.keys():
+				self.values[icx] = val
+				self.lcConfig.refreshItem(icx)
 
 	def switchToPage(self):
 		try:
@@ -74,8 +86,6 @@ class ConfigListCtrl(wx.ListCtrl):
 		self.SetFont(font)
 
 		self.cfgKeys = sorted(Settings.keys())
-
-		self.fl = None
 		
 		self.InsertColumn(0, "Parameter")
 		self.InsertColumn(1, "Value")

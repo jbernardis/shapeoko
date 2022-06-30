@@ -149,7 +149,7 @@ class ListenThread(threading.Thread):
 					else:
 						if line.startswith("<"):
 							msg = {"type": "status", "data": line}
-						elif line.startswith("$"):
+						elif line.startswith("$") or line.startswith("Grbl"):
 							msg = {"type": "config", "data": line}
 						elif line.startswith("[GC:"):
 							msg = {"type": "parserstate", "data": line}
