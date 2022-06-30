@@ -17,11 +17,10 @@ class ConfigPanel(wx.Panel):
 		self.dc = wx.ScreenDC()
 		self.dc.SetFont(fontText)
 
-		self.stVersion = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 20))
+		self.stVersion = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 10))
 		self.stVersion.SetFont(fontText)
 
 		self.lcConfig = ConfigListCtrl(self)
-		self.lcConfig.SetPosition(0, 60)
 
 		self.values = {}
 		for k in Settings.keys():
@@ -34,8 +33,8 @@ class ConfigPanel(wx.Panel):
 		self.settings = settings
 		
 		h, v = self.GetClientSize()
-		self.lcConfig.SetSize((h, v))
-		self.lcConfig.SetPosition((0, 0))
+		self.lcConfig.SetSize((h, v-50))
+		self.lcConfig.SetPosition((0, 50))
 
 		self.lcConfig.setValues(self.values)
 
@@ -52,7 +51,9 @@ class ConfigPanel(wx.Panel):
 		if msg.startswith("Grbl"):
 			l = msg.split()
 			versionString = "%s %s" % (l[0], l[1])
+			w,h = self.dc.GetTextExtent(versionString)
 			self.stVersion.SetLabel(versionString)
+			self.stVersion.SetSize((w, h))
 		else:
 			cx, val = msg[1:].split("=", 1)
 			try:

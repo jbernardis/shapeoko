@@ -36,6 +36,11 @@ class Shapeoko(threading.Thread):
 		self.isRunning = False
 		self.endOfLife = False
 
+		self.versionString = ""
+		self.config = {}
+		for k in Settings.keys():
+			self.config[k] = None
+
 		self.cbStatusHandlers = []
 		self.cbPositionHandlers = []
 		self.cbParserStateHandlers = []
@@ -59,10 +64,6 @@ class Shapeoko(threading.Thread):
 			self.pendant = Pendant(tty=self.settings.ttypendant)
 		except:
 			self.pendant = None  # allow operation without pendant
-
-		self.config = {}
-		for k in Settings.keys():
-			self.config[k] = None
 		
 		self.startHttpServer(self.settings.ipaddr, self.settings.port)
 
@@ -84,13 +85,17 @@ class Shapeoko(threading.Thread):
 
 	def sendConfigData(self, cfg):
 		# record the configuration locally
-		cx, val = cfg[1:].split("=", 1)
-		try:
-			icx = int(cx)
-		except:
-			icx = None
-		if icx is not None and icx in Settings.keys():
-			self.config[icx] = val
+		if cfg.startswith("$"):
+			cx, val = cfg[1:].split("=", 1)
+			try:
+				icx = int(cx)
+			except:
+				icx = None
+			if icx is not None and icx in Settings.keys():
+				self.config[icx] = val
+		else:
+			l = cfg.split()
+			self.versionString = "%s %s" % (l[0], l[1])
 
 		for cb in self.cbConfigHandlers:
 			cb(cfg)
