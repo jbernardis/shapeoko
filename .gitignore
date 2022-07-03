@@ -8,3 +8,5 @@ filemanager/.password
 filemanager/shapeoko.ini
 filemanager/__pycache__/*
 
+arduino/pendant/.vscode/c_cpp_properties.json
+arduino/shapeokorpm/.vscode/c_cpp_properties.json
