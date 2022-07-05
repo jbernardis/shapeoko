@@ -72,7 +72,7 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.drawAxes = True
 		self.drawZAxis = False
 		self.drawGrid = True
-		self.drawTool = True
+		self.drawTool = False
 		self.zoom = 1.0
 		self.buildarea = buildarea
 		self.adjPt = [x/2 for x in buildarea]
@@ -198,7 +198,7 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.Refresh(True)
 
 	def setDrawTool(self, flag):
-		self.drawTool = True #flag
+		self.drawTool = flag
 		self.Refresh(True)
 
 	def setDrawGrid(self, flag):

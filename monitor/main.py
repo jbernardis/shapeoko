@@ -39,6 +39,7 @@ class MainFrame(wx.Frame):
 		self.controller = None
 		self.following = False
 		self.status = ""
+		self.runStarted = False
 			
 		self.fileInfo = ""
 		self.followStatus = ""
@@ -165,17 +166,23 @@ class MainFrame(wx.Frame):
 				self.msgDlg("HTTP Error retrieving job information: %d" % rc, "HTTP Error")
 				return
 
-			nx = json["mpos"][0] - json["wco"][0]
-			ny = json["mpos"][1] - json["wco"][1]
-			nz = json["mpos"][2] - json["wco"][2]
+			if json["state"] in [ "run", "hold" ]:
+				self.runStarted = True
+				nx = json["mpos"][0] - json["wco"][0]
+				ny = json["mpos"][1] - json["wco"][1]
+				nz = json["mpos"][2] - json["wco"][2]
 
-			if self.position != json["position"] or nx != self.tx or ny != self.ty or nz != self.tz:
-				self.position = json["position"]
-				self.tx = nx
-				self.ty = ny
-				self.tz = nz
-				self.gl.setPosition(self.position, nx, ny, nz)
-				self.showStatus()
+				if self.position != json["position"] or nx != self.tx or ny != self.ty or nz != self.tz:
+					self.position = json["position"]
+					self.tx = nx
+					self.ty = ny
+					self.tz = nz
+					self.gl.setPosition(self.position, nx, ny, nz)
+					self.showStatus()
+			else:
+				# finish following unless we're in idle state and the job hasn't started yet
+				if not(json["state"] == "idle" and not self.runStarted):
+					self.stopFollowing()
 
 	def onshowAxes(self, _):
 		self.showAxes = self.cbshowAxes.GetValue()
@@ -265,7 +272,6 @@ class MainFrame(wx.Frame):
 			self.followStatus = "Not Following"
 		else:
 			self.followStatus = ""
-			#self.stStatus.SetLabel("")
 		self.updateTitle()
 
 	def updateTitle(self):
@@ -370,26 +376,30 @@ class MainFrame(wx.Frame):
 
 	def onBFollow(self, _):
 		if self.following:
-			self.timer.Stop()
-			self.following = False
-			self.showTool = False
-			self.position = 0
-			self.tx = 0
-			self.ty = 0
-			self.tz = 0
-			self.gl.setDrawTool(self.showTool)
-			self.gl.setPosition(self.position, self.tx, self.ty, self.tx)
+			self.stopFollowing()
 			
 		else:
 			self.timer.Start(250)
 			self.following = True
+			self.runStarted = False
 			self.showTool = self.cbShowTool.GetValue()
 			self.gl.setDrawTool(self.showTool)
+			self.enableButtons()
+			self.showStatus()
 
-		
+	def stopFollowing(self):
+		self.timer.Stop()
+		self.following = False
+		self.showTool = False
+		self.position = 0
+		self.tx = 0
+		self.ty = 0
+		self.tz = 0
+		self.gl.setDrawTool(self.showTool)
+		self.gl.setPosition(self.position, self.tx, self.ty, self.tx)
 		self.enableButtons()
-
 		self.showStatus()
+
 
 	def enableButtons(self):
 		self.bRetrieveJob.Enable(not self.following)

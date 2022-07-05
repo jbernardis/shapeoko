@@ -92,7 +92,7 @@ class JobPanel(wx.Panel):
 		resp = {}
 		resp["file"] = "" if self.currentFile is None else self.currentFile
 		resp["lines"] = self.fileLines
-		resp["state"] = "running" if self.playing else "idle"
+		resp["state"] = self.status
 		resp["position"] = self.filePosition
 		return resp		
 
