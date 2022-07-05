@@ -19,7 +19,8 @@ TYPE_LOCALFILE = 3
 class MainFrame(wx.Frame):
 	def __init__(self):		
 		wx.Frame.__init__(self, None)
-		self.SetTitle("Shapeoko File Manager")
+		self.titleString = "Shapeoko Monitor:  "
+		self.SetTitle(self.titleString)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
 		self.SetClientSize((800, 480))
@@ -27,8 +28,10 @@ class MainFrame(wx.Frame):
 		self.settings = Settings()
 		self.images = Images("images")
 
+		self.showAxes = True
+		self.showZAxis = False
+		self.showTool = False
 		self.showGrid = True
-		self.showZGrid = False
 		self.fileName = None
 		self.position = 0
 		self.fileLines = 0
@@ -36,39 +39,16 @@ class MainFrame(wx.Frame):
 		self.controller = None
 		self.following = False
 		self.status = ""
+			
+		self.fileInfo = ""
+		self.followStatus = ""
 
 		font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
 
-		vsz = wx.BoxSizer(wx.VERTICAL)
+		vsz = wx.BoxSizer(wx.HORIZONTAL)
 		vsz.AddSpacer(20)
 
-		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		st = wx.StaticText(self, wx.ID_ANY, "File:", size=(100, -1), style=wx.ALIGN_RIGHT)
-		st.SetFont(font)
-		hsz.AddSpacer(30)
-		hsz.Add(st)
-		hsz.AddSpacer(10)
-		self.stFileInfo = wx.StaticText(self, wx.ID_ANY, "", size=(400, -1))
-		self.stFileInfo.SetFont(font)
-		hsz.Add(self.stFileInfo)
-
-		vsz.Add(hsz)
-		vsz.AddSpacer(5)
-
-		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		st = wx.StaticText(self, wx.ID_ANY, "Status:", size=(100, -1), style=wx.ALIGN_RIGHT)
-		st.SetFont(font)
-		hsz.AddSpacer(30)
-		hsz.Add(st)
-		hsz.AddSpacer(10)
-		self.stStatus = wx.StaticText(self, wx.ID_ANY, "", size=(400, -1))
-		self.stStatus.SetFont(font)
-		hsz.Add(self.stStatus)
-
-		vsz.Add(hsz)
-		vsz.AddSpacer(20)
-
-		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz = wx.BoxSizer(wx.VERTICAL)
 		hsz.AddSpacer(20)
 
 		self.gl = ViewCanvas(self, buildarea=(200, 200))
@@ -78,28 +58,9 @@ class MainFrame(wx.Frame):
 		vsz.Add(hsz)
 		vsz.AddSpacer(20)
 
-		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		
-		self.cbShowGrid = wx.CheckBox(self, wx.ID_ANY, "Draw Axes")
-		self.cbShowGrid.SetValue(self.showGrid)
-		self.gl.setDrawGrid(self.showGrid)
-		self.Bind(wx.EVT_CHECKBOX, self.onShowGrid, self.cbShowGrid)		
-		hsz.Add(self.cbShowGrid)
-
-		hsz.AddSpacer(20)
-
-		self.cbShowZGrid = wx.CheckBox(self, wx.ID_ANY, "Draw Z Axis")
-		self.cbShowZGrid.SetValue(self.showZGrid)
-		self.gl.setDrawZGrid(self.showZGrid)
-		self.Bind(wx.EVT_CHECKBOX, self.onShowZGrid, self.cbShowZGrid)		
-		hsz.Add(self.cbShowZGrid)
-		self.cbShowZGrid.Enable(self.showGrid)
-
-		vsz.Add(hsz, 0, wx.ALIGN_CENTER_HORIZONTAL)
-
 		vsz.AddSpacer(20)
 
-		btnsz = wx.BoxSizer(wx.HORIZONTAL)
+		btnsz = wx.BoxSizer(wx.VERTICAL)
 
 		self.bRetrieveJob = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJob, size=(BUTTONSIZE))
 		self.Bind(wx.EVT_BUTTON, self.onBRetrieveJob, self.bRetrieveJob)
@@ -127,7 +88,41 @@ class MainFrame(wx.Frame):
 		self.bShapeokoFile.SetToolTip("Select and download a shapeoko file for viewing only")
 		btnsz.Add(self.bShapeokoFile)
 
-		vsz.Add(btnsz, 0, wx.ALIGN_CENTER_HORIZONTAL)
+		btnsz.AddSpacer(50)
+
+		self.cbshowAxes = wx.CheckBox(self, wx.ID_ANY, "Draw Axes")
+		self.cbshowAxes.SetValue(self.showAxes)
+		self.gl.setDrawAxes(self.showAxes)
+		self.Bind(wx.EVT_CHECKBOX, self.onshowAxes, self.cbshowAxes)		
+		btnsz.Add(self.cbshowAxes)
+
+		btnsz.AddSpacer(20)
+
+		self.cbshowZAxis = wx.CheckBox(self, wx.ID_ANY, "Draw Z Axis")
+		self.cbshowZAxis.SetValue(self.showZAxis)
+		self.gl.setDrawZAxis(self.showZAxis)
+		self.Bind(wx.EVT_CHECKBOX, self.onshowZAxis, self.cbshowZAxis)		
+		btnsz.Add(self.cbshowZAxis)
+		self.cbshowZAxis.Enable(self.showAxes)
+
+		btnsz.AddSpacer(20)
+
+		self.cbshowGrid = wx.CheckBox(self, wx.ID_ANY, "Draw Grid")
+		self.cbshowGrid.SetValue(self.showGrid)
+		self.gl.setDrawGrid(self.showGrid)
+		self.Bind(wx.EVT_CHECKBOX, self.onshowGrid, self.cbshowGrid)		
+		btnsz.Add(self.cbshowGrid)
+
+		btnsz.AddSpacer(20)
+
+		self.cbShowTool = wx.CheckBox(self, wx.ID_ANY, "Draw Tool")
+		self.cbShowTool.SetValue(self.showTool)
+		self.gl.setDrawTool(self.showTool)
+		self.Bind(wx.EVT_CHECKBOX, self.onShowTool, self.cbShowTool)		
+		btnsz.Add(self.cbShowTool)
+		self.cbShowTool.Enable(self.following)
+
+		vsz.Add(btnsz, 0, wx.ALIGN_CENTER_VERTICAL)
 		vsz.AddSpacer(20)
 
 		self.SetSizer(vsz)
@@ -141,11 +136,16 @@ class MainFrame(wx.Frame):
 		wx.CallAfter(self.initialize)
 
 	def initialize(self):
+		self.gl.setDrawAxes(self.showAxes)
+		self.gl.setDrawZAxis(self.showZAxis)
+		self.gl.setDrawTool(self.showTool)
 		self.gl.setDrawGrid(self.showGrid)
-		self.gl.setDrawZGrid(self.showZGrid)
 
 		self.controller = Controller(self.settings.ipaddr, self.settings.port, self.settings.user, self.settings.password)
 		self.position = 0
+		self.tx = 0
+		self.ty = 0
+		self.tz = 0
 		
 		self.Bind(wx.EVT_TIMER, self.ticker)
 
@@ -165,19 +165,34 @@ class MainFrame(wx.Frame):
 				self.msgDlg("HTTP Error retrieving job information: %d" % rc, "HTTP Error")
 				return
 
-			if self.position != json["position"]:
+			nx = json["mpos"][0] - json["wco"][0]
+			ny = json["mpos"][1] - json["wco"][1]
+			nz = json["mpos"][2] - json["wco"][2]
+
+			if self.position != json["position"] or nx != self.tx or ny != self.ty or nz != self.tz:
 				self.position = json["position"]
-				self.gl.setPosition(self.position)
+				self.tx = nx
+				self.ty = ny
+				self.tz = nz
+				self.gl.setPosition(self.position, nx, ny, nz)
 				self.showStatus()
 
-	def onShowGrid(self, _):
-		self.showGrid = self.cbShowGrid.GetValue()
-		self.gl.setDrawGrid(self.showGrid)
-		self.cbShowZGrid.Enable(self.showGrid)
+	def onshowAxes(self, _):
+		self.showAxes = self.cbshowAxes.GetValue()
+		self.gl.setDrawAxes(self.showAxes)
+		self.cbshowZAxis.Enable(self.showAxes)
 		
-	def onShowZGrid(self, _):
-		self.showZGrid = self.cbShowZGrid.GetValue()
-		self.gl.setDrawZGrid(self.showZGrid)
+	def onshowZAxis(self, _):
+		self.showZAxis = self.cbshowZAxis.GetValue()
+		self.gl.setDrawZAxis(self.showZAxis)
+		
+	def onshowGrid(self, _):
+		self.showGrid = self.cbshowGrid.GetValue()
+		self.gl.setDrawGrid(self.showGrid)
+		
+	def onShowTool(self, _):
+		self.showTool = self.cbShowTool.GetValue()
+		self.gl.setDrawTool(self.showTool)
 
 	def onBRetrieveJob(self, _):
 		self.fileType = None
@@ -235,19 +250,38 @@ class MainFrame(wx.Frame):
 			ft = ""
 
 		if self.fileName is None:
-			self.stFileInfo.SetLabel("")
+			self.fileInfo = ""
+			#self.stFileInfo.SetLabel("")
 		else:
-			self.stFileInfo.SetLabel("%s%s" % (self.fileName, ft))
+			#self.stFileInfo.SetLabel("%s%s" % (self.fileName, ft))
+			self.fileInfo = "%s%s" % (self.fileName, ft)
+		self.updateTitle()
 
 	def showStatus(self):
 		if self.fileName is None:
-			self.stStatus.SetLabel("")
+			self.followStatus = ""
+			#self.stStatus.SetLabel("")
 		elif self.following:
-			self.stStatus.SetLabel("Following (line %d/%d)" % (self.position, self.fileLines))
+			self.followStatus = "Following (line %d/%d)" % (self.position, self.fileLines)
+			#self.stStatus.SetLabel("Following (line %d/%d)" % (self.position, self.fileLines))
 		elif self.fileType == TYPE_ACTIVEJOB:
-			self.stStatus.SetLabel("Idle")
+			self.followStatus - "Not Following"
+			#self.stStatus.SetLabel("Not Following")
 		else:
-			self.stStatus.SetLabel("")
+			self.followStatus = ""
+			#self.stStatus.SetLabel("")
+		self.updateTitle()
+
+	def updateTitle(self):
+		title = self.titleString
+
+		if self.fileInfo != "":
+			title += " %s" % self.fileInfo
+
+			if self.followStatus != "":
+				title += " / %s" % self.followStatus
+
+		self.SetTitle(title)
 
 	def loadGCode(self, gcode):			
 		self.gcode = gcode
@@ -342,13 +376,22 @@ class MainFrame(wx.Frame):
 		if self.following:
 			self.timer.Stop()
 			self.following = False
+			self.showTool = False
 			self.position = 0
-			self.gl.setPosition(self.position)
-			self.enableButtons()
+			self.tx = 0
+			self.ty = 0
+			self.tz = 0
+			self.gl.setDrawTool(self.showTool)
+			self.gl.setPosition(self.position, self.tx, self.ty, self.tx)
+			
 		else:
-			self.timer.Start(1000)
+			self.timer.Start(250)
 			self.following = True
-			self.enableButtons()
+			self.showTool = self.cbShowTool.GetValue()
+			self.gl.setDrawTool(self.showTool)
+
+		
+		self.enableButtons()
 
 		self.showStatus()
 
@@ -357,6 +400,8 @@ class MainFrame(wx.Frame):
 		self.bLocalFile.Enable(not self.following)
 		self.bShapeokoFile.Enable(not self.following)
 		self.bFollow.Enable(self.fileType == TYPE_ACTIVEJOB)
+		self.cbShowTool.Enable(self.following)
+
 
 	def msgDlg(self, msg, captian, style = wx.OK | wx.ICON_ERROR):
 		dlg = wx.MessageDialog(self, msg, captian, style = style)

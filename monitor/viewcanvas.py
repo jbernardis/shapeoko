@@ -7,16 +7,19 @@ from OpenGL.GL import (glViewport, GLfloat, glColor3f, glClearColor, glEnable, G
 					   glMaterialf, glMaterialfv, GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, GL_SHININESS,
 					   GL_EMISSION, glMatrixMode, GL_PROJECTION, glLoadIdentity, glFrustum, GL_MODELVIEW,
 					   glRotatef, glTranslatef, glClear, glColorMaterial, GL_COLOR_MATERIAL,
-					   GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glBegin, GL_LINES, glColor, glVertex3f, glEnd,
-					   glDisable, GL_LINE_STRIP)
+					   GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glBegin, GL_LINES, GL_TRIANGLES, glColor, glVertex3f, glEnd,
+					   glDisable, GL_LINE_STRIP, GL_FLOAT, GL_VERTEX_ARRAY, GL_NORMAL_ARRAY,
+					   glEnableClientState, glVertexPointer, glNormalPointer, glDrawArrays)
 from OpenGL.GLU import gluLookAt
+
+from tool import Tool
 
 def vec(*args):
 	return (GLfloat * len(args))(*args)
 	
 class ViewCanvas(glcanvas.GLCanvas):
 	def __init__(self, parent, wid=-1, buildarea=(1000, 1000), pos=wx.DefaultPosition,
-				 size=(600, 600), style=0):
+				 size=(1000, 1000), style=0):
 		attribList = (glcanvas.WX_GL_RGBA,  # RGBA
 					  glcanvas.WX_GL_DOUBLEBUFFER,  # Double Buffered
 					  glcanvas.WX_GL_DEPTH_SIZE, 24)  # 24 bit
@@ -37,6 +40,9 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.midx = 0
 		self.midy = 0
 
+		self.tool = Tool()
+		self.toolSize = self.tool.getSize()
+
 		# initial mouse position
 		self.lastx = self.x = 0
 		self.lasty = self.y = 0
@@ -48,8 +54,10 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.size = None
 		
 		self.clientwidth = size[0]
+		self.drawAxes = True
+		self.drawZAxis = False
 		self.drawGrid = True
-		self.drawZGrid = False
+		self.drawTool = True
 		self.zoom = 1.0
 		self.buildarea = buildarea
 		self.adjPt = [x/2 for x in buildarea]
@@ -164,13 +172,22 @@ class ViewCanvas(glcanvas.GLCanvas):
 		glLightfv(GL_LIGHT0, GL_POSITION, vec(0.0, 200.0, 100.0, 1))
 		glLightfv(GL_LIGHT1, GL_POSITION, vec(0.0, -200.0, 100.0, 1))
 		
-	def setDrawGrid(self, flag):
-		self.drawGrid = flag
+	def setDrawAxes(self, flag):
+		self.drawAxes = flag
 		self.setGridArrays()
 		self.Refresh(True)
 		
-	def setDrawZGrid(self, flag):
-		self.drawZGrid = flag
+	def setDrawZAxis(self, flag):
+		self.drawZAxis = flag
+		self.setGridArrays()
+		self.Refresh(True)
+
+	def setDrawTool(self, flag):
+		self.drawTool = flag
+		self.Refresh(True)
+
+	def setDrawGrid(self, flag):
+		self.drawGrid = flag
 		self.setGridArrays()
 		self.Refresh(True)
 
@@ -181,7 +198,24 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.gridVertices = []
 		self.gridColors = []
 
-		if self.drawGrid:		
+		if self.drawGrid:
+			for x in range(-500, 501, 10):
+				if not(self.drawAxes and x == 0):
+					self.gridVertices.append([x, -500, 0, x, 500, 0])
+					if x % 100 == 0:
+						self.gridColors.append([1.0, 1.0, 1.0, 1])
+					else:
+						self.gridColors.append([0.25, 0.25, 0.25, 1])
+
+			for y in range(-500, 501, 10):
+				if not(self.drawAxes and y == 0):
+					self.gridVertices.append([-500, y, 0, 500, y, 0])
+					if y % 100 == 0:
+						self.gridColors.append([1.0, 1.0, 1.0, 1])
+					else:
+						self.gridColors.append([0.25, 0.25, 0.25, 1])
+
+		if self.drawAxes:		
 			self.gridVertices.append([-500, 0, 0, 500, 0, 0])
 			self.gridColors.append([1.0, 0.0, 0.0, 1])
 			v = -500
@@ -208,7 +242,7 @@ class ViewCanvas(glcanvas.GLCanvas):
 					self.gridColors.append([0.0, 1.0, 0.0, 1])
 				v += 10
 
-		if self.drawGrid and self.drawZGrid:			
+		if self.drawAxes and self.drawZAxis:			
 			self.gridVertices.append([0, 0, -500, 0, 0, 500])
 			self.gridColors.append([0.0, 0.0, 1.0, 1])
 			v = -500
@@ -245,8 +279,9 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.setZoom(1.0)
 		self.Refresh(True)
 
-	def setPosition(self, p):
+	def setPosition(self, p, nx, ny, nz):
 		self.currentLine = p
+		self.tool.setPosition(nx, ny, nz)
 		self.Refresh(True)
 
 	def OnDraw(self):
@@ -290,7 +325,7 @@ class ViewCanvas(glcanvas.GLCanvas):
 		glEnable(GL_LIGHT0)
 		glEnable(GL_LIGHT1)
 		
-		if self.drawGrid:
+		if self.drawAxes or self.drawGrid:
 			glBegin(GL_LINES)
 			for i in range(len(self.gridVertices)):
 				glColor(self.gridColors[i])
@@ -327,6 +362,19 @@ class ViewCanvas(glcanvas.GLCanvas):
 			glVertex3f(p[0], p[1], p[2])
 			
 		glEnd()
+
+		if self.drawTool:
+			self.vertexPositions = self.tool.getVertexPositions()
+			self.normalPositions = self.tool.getNormalPositions()
+			self.vertexPositions.bind()
+			glEnableClientState(GL_VERTEX_ARRAY)
+			glVertexPointer(3, GL_FLOAT, 0, self.vertexPositions)
+			
+			self.normalPositions.bind()
+			glEnableClientState(GL_NORMAL_ARRAY)
+			glNormalPointer(GL_FLOAT, 0, self.normalPositions)
+
+			glDrawArrays(GL_TRIANGLES, 0, self.toolSize)
 				
 		self.SwapBuffers()
 		
