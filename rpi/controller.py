@@ -32,6 +32,7 @@ class MainFrame(wx.Frame):
 
 		self.images = Images("images")
 		self.registeredTickers = []
+		self.registeredLogs = []
 
 		self.lb = wx.Listbook(self, wx.ID_ANY, style=wx.BK_RIGHT)
 		il = wx.ImageList(32, 32)
@@ -118,6 +119,13 @@ class MainFrame(wx.Frame):
 	def ticker(self, evt):
 		for cb in self.registeredTickers:
 			cb()
+
+	def registerLogHandler(self, cbLog):
+		self.registeredLogs.append(cbLog)
+
+	def log(self, msg):
+		for cb in self.registeredLogs:
+			cb(msg)
 
 	def getJobInfo(self):
 		return self.JobPanel.getJobInfo()

@@ -21,15 +21,15 @@ class StatPanel(wx.Panel):
 		self.dc = wx.ScreenDC()
 		self.dc.SetFont(fontText)
 
-		self.stMachineState = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 20))
+		self.stMachineState = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 20))
 		self.stMachineState.SetFont(fontText)
 
-		self.stParserState1 = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 80))
+		self.stParserState1 = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 80))
 		self.stParserState1.SetFont(fontText)
-		self.stParserState2 = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 120))
+		self.stParserState2 = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 120))
 		self.stParserState2.SetFont(fontText)
 
-		self.stAlarmText = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 200))
+		self.stAlarmText = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 200))
 		self.stAlarmText.SetFont(fontText)
 		self.stAlarmText.SetForegroundColour(wx.Colour(StateColors["alarm"]))
 

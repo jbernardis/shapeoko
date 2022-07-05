@@ -16,6 +16,21 @@ from tool import Tool
 
 def vec(*args):
 	return (GLfloat * len(args))(*args)
+
+
+	
+colors = {
+	MT_RAPID:  [0.0, 1.0, 1.0, 1],
+	MT_NORMAL: [1.0, 1.0, 1.0, 1]
+}
+colorsDone = {
+	MT_RAPID:  [0.0, 1.0, 0.0, 1],
+	MT_NORMAL: [0.0, 0.0, 1.0, 1]
+}
+
+colorDoing = [1.0, 0.0, 0.0, 1]
+colorTool = [0.93, 0.25, 0.14, 1]
+
 	
 class ViewCanvas(glcanvas.GLCanvas):
 	def __init__(self, parent, wid=-1, buildarea=(1000, 1000), pos=wx.DefaultPosition,
@@ -183,7 +198,7 @@ class ViewCanvas(glcanvas.GLCanvas):
 		self.Refresh(True)
 
 	def setDrawTool(self, flag):
-		self.drawTool = flag
+		self.drawTool = True #flag
 		self.Refresh(True)
 
 	def setDrawGrid(self, flag):
@@ -334,15 +349,6 @@ class ViewCanvas(glcanvas.GLCanvas):
 				glVertex3f(p[3], p[4], p[5])
 			glEnd()
 
-		colors = {
-			MT_RAPID:  [0.0, 1.0, 1.0, 1],
-			MT_NORMAL: [1.0, 1.0, 1.0, 1]
-		}
-		colorsDone = {
-			MT_RAPID:  [0.0, 1.0, 0.0, 1],
-			MT_NORMAL: [0.0, 0.0, 1.0, 1]
-		}
-			
 		currentLineType = MT_RAPID
 		currentColor = colors[MT_RAPID]
 		glColor(currentColor)
@@ -353,7 +359,7 @@ class ViewCanvas(glcanvas.GLCanvas):
 			if self.currentLine > p[4]:
 				nc = colorsDone[currentLineType]
 			elif self.currentLine == p[4]:
-				nc = [1.0, 0.0, 0.0, 1]
+				nc = colorDoing
 			else:
 				nc = colors[currentLineType]
 			if currentColor != nc:
@@ -364,6 +370,7 @@ class ViewCanvas(glcanvas.GLCanvas):
 		glEnd()
 
 		if self.drawTool:
+			glColor(colorTool)
 			self.vertexPositions = self.tool.getVertexPositions()
 			self.normalPositions = self.tool.getNormalPositions()
 			self.vertexPositions.bind()

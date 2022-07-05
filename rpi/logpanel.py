@@ -61,6 +61,8 @@ class LogPanel(wx.Panel):
 		self.shapeoko.registerMessageHandler(self.messageHandler)
 		self.Bind(EVT_MESSAGE, self.showMessage)
 
+		self.parentFrame.registerLogHandler(self.addToLog)
+
 	def alarmHandler(self, msg):  # thread context
 		evt = AlarmEvent(msg=msg)
 		wx.PostEvent(self, evt)
@@ -101,7 +103,10 @@ class LogPanel(wx.Panel):
 		wx.PostEvent(self, evt)
 
 	def showMessage(self, evt):
-		self.teLog.AppendText(evt.msg + "\n")
+		self.addToLog(evt.msg)
+
+	def addToLog(self, msg):
+		self.teLog.AppendText(msg + "\n")
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))

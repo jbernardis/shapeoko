@@ -2,3 +2,5 @@ tool on
 tool off
 tool speed
 feed speed, overrides
+
+in job panel - add a times pop-up to show job completion and elapsed time

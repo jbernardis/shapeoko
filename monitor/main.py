@@ -251,22 +251,18 @@ class MainFrame(wx.Frame):
 
 		if self.fileName is None:
 			self.fileInfo = ""
-			#self.stFileInfo.SetLabel("")
 		else:
-			#self.stFileInfo.SetLabel("%s%s" % (self.fileName, ft))
 			self.fileInfo = "%s%s" % (self.fileName, ft)
 		self.updateTitle()
 
 	def showStatus(self):
 		if self.fileName is None:
 			self.followStatus = ""
-			#self.stStatus.SetLabel("")
 		elif self.following:
-			self.followStatus = "Following (line %d/%d)" % (self.position, self.fileLines)
-			#self.stStatus.SetLabel("Following (line %d/%d)" % (self.position, self.fileLines))
+			pct = (self.position/self.fileLines)*100.0
+			self.followStatus = "Following (line %d/%d - %5.1f%%)" % (self.position, self.fileLines, pct)
 		elif self.fileType == TYPE_ACTIVEJOB:
-			self.followStatus - "Not Following"
-			#self.stStatus.SetLabel("Not Following")
+			self.followStatus = "Not Following"
 		else:
 			self.followStatus = ""
 			#self.stStatus.SetLabel("")

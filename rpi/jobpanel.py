@@ -4,6 +4,7 @@ from wx.lib import newevent
 import glob
 import os
 import time
+from datetime import timedelta
 import queue
 from gparser import Scanner
 from common import StateColors
@@ -39,15 +40,15 @@ class JobPanel(wx.Panel):
 		self.bFiles = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBfiles, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
 
-		self.stMachineState = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 20))
+		self.stMachineState = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 20))
 		self.stMachineState.SetFont(fontText)
-		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 80))
+		self.stFileName = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 80))
 		self.stFileName.SetFont(fontText)
-		self.stFileSize = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 120))
+		self.stFileSize = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 120))
 		self.stFileSize.SetFont(fontText)
-		self.stFileLines = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 160))
+		self.stFileLines = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 160))
 		self.stFileLines.SetFont(fontText)
-		self.stFileDate = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 200))
+		self.stFileDate = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 200))
 		self.stFileDate.SetFont(fontText)
 
 		self.bCheckSize = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBchecksize, size=(120, 120), pos=(50, 160))
@@ -115,7 +116,8 @@ class JobPanel(wx.Panel):
 			np = self.shapeoko.getPosition()
 			if np != self.filePosition:
 				self.filePosition = np
-				txt = "%d / %d lines" % (np, self.fileLines)
+				pct = (np / self.fileLines) * 100.0
+				txt = "%d / %d lines (%5.1f%%" % (np, self.fileLines, pct)
 				w,h = self.dc.GetTextExtent(txt)
 				self.stFileLines.SetLabel(txt)
 				self.stFileLines.SetSize((w, h))
@@ -193,6 +195,7 @@ class JobPanel(wx.Panel):
 	def onBPlay(self, evt):
 		self.playing = True
 		self.filePosition = 0
+		self.startPlay = time.time()
 		self.enableButtons()
 		self.shapeoko.sendGCodeFile(self.fullFileName)
 
@@ -201,6 +204,10 @@ class JobPanel(wx.Panel):
 		self.playing = False
 		self.filePosition = 0
 		self.enableButtons()
+
+		elapsed = time.time() - self.startPlay
+		logMsg = "File %s completed.  %s elapsed time." % (self.currentFile, timedelta(seconds=elapsed))
+		self.parentFrame.log(logMsg)
 
 		txt = "%d lines" % self.fileLines
 		w,h = self.dc.GetTextExtent(txt)

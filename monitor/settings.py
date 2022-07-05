@@ -70,7 +70,10 @@ class Settings:
 		else:
 			self.password = self.inipassword
 
-		self.ipaddr = socket.gethostbyname(self.iniipaddr)
+		try:
+			self.ipaddr = socket.gethostbyname(self.iniipaddr)
+		except socket.gaierror:
+			self.ipaddr = self.iniipaddr
 	
 	def setModified(self):
 		self.modified = True
