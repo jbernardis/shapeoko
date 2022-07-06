@@ -286,7 +286,7 @@ class Shapeoko(threading.Thread):
 			return
 
 		try:
-			verb = cmd["cmd"][0]
+			verb = cmd["__cmd"][0]
 		except KeyError:
 			self.HttpRespQ.put((400, b'missing verb'))
 			return

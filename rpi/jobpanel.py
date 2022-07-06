@@ -8,6 +8,7 @@ from datetime import timedelta
 import queue
 from gparser import Scanner
 from common import StateColors
+from msgdlg import MessageDlg
 
 (StatusEvent, EVT_NEWSTATUS) = newevent.NewEvent()  
 
@@ -120,15 +121,17 @@ class JobPanel(wx.Panel):
 			if np != self.filePosition:
 				self.filePosition = np
 				pct = (np / self.fileLines) * 100.0
-				txt = "%d / %d lines (%5.1f%%" % (np, self.fileLines, pct)
+				txt = "%d / %d lines (%5.1f%%)" % (np, self.fileLines, pct)
 				w,h = self.dc.GetTextExtent(txt)
 				self.stFileLines.SetLabel(txt)
 				self.stFileLines.SetSize((w, h))
 
 		if self.completionDlgTimer > 0:
+			print(self.completionDlgTimer)
 			self.completionDlgTimer -= 1
 			if self.completionDlgTimer == 0 and self.completionDlg is not None:
-				self.completionDlg.Destroy()
+				print("destroying dialog after 5 seconds")
+				self.completionDlg.doDestroy()
 				self.completionDlg = None
 
 	def enableButtons(self):
@@ -214,11 +217,15 @@ class JobPanel(wx.Panel):
 		self.filePosition = 0
 		self.enableButtons()
 
-		elapsed = time.time() - self.startPlay
-		logMsg = "File %s completed.  %s elapsed time." % (self.currentFile, timedelta(seconds=elapsed))
-		self.parentFrame.log(logMsg)
+		elapsed = int(time.time() - self.startPlay)
 
-		self.completionDlg = wx.MessageDialog(self, logMsg, "Job Completed", style=wx.ICON_INFORMATION)
+		logMsg = [
+			"File %s completed." % self.currentFile,
+			"%s elapsed time." % timedelta(seconds=elapsed)
+		]
+		self.parentFrame.log(" ".join(logMsg))
+
+		self.completionDlg = MessageDlg(None, "Job Completed", logMsg)
 		self.completionDlg.CenterOnParent()
 		self.completionDlg.Show()
 		self.completionDlgTimer = 5  # leave it showing for 5 seconds

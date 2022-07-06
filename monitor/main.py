@@ -166,7 +166,8 @@ class MainFrame(wx.Frame):
 				self.msgDlg("HTTP Error retrieving job information: %d" % rc, "HTTP Error")
 				return
 
-			if json["state"] in [ "run", "hold" ]:
+			lState = json["state"].lower()
+			if lState in [ "run", "hold" ]:
 				self.runStarted = True
 				nx = json["mpos"][0] - json["wco"][0]
 				ny = json["mpos"][1] - json["wco"][1]
@@ -181,7 +182,7 @@ class MainFrame(wx.Frame):
 					self.showStatus()
 			else:
 				# finish following unless we're in idle state and the job hasn't started yet
-				if not(json["state"] == "idle" and not self.runStarted):
+				if not(lState == "idle" and not self.runStarted):
 					self.stopFollowing()
 
 	def onshowAxes(self, _):
