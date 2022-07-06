@@ -105,8 +105,8 @@ class MainFrame(wx.Frame):
 			except AttributeError:
 				pass
 
-		self.timer.Start(1000)
 		self.Bind(wx.EVT_TIMER, self.ticker)
+		self.timer.Start(1000)
 
 		if self.shapeoko is not None:
 			self.shapeoko.go()
@@ -136,8 +136,6 @@ class MainFrame(wx.Frame):
 
 	def onCloseRequest(self, evt):
 		global ShutDownFlag
-		ShutDownFlag = evt.shutdown
-		
 		try:
 			ShutDownFlag = evt.shutdown
 			
@@ -177,7 +175,6 @@ class App(wx.App):
 		self.frame = MainFrame()
 		self.frame.ShowFullScreen(True)
 		return True
-
 
 if DEPLOYED:
 	ofp = open("shapeoko.out", "w")

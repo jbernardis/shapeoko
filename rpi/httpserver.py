@@ -16,7 +16,7 @@ class Handler(BaseHTTPRequestHandler):
 		if cmd.startswith('/'):
 			cmd = cmd[1:]
 			
-		cmdDict['cmd'] = [cmd]
+		cmdDict['__cmd'] = [cmd]
 		rc, b = app.dispatch(cmdDict)
 		req += (" - %d" % rc)
 		try:

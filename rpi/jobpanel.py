@@ -37,6 +37,9 @@ class JobPanel(wx.Panel):
 		self.status = ""
 		self.filePosition = 0
 
+		self.completionDlg = None
+		self.completionDlgTimer = 0
+
 		self.bFiles = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBfiles, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBFiles, self.bFiles)
 
@@ -121,6 +124,12 @@ class JobPanel(wx.Panel):
 				w,h = self.dc.GetTextExtent(txt)
 				self.stFileLines.SetLabel(txt)
 				self.stFileLines.SetSize((w, h))
+
+		if self.completionDlgTimer > 0:
+			self.completionDlgTimer -= 1
+			if self.completionDlgTimer == 0 and self.completionDlg is not None:
+				self.completionDlg.Destroy()
+				self.completionDlg = None
 
 	def enableButtons(self):
 		self.bCheckSize.Enable(self.currentFile is not None and not self.playing and self.status.lower() == "idle")
@@ -208,6 +217,11 @@ class JobPanel(wx.Panel):
 		elapsed = time.time() - self.startPlay
 		logMsg = "File %s completed.  %s elapsed time." % (self.currentFile, timedelta(seconds=elapsed))
 		self.parentFrame.log(logMsg)
+
+		self.completionDlg = wx.MessageDialog(self, logMsg, "Job Completed", style=wx.ICON_INFORMATION)
+		self.completionDlg.CenterOnParent()
+		self.completionDlg.Show()
+		self.completionDlgTimer = 5  # leave it showing for 5 seconds
 
 		txt = "%d lines" % self.fileLines
 		w,h = self.dc.GetTextExtent(txt)

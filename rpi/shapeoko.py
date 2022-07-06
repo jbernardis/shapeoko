@@ -297,11 +297,12 @@ class Shapeoko(threading.Thread):
 		if verb == "getcfg":
 			resp = str(self.config)
 			self.HttpRespQ.put((200, resp.encode()))
+
 		elif verb == "setcfg":
 			errKeys = []
 			cmds = []
 			for k in cmd.keys():
-				if k in [ "cmd" ]:
+				if k in [ "__cmd" ]:
 					continue
 				try:
 					ik = int(k)
@@ -323,20 +324,41 @@ class Shapeoko(threading.Thread):
 					self.grbl.getConfig()
 				resp = "%d action(s) performed" % len(cmds)
 				self.HttpRespQ.put((400, resp.encode()))
+
+		elif verb == "command":
+			badKeys = []
+			for k in cmd.keys():
+				if k in ["__cmd", "cmd"]:
+					continue
+				badKeys.append(k)
+
+			if len(badKeys) > 0:
+				self.HttpRespQ.put(400, "Invalid paremeter(s): %s" ", ".join(badKeys))
+			else:
+				if "cmd" in cmd.keys():
+					cmdString = cmd["cmd"]
+					self.grbl.sendCommand(cmdString)
+					self.HttpRespQ.put(200, "Command '%s' queued" % cmdString)
+				else:
+					self.HttpRespQ.put(400, "Missing 'cmd' parameter")
+
 		elif verb == "getjob":
 			resp = self.parent.getJobInfo()
 			resp["mpos"] = [self.x, self.y, self.z]
 			resp["wco"] = [self.offx, self.offy, self.offz]
 			respstr = str(resp)
 			self.HttpRespQ.put((200, respstr.encode()))
+
 		elif verb == "exit":
 			self.parent.requestClose(shutdown=False)
-			resp = "exit pending"
+			resp = "exit requested"
 			self.HttpRespQ.put((200, resp.encode()))
+
 		elif verb == "shutdown":
 			self.parent.requestClose(shutdown=True)
-			resp = "shutdown pending"
+			resp = "shutdown requested"
 			self.HttpRespQ.put((200, resp.encode()))
+
 		else:
 			msg = "Unknown command: %s" % cmd
 			self.HttpRespQ.put((400, msg.encode()))
