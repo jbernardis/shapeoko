@@ -2,10 +2,9 @@ import wx
 
 class MessageDlg(wx.Dialog):
 	def __init__(self, parent, caption, msg):
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, caption, style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, caption, style=wx.CAPTION | wx.STAY_ON_TOP)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.SetBackgroundColour(wx.Colour(111, 237, 134))
-		self.Bind(wx.EVT_ACTIVATE, self.activate)
 
 		font = wx.Font(28, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		self.dc = wx.ScreenDC()
@@ -27,15 +26,11 @@ class MessageDlg(wx.Dialog):
 		self.msgfld.SetLabel(msgString)
 		self.msgfld.SetSize((w, h))
 
-		print(self.msgfld.GetSize())
-
 		self.SetClientSize((w+40, h+40))
+		wx.CallAfter(self.initialize)
 
-
-	def activate(self, evt):
-		print("in activate")
+	def initialize(self):
 		self.msgfld.SetPosition((20, 20))
-		evt.Skip()
 
 	def onClose(self, _):
 		self.doDestroy()

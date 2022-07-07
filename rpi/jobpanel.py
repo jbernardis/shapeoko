@@ -127,10 +127,8 @@ class JobPanel(wx.Panel):
 				self.stFileLines.SetSize((w, h))
 
 		if self.completionDlgTimer > 0:
-			print(self.completionDlgTimer)
 			self.completionDlgTimer -= 1
 			if self.completionDlgTimer == 0 and self.completionDlg is not None:
-				print("destroying dialog after 5 seconds")
 				self.completionDlg.doDestroy()
 				self.completionDlg = None
 
