@@ -336,14 +336,14 @@ class Shapeoko(threading.Thread):
 				badKeys.append(k)
 
 			if len(badKeys) > 0:
-				self.HttpRespQ.put(400, "Invalid paremeter(s): %s" ", ".join(badKeys))
+				self.HttpRespQ.put((400, "Invalid paremeter(s): %s" ", ".join(badKeys)))
 			else:
 				if "cmd" in cmd.keys():
-					cmdString = cmd["cmd"]
+					cmdString = cmd["cmd"][0]
 					self.grbl.sendCommand(cmdString)
-					self.HttpRespQ.put(200, "Command '%s' queued" % cmdString)
+					self.HttpRespQ.put((200, "Command '%s' queued" % cmdString))
 				else:
-					self.HttpRespQ.put(400, "Missing 'cmd' parameter")
+					self.HttpRespQ.put((400, "Missing 'cmd' parameter"))
 
 		elif verb == "getjob":
 			resp = self.parent.getJobInfo()
