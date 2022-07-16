@@ -58,6 +58,8 @@ class StatPanel(wx.Panel):
 		self.shapeoko.registerAlarmHandler(self.alarmHandler)
 		self.Bind(EVT_ALARM, self.showAlarm)
 
+		self.showAlarmText("Un-Homed")
+
 	def enableButtons(self):
 		self.bClearAlarm.Enable(self.status == "Alarm")
 

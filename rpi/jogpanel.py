@@ -23,7 +23,7 @@ class JogPanel(wx.Panel):
 		colx = basex + 4*bdim
 		rowy = basey + 4*bdim
 
-		self.bHome = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(40, 40), pos=(basex,  basey))
+		self.bHome = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(54, 54), pos=(basex,  basey))
 		self.bHome.Bind(wx.EVT_BUTTON,  self.onHomeButton)
 
 		self.bY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupgreen,    size=(40, 40), pos=(colx,  basey))
@@ -101,15 +101,17 @@ class JogPanel(wx.Panel):
 
 		txt = "RESET    GO TO"
 		w,h = dc.GetTextExtent(txt)
-		self.status = wx.StaticText(self, wx.ID_ANY, txt, pos=(basex+10*bdim, basey), size=(w, h))
-		self.status.SetFont(font)
+		hdr = wx.StaticText(self, wx.ID_ANY, txt, pos=(basex+10*bdim, basey), size=(w, h))
+		hdr.SetFont(font)
 
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
 		self.SetSize(evt.GetSize())
 
-	def onJHomeButton(self, evt):
+	def onHomeButton(self, evt):
+		if self.status.lower() == "alarm":
+			self.shapeoko.clearAlarm()
 		self.shapeoko.gotoHome()
 
 	def onJogButton(self, evt, command):
@@ -137,3 +139,7 @@ class JogPanel(wx.Panel):
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
+		self.shapeoko.registerStatusHandler(self.statusUpdate)
+
+	def statusUpdate(self, ns):  #thread context
+		self.status = ns

@@ -226,6 +226,9 @@ class Grbl:
 		jogcmd += "F%d" % speed
 		return self.sendCommand(jogcmd)
 
+	def gotoHome(self):
+		return self.sendCommand("$H")
+
 	def goto(self, x, y, z):
 		gotocmd = "G90 G0"
 		if x is not None or y is not None:
