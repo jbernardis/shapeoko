@@ -23,6 +23,9 @@ class JogPanel(wx.Panel):
 		colx = basex + 4*bdim
 		rowy = basey + 4*bdim
 
+		self.bHome = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(40, 40), pos=(basex,  basey))
+		self.bHome.Bind(wx.EVT_BUTTON,  self.onHomeButton)
+
 		self.bY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupgreen,    size=(40, 40), pos=(colx,  basey))
 		self.bY3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupblue,     size=(40, 40), pos=(colx,  basey+bdim))
 		self.bY2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupred,      size=(40, 40), pos=(colx,  basey+bdim*2))
@@ -105,6 +108,9 @@ class JogPanel(wx.Panel):
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
 		self.SetSize(evt.GetSize())
+
+	def onJHomeButton(self, evt):
+		self.shapeoko.gotoHome()
 
 	def onJogButton(self, evt, command):
 		self.shapeoko.jog(command)

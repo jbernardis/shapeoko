@@ -264,6 +264,9 @@ class Shapeoko(threading.Thread):
 	def resetAxis(self, x=None, y=None, z=None):
 		return self.grbl.resetAxis(x, y, z)
 
+	def gotoHome(self):
+		return self.grbl.gotoHome()
+
 	def goto(self, x=None, y=None, z=None):
 		return self.grbl.goto(x, y, z)
 
