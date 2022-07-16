@@ -26,7 +26,7 @@ class SendThread(threading.Thread):
 		self.isRunning = False
 		self.endOfLife = False
 		self.lineCt = 0
-		self.waitOKQ = queue.Queue(0)
+		self.waitOK = None
 		self.sequence = 0
 		self.inFile = False
 
@@ -49,12 +49,11 @@ class SendThread(threading.Thread):
 					self.inFile = False
 					self.lineCt = 0
 				
-			if not self.waitOKQ.empty():
-				self.checkForOK()
+			self.waitOK = None
 
-			elif not self.commandQ.empty():
+			if not self.commandQ.empty():
 				string = self.commandQ.get(False)
-				self.waitOKQ.put({"seq": self.sequence, "data": string.rstrip()})
+				self.waitOK = {"seq": self.sequence, "data": string.rstrip()}
 				self.sendMessage(string)
 				self.sequence += 1
 				
@@ -67,7 +66,7 @@ class SendThread(threading.Thread):
 				elif msg["cmd"] == "DATA":
 					if self.inFile:
 						self.lineCt += 1
-					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
+					self.waitOK = {"seq": self.sequence, "data": msg["data"].rstrip()}
 					self.sendMessage(msg["data"])
 					self.sequence += 1
 
@@ -76,22 +75,23 @@ class SendThread(threading.Thread):
 					self.asyncQ.put({"type": "eof", "file": msg["name"], "lines": self.lineCt})
 
 				elif msg["cmd"] == "LINE":
-					self.waitOKQ.put({"seq": self.sequence, "data": msg["data"].rstrip()})
+					self.waitOK = {"seq": self.sequence, "data": msg["data"].rstrip()}
 					self.sendMessage(msg["data"])
 					self.sequence += 1
+
+			if self.waitOK is not None:
+				try:
+					response = self.responseQ.get(True, 0.25)
+				except queue.Empty:
+					outMsg = {"type": "response", "status": "<missing>", "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
+					self.asyncQ.put(outMsg)
+				else:
+					outMsg = {"type": "response", "status": response, "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
+					self.asyncQ.put(outMsg)
+
 			time.sleep(0.01)
 
 		self.endOfLife = True
-
-	def checkForOK(self):
-		if self.responseQ.empty():
-			return True
-
-		response = self.responseQ.get(False)
-		message = self.waitOKQ.get(False)
-		outMsg = {"type": "response", "status": response, "data": message["data"], "sequence": message["seq"]}
-		self.asyncQ.put(outMsg)
-		return False
 
 	def getPosition(self):
 		return self.lineCt
