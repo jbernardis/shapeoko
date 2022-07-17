@@ -304,32 +304,58 @@ class FilesDlg(wx.Dialog):
 		self.lbFiles = wx.CheckListBox(self, wx.ID_ANY, size=(400, 220), pos=(50, 30), choices=self.flist)
 		self.lbFiles.SetFont(font)
 		self.Bind(wx.EVT_CHECKLISTBOX, self.onLbFiles, self.lbFiles)
-		self.lbFiles.SetSelection(wx.NOT_FOUND)
+		self.lbFiles.SetSelection(0)
+		self.selectedIndex = 0
 
-		self.bCheckAll = wx.BitmapButton(self, wx.ID_ANY, images.pngBcheckall, size=(54, 54), pos=(470, 30))
+		self.bUp = wx.BitmapButton(self, wx.ID_ANY, images.pngJogupred, size=(54, 54), pos=(470, 60))
+		self.Bind(wx.EVT_BUTTON, self.onBUp, self.bUp)
+		self.bDn = wx.BitmapButton(self, wx.ID_ANY, images.pngJogdnred, size=(54, 54), pos=(470, 160))
+		self.Bind(wx.EVT_BUTTON, self.onBDown, self.bDn)
+
+		self.bCheckAll = wx.BitmapButton(self, wx.ID_ANY, images.pngBcheckall, size=(54, 54), pos=(135, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBCheckAll, self.bCheckAll)
 
-		self.bCheckOne = wx.BitmapButton(self, wx.ID_ANY, images.pngBcheckone, size=(54, 54), pos=(470, 110))
+		self.bCheckOne = wx.BitmapButton(self, wx.ID_ANY, images.pngBcheckone, size=(54, 54), pos=(215, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBCheckOne, self.bCheckOne)
 
-		self.bCheckNone = wx.BitmapButton(self, wx.ID_ANY, images.pngBchecknone, size=(54, 54), pos=(470, 190))
+		self.bCheckNone = wx.BitmapButton(self, wx.ID_ANY, images.pngBchecknone, size=(54, 54), pos=(295, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBCheckNone, self.bCheckNone)
 
-		self.bLoad = wx.BitmapButton(self, wx.ID_ANY, images.pngBload, size=(100, 60), pos=(40, 270))
+		self.bLoad = wx.BitmapButton(self, wx.ID_ANY, images.pngBload, size=(100, 60), pos=(40, 350))
 		self.bLoad.SetBitmapDisabled(images.pngBloaddis)
 		self.bLoad.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBLoad, self.bLoad)
 
-		self.bDelete = wx.BitmapButton(self, wx.ID_ANY, images.pngBdelete, size=(100, 60), pos=(150, 270))
+		self.bDelete = wx.BitmapButton(self, wx.ID_ANY, images.pngBdelete, size=(100, 60), pos=(150, 350))
 		self.bDelete.SetBitmapDisabled(images.pngBdeletedis)
 		self.bDelete.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 
-		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, images.pngBrefresh, size=(100, 60), pos=(260, 270))
+		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, images.pngBrefresh, size=(100, 60), pos=(260, 350))
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
-		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(370, 270))
+		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, images.pngBcancel, size=(100, 60), pos=(370, 350))
 		self.Bind(wx.EVT_BUTTON, self.onBCancel, self.bCancel)
+
+	def onBUp(self, _):
+		if self.selectedIndex == wx.NOT_FOUND:
+			return
+		if self.selectedIndex == 0:
+			return
+
+		self.selectedIndex -= 1
+		self.lbFiles.SetSelection(wx.NOT_FOUND)
+		self.lbFiles.SetSelection(self.selectedIndex)
+
+	def onBDown(self, _):
+		if self.selectedIndex == wx.NOT_FOUND:
+			return
+		if self.selectedIndex >= len(self.flist)-1:
+			return
+
+		self.selectedIndex += 1
+		self.lbFiles.SetSelection(wx.NOT_FOUND)
+		self.lbFiles.SetSelection(self.selectedIndex)
 
 	def activate(self, evt):
 		self.SetPosition((120, 20))
