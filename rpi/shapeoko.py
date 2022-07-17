@@ -242,6 +242,12 @@ class Shapeoko(threading.Thread):
 	def checkMode(self):
 		return self.grbl.checkMode()
 
+	def spindleOn(self):
+		return self.grbl.spindleOn()
+
+	def spindleOff(self):
+		return self.grbl.spindleOff()
+
 	def jog(self, cmd):
 		terms = cmd.split(" ")
 		if len(terms) == 2:
@@ -394,8 +400,9 @@ class Shapeoko(threading.Thread):
 						self.sendMessage("%s (ok)" % msg["data"], verbose=True)
 
 				elif msg["type"] == "feedback":
-					self.sendMessage("[MSG: %s]" % msg["data"])
-					self.parent.showFeedback(msg["data"])
+					fb = msg["data"]
+					self.sendMessage("[MSG: %s]" % fb)
+					self.parent.showFeedback(fb.replace("$H", "Home").replace("$X", "Clear Alarm"))
 
 				elif msg["type"] == "alarm":
 					self.sendAlarm(msg["data"])

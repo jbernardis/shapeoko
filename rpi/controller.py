@@ -13,6 +13,7 @@ from dropanel import DROPanel
 from statpanel import StatPanel
 from jobpanel import JobPanel
 from jogpanel import JogPanel 
+from spindlepanel import SpindlePanel
 from configpanel import ConfigPanel
 from logpanel import LogPanel
 from settings import Settings
@@ -45,6 +46,7 @@ class MainFrame(wx.Frame):
 		il.Add(self.images.pngJogpanel)
 		il.Add(self.images.pngCfgpanel)
 		il.Add(self.images.pngLogpanel)
+		il.Add(self.images.pngSpindlepanel)
 
 		il.Add(self.images.pngExitpanel)
 
@@ -54,6 +56,7 @@ class MainFrame(wx.Frame):
 		self.StatPanel = StatPanel(self.lb, self, self.images)
 		self.JobPanel = JobPanel(self.lb, self, self.images)
 		self.JogPanel = JogPanel(self.lb, self, self.images)
+		self.SpindlePanel = SpindlePanel(self.lb, self, self.images)
 		self.CfgPanel = ConfigPanel(self.lb, self, self.images)
 		self.LogPanel = LogPanel(self.lb, self, self.images)
 
@@ -65,12 +68,13 @@ class MainFrame(wx.Frame):
 			[ self.StatPanel, "Status", 1 ],
 			[ self.JobPanel, "Job", 2 ],
 			[ self.JogPanel, "Jog", 3 ],
-			[ self.CfgPanel, "Config", 4 ],
-			[ self.LogPanel, "Log", 5 ]
+			[ self.SpindlePanel, "Spindle", 4 ],
+			[ self.CfgPanel, "Config", 5 ],
+			[ self.LogPanel, "Log", 6 ]
 		]
 
 		if not DEPLOYED:
-			self.pages.append([ self.ExitPanel, "EXIT", 6 ]) 
+			self.pages.append([ self.ExitPanel, "EXIT", 7 ]) 
 
 		for pg in self.pages:
 			self.lb.AddPage(pg[0], pg[1], imageId=pg[2])

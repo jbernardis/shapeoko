@@ -104,6 +104,10 @@ class JogPanel(wx.Panel):
 		hdr = wx.StaticText(self, wx.ID_ANY, txt, pos=(basex+10*bdim, basey), size=(w, h))
 		hdr.SetFont(font)
 
+	def initialize(self, shapeoko, settings):
+		self.shapeoko = shapeoko
+		self.settings = settings
+		self.shapeoko.registerStatusHandler(self.statusUpdate)
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -135,11 +139,6 @@ class JogPanel(wx.Panel):
 
 	def onGoToXYButton(self, evt):
 		self.shapeoko.goto(x=0, y=0)
-
-	def initialize(self, shapeoko, settings):
-		self.shapeoko = shapeoko
-		self.settings = settings
-		self.shapeoko.registerStatusHandler(self.statusUpdate)
 
 	def statusUpdate(self, ns):  #thread context
 		self.status = ns

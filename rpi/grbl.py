@@ -45,14 +45,17 @@ class SendThread(threading.Thread):
 			while not self.immedQ.empty():
 				string = self.immedQ.get(False)
 				self.sendMessage(string)
+				if string == "?":
+					print("sending poll")
+
 				if string == chr(0x18): # soft reset
 					self.drainQueue()
 					self.inFile = False
 					self.lineCt = 0
 
 			if self.waitOK is None and not self.commandQ.empty():
-				string = self.commandQ.get(False)
-				self.waitOK = {"seq": self.sequence, "data": string.rstrip(), "command": True, "tries": 2}
+				string, tries = self.commandQ.get(False)
+				self.waitOK = {"seq": self.sequence, "data": string.rstrip(), "command": True, "tries": tries}
 				self.sendMessage(string)
 				self.sequence += 1
 				
@@ -237,7 +240,7 @@ class Grbl:
 		return self.sendCommand(jogcmd)
 
 	def gotoHome(self):
-		return self.sendCommand("$H")
+		return self.sendCommand("$H", tries=40)
 
 	def goto(self, x, y, z):
 		gotocmd = "G90 G0"
@@ -291,6 +294,12 @@ class Grbl:
 	def checkMode(self):
 		return self.sendCommand("$C")
 
+	def spindleOn(self):
+		return self.sendCommand("M3")
+
+	def spindleOff(self):
+		return self.sendCommand("M5")
+
 	def startPoll(self):
 		if not self.connected:
 			return False
@@ -303,11 +312,11 @@ class Grbl:
 	def sendPoll(self):
 		self.sendImmediate("?")
 
-	def sendCommand(self, cmd):
+	def sendCommand(self, cmd, tries=2):
 		if not self.connected:
 			return False
 
-		self.commandQ.put(cmd + '\n')
+		self.commandQ.put((cmd + '\n', tries))
 		return True
 
 	def sendImmediate(self, cmd):

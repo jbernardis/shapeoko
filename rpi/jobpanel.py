@@ -223,6 +223,26 @@ class JobPanel(wx.Panel):
 		self.stFileLines.SetLabel(txt)
 		self.stFileLines.SetSize((w, h))
 
+	def abortRun(self):
+		self.paused = False
+		self.playing = False
+		self.filePosition = 0
+		self.enableButtons()
+
+		logMsg = [
+			"File %s job aborted." % self.currentFile
+		]
+		self.parentFrame.log(" ".join(logMsg))
+
+		dlg = MessageDlg(None, "Job Aborted", logMsg, 5)
+		dlg.CenterOnParent()
+		dlg.Show()
+
+		txt = "%d lines" % self.fileLines
+		w,h = self.dc.GetTextExtent(txt)
+		self.stFileLines.SetLabel(txt)
+		self.stFileLines.SetSize((w, h))
+
 	def onBPause(self, evt):
 		if self.paused:
 			self.shapeoko.resume()
@@ -233,6 +253,8 @@ class JobPanel(wx.Panel):
 
 	def onBReset(self, evt):
 		self.shapeoko.softReset()
+		if self.playing:
+			self.abortRun()
 
 	def onBCheck(self, evt):
 		self.shapeoko.checkMode()
