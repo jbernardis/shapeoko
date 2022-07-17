@@ -6,7 +6,6 @@ import socket
 from grbl import Grbl
 from pendant import Pendant
 from httpserver import ShapeokoHTTPServer
-from msgdlg import MessageDlg
 
 from common import XAXIS, YAXIS, ZAXIS, Settings
 
@@ -396,9 +395,7 @@ class Shapeoko(threading.Thread):
 
 				elif msg["type"] == "feedback":
 					self.sendMessage("[MSG: %s]" % msg["data"])
-					dlg = MessageDlg(None, "Feedback", msg["data"], 5)
-					dlg.CenterOnParent()
-					dlg.Show()
+					self.parent.showFeedback(msg["data"])
 
 				elif msg["type"] == "alarm":
 					self.sendAlarm(msg["data"])

@@ -16,8 +16,10 @@ from jogpanel import JogPanel
 from configpanel import ConfigPanel
 from logpanel import LogPanel
 from settings import Settings
+from msgdlg import MessageDlg
 
 (CloseRequest, EVT_CLOSEREQUEST) = newevent.NewEvent()
+(FeedbackMsg, EVT_FEEDBACK) = newevent.NewEvent()
 
 class MainFrame(wx.Frame):
 	def __init__(self):		
@@ -76,6 +78,7 @@ class MainFrame(wx.Frame):
 		self.lb.Bind(wx.EVT_LISTBOOK_PAGE_CHANGED, self.onPageChanged)
 
 		self.Bind(EVT_CLOSEREQUEST, self.onCloseRequest)
+		self.Bind(EVT_FEEDBACK, self.onFeedback)
 
 		self.timer = wx.Timer(self)
 
@@ -112,6 +115,15 @@ class MainFrame(wx.Frame):
 			self.shapeoko.go()
 		
 		self.initialized = True
+
+	def showFeedback(self, msg):  # thread context
+		evt = FeedbackMsg(msg=msg)
+		wx.PostEvent(self, evt)
+
+	def onFeedback(self, evt):
+		dlg = MessageDlg(None, "Feedback", [evt.msg], 5)
+		dlg.CenterOnParent()
+		dlg.Show()
 
 	def registerTicker(self, cbTicker):
 		self.registeredTickers.append(cbTicker)
