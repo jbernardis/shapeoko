@@ -65,7 +65,8 @@ class StatPanel(wx.Panel):
 
 	def switchToPage(self):
 		try:
-			self.shapeoko.getParserState()
+			if self.status.lower() not in [ "alarm", "hold" ]:
+				self.shapeoko.getParserState()
 		except:
 			pass
 

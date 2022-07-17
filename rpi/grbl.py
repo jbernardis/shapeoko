@@ -40,6 +40,7 @@ class SendThread(threading.Thread):
 
 	def run(self):
 		self.isRunning = True
+		self.waitOK = None
 		while self.isRunning:
 			while not self.immedQ.empty():
 				string = self.immedQ.get(False)
@@ -48,16 +49,14 @@ class SendThread(threading.Thread):
 					self.drainQueue()
 					self.inFile = False
 					self.lineCt = 0
-				
-			self.waitOK = None
 
-			if not self.commandQ.empty():
+			if self.waitOK is None and not self.commandQ.empty():
 				string = self.commandQ.get(False)
-				self.waitOK = {"seq": self.sequence, "data": string.rstrip()}
+				self.waitOK = {"seq": self.sequence, "data": string.rstrip(), "command": True}
 				self.sendMessage(string)
 				self.sequence += 1
 				
-			elif not self.gcodeQ.empty():
+			elif self.waitOK is None and not self.gcodeQ.empty():
 				msg = self.gcodeQ.get(False)
 				if msg["cmd"] == "START":
 					self.lineCt = 0
@@ -66,7 +65,7 @@ class SendThread(threading.Thread):
 				elif msg["cmd"] == "DATA":
 					if self.inFile:
 						self.lineCt += 1
-					self.waitOK = {"seq": self.sequence, "data": msg["data"].rstrip()}
+					self.waitOK = {"seq": self.sequence, "data": msg["data"].rstrip(), "command": False}
 					self.sendMessage(msg["data"])
 					self.sequence += 1
 
@@ -75,7 +74,7 @@ class SendThread(threading.Thread):
 					self.asyncQ.put({"type": "eof", "file": msg["name"], "lines": self.lineCt})
 
 				elif msg["cmd"] == "LINE":
-					self.waitOK = {"seq": self.sequence, "data": msg["data"].rstrip()}
+					self.waitOK = {"seq": self.sequence, "data": msg["data"].rstrip(), "command": False}
 					self.sendMessage(msg["data"])
 					self.sequence += 1
 
@@ -83,11 +82,14 @@ class SendThread(threading.Thread):
 				try:
 					response = self.responseQ.get(True, 0.25)
 				except queue.Empty:
-					outMsg = {"type": "response", "status": "<missing>", "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
-					self.asyncQ.put(outMsg)
+					if self.waitOK["command"]:
+						outMsg = {"type": "response", "status": "<missing>", "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
+						self.asyncQ.put(outMsg)
+						self.waitOK = None
 				else:
 					outMsg = {"type": "response", "status": response, "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
 					self.asyncQ.put(outMsg)
+					self.waitOK = None
 
 			time.sleep(0.01)
 
