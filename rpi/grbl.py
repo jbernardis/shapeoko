@@ -45,8 +45,6 @@ class SendThread(threading.Thread):
 			while not self.immedQ.empty():
 				string = self.immedQ.get(False)
 				self.sendMessage(string)
-				if string == "?":
-					print("sending poll")
 
 				if string == chr(0x18): # soft reset
 					self.drainQueue()
@@ -240,7 +238,7 @@ class Grbl:
 		return self.sendCommand(jogcmd)
 
 	def gotoHome(self):
-		return self.sendCommand("$H", tries=40)
+		return self.sendCommand("$H", tries=400)
 
 	def goto(self, x, y, z):
 		gotocmd = "G90 G0"
@@ -295,6 +293,7 @@ class Grbl:
 		return self.sendCommand("$C")
 
 	def spindleOn(self):
+		self.sendCommand("S6000")
 		return self.sendCommand("M3")
 
 	def spindleOff(self):

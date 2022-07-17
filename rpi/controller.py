@@ -44,9 +44,9 @@ class MainFrame(wx.Frame):
 		il.Add(self.images.pngStatpanel)
 		il.Add(self.images.pngJobpanel)
 		il.Add(self.images.pngJogpanel)
+		il.Add(self.images.pngSpindlepanel)
 		il.Add(self.images.pngCfgpanel)
 		il.Add(self.images.pngLogpanel)
-		il.Add(self.images.pngSpindlepanel)
 
 		il.Add(self.images.pngExitpanel)
 
