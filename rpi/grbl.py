@@ -52,7 +52,7 @@ class SendThread(threading.Thread):
 
 			if self.waitOK is None and not self.commandQ.empty():
 				string = self.commandQ.get(False)
-				self.waitOK = {"seq": self.sequence, "data": string.rstrip(), "command": True}
+				self.waitOK = {"seq": self.sequence, "data": string.rstrip(), "command": True, "tries": 2}
 				self.sendMessage(string)
 				self.sequence += 1
 				
@@ -83,9 +83,11 @@ class SendThread(threading.Thread):
 					response = self.responseQ.get(True, 0.25)
 				except queue.Empty:
 					if self.waitOK["command"]:
-						outMsg = {"type": "response", "status": "<missing>", "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
-						self.asyncQ.put(outMsg)
-						self.waitOK = None
+						self.waitOK["tries"] -= 1
+						if self.waitOK["tries"] == 0:
+							outMsg = {"type": "response", "status": "<missing>", "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
+							self.asyncQ.put(outMsg)
+							self.waitOK = None
 				else:
 					outMsg = {"type": "response", "status": response, "data": self.waitOK["data"], "sequence": self.waitOK["seq"]}
 					self.asyncQ.put(outMsg)
@@ -157,6 +159,12 @@ class ListenThread(threading.Thread):
 							msg = {"type": "parserstate", "data": line}
 						elif line.startswith("ALARM"):
 							msg = {"type": "alarm", "data": line}
+						elif line.startswith("[MSG:"):
+							try:
+								body = line[5:-1]
+							except:
+								body = line
+							msg = {"type": "feedback", "data": body}
 						else:
 							msg = {"type": "message", "data": line}
 
