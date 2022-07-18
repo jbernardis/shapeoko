@@ -48,6 +48,7 @@ class Shapeoko(threading.Thread):
 		self.cbParserStateHandlers = []
 		self.cbAlarmHandlers = []
 		self.cbProbeHandlers = []
+		self.cbSpeedHandlers = []
 		self.cbErrorHandlers = []
 		self.cbMessageHandlers = []
 		self.cbConfigHandlers = []
@@ -162,6 +163,8 @@ class Shapeoko(threading.Thread):
 
 		posChanged = False
 		spdChanged = False
+		nf = None
+		ns = None
 		for term in terms[1:]:
 			if term.startswith("MPos:"):
 				posterm = term[5:].replace(">", "")
@@ -223,15 +226,19 @@ class Shapeoko(threading.Thread):
 					if self.feedspeed != nf:
 						self.feedspeed = nf
 						spdChanged = True
+					else:
+						nf = None
 					if self.spindlespeed!= ns:
 						self.spindlespeed = ns
 						spdChanged = True
+					else:
+						ns = None
 
 		if posChanged:
 			self.sendPosition({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
 
 		if spdChanged:
-			self.sendSpeeds(self.feedspeed, self.spindlespeed)
+			self.sendSpeeds(nf, ns)
 
 	def getDistance(self, dx):
 		if dx < 0:

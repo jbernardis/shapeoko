@@ -156,11 +156,9 @@ class JogPanel(wx.Panel):
 		self.status = ns
 
 	def probeReport(self, msg): # thread context
-		print("probe report (%s)" % msg)
 		evt = ProbeEvent(msg=msg)
 		wx.PostEvent(self, evt)
 
 	def probeEvent(self, evt):
-		print("probe event (%s)" % evt.msg)
 		self.shapeoko.resetAxis(z=self.settings.probeheight)
 

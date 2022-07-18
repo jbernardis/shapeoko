@@ -20,8 +20,11 @@ class SpindlePanel(wx.Panel):
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
 
-		self.bOnOff = wx.BitmapButton(self, wx.ID_ANY, images.pngOn, pos=(75, 30), size=(54, 54))
+		self.bOnOff = wx.BitmapButton(self, wx.ID_ANY, images.pngPower, pos=(35, 30), size=(54, 54))
 		self.Bind(wx.EVT_BUTTON,  self.onBOnOff, self.bOnOff)
+
+		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, images.pngRefresh, pos=(115, 30), size=(54, 54))
+		self.Bind(wx.EVT_BUTTON,  self.onBRefresh, self.bRefresh)
 
 		self.slSpindleSpeed = wx.Slider(self, wx.ID_ANY,
 			self.spindleSpeed, 0, self.maxSpindleSpeed, size=(150, 300), pos=(30, 90),
@@ -61,8 +64,11 @@ class SpindlePanel(wx.Panel):
 		self.shapeoko.registerSpeedHandler(self.updateSpeeds)
 
 	def updateSpeeds(self, feed, spindle):
-		self.reportedSpindleSpeed = spindle
-		print("spindle speed updated to %d" % spindle)
+		if spindle is not None:
+			self.reportedSpindleSpeed = spindle
+			print("spindle speed updated to %d" % spindle)
+		else:
+			print("spindle speed unchanged")
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -71,13 +77,11 @@ class SpindlePanel(wx.Panel):
 	def onBOnOff(self, _):
 		if self.spindleOn:
 			self.shapeoko.spindleOff()
-			self.bOnOff.SetBitmap(self.images.pngOn)
 			self.stSpindleState.SetLabel("Spindle is OFF")
 			self.spindleOn = False
 		else:
 			self.shapeoko.setSpindleSpeed(self.spindleSpeed)
 			self.shapeoko.spindleOn()
-			self.bOnOff.SetBitmap(self.images.pngOff)
 			self.stSpindleState.SetLabel("Spindle is ON")
 			self.spindleOn = True
 
@@ -116,9 +120,11 @@ class SpindlePanel(wx.Panel):
 		if self.spindleOn:
 			self.shapeoko.setSpindleSpeed(self.spindleSpeed)
 
+	def onBRefresh(self, _):
+		self.updateFromSpindle()
+
 	def updateFromShapeoko(self):
 		self.spindleOn = self.reportedSpindleSpeed != 0
-		self.bOnOff.SetBitmap(self.images.pngOff if self.spindleOn else self.images.pngOn)
 		self.spindleSpeed = self.reportedSpindleSpeed
 		self.slSpindleSpeed.SetValue(self.spindleSpeed)
 		self.stSpindleState.SetLabel("Spindle is ON" if self.spindleOn else "Spindle is OFF")
