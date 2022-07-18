@@ -276,6 +276,9 @@ class Shapeoko(threading.Thread):
 	def gotoHome(self):
 		return self.grbl.gotoHome()
 
+	def probe(self):
+		self.grbl.probe()
+
 	def goto(self, x=None, y=None, z=None):
 		return self.grbl.goto(x, y, z)
 
@@ -396,11 +399,14 @@ class Shapeoko(threading.Thread):
 					self.sendParserState(msg["data"])
 
 				elif msg["type"] == "response":
-					if msg["status"] != "ok":
-						self.sendError(msg["status"], msg["data"])
+					if msg["status"] == "ok":
+						self.sendMessage("%s (ok)" % msg["data"], verbose=True)
+
+					elif msg["status"] == "<missing>":
+						self.sendMessage("%s (ok not received)" % msg["data"], verbose=True)
 
 					else:
-						self.sendMessage("%s (ok)" % msg["data"], verbose=True)
+						self.sendError(msg["status"], msg["data"])
 
 				elif msg["type"] == "feedback":
 					fb = msg["data"]

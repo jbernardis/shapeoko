@@ -1,6 +1,3 @@
-tool on
-tool off
-tool speed
 feed speed, overrides
 
 up/down buttons on log and status screens

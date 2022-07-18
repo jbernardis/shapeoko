@@ -240,6 +240,9 @@ class Grbl:
 	def gotoHome(self):
 		return self.sendCommand("$H", tries=400)
 
+	def probe(self):
+		return self.sendCommand("G38.2 Z-10 F100", tries=200)
+
 	def goto(self, x, y, z):
 		gotocmd = "G90 G0"
 		if x is not None or y is not None:
