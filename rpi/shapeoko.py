@@ -248,6 +248,9 @@ class Shapeoko(threading.Thread):
 	def spindleOff(self):
 		return self.grbl.spindleOff()
 
+	def setSpindleSpeed(self, speed):
+		return self.grbl.setSpindleSpeed(speed)
+
 	def jog(self, cmd):
 		terms = cmd.split(" ")
 		if len(terms) == 2:

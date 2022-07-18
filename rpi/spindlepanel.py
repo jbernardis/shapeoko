@@ -9,8 +9,8 @@ class SpindlePanel(wx.Panel):
 
 		self.images = images
 
-		self.spindleStat = False
-		self.speed = 0
+		self.spindleOn = False
+		self.spindleSpeed = 0
 
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
@@ -18,8 +18,14 @@ class SpindlePanel(wx.Panel):
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
 
-		self.bOn = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(54, 54), pos=(50, 50))
-		self.bOn.Bind(wx.EVT_BUTTON,  self.onOnButton)
+		self.cbOnOff = wx.CheckBox(self, wx.ID_ANY, "Turn spindle On", pos=(50, 50))
+		self.cbOnOff.Bind(wx.EVT_CHECKBOX,  self.onOnOff)
+		self.cbOnOff.SetValue(False)
+
+		self.slSpindleSpeed = wx.Slider(self, wx.ID_ANY,
+			self.spindleSpeed, 0, 6000, size=(250, 400), pos=(50, 90),
+			style=wx.SL_VERTICAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+
 
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
@@ -29,12 +35,15 @@ class SpindlePanel(wx.Panel):
 		self.SetPosition((0,0))
 		self.SetSize(evt.GetSize())
 
-	def onOnButton(self, _):
-		if self.spindleStat:
-			self.shapeoko.spindleOff()
-			self.spindleStat = False
-		else:
+	def onOnOff(self, _):
+		self.spindleOn = self.cbOnOff.GetValue()
+		if self.spindleOn:
+			self.shapeoko.setSpindleSpeec(self.spindleSpeed)
 			self.shapeoko.spindleOn()
-			self.spindleStat = True
+			self.cbOnOff.SetLabel("Turn Spindle Off")
+		else:
+			self.shapeoko.spindleOff()
+			self.cbOnOff.SetLabel("Turn Spindle On")
+
 
 

@@ -3,3 +3,6 @@ tool off
 tool speed
 feed speed, overrides
 
+up/down buttons on log and status screens
+
+look into bigger bitmaps/not text to improve list book navigation

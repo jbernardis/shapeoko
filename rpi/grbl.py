@@ -293,11 +293,13 @@ class Grbl:
 		return self.sendCommand("$C")
 
 	def spindleOn(self):
-		self.sendCommand("S6000")
 		return self.sendCommand("M3")
 
 	def spindleOff(self):
 		return self.sendCommand("M5")
+
+	def setSpindleSpeed(self, speed):
+		return self.sendCommand("S%d" % speed)
 
 	def startPoll(self):
 		if not self.connected:

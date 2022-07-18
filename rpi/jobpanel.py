@@ -307,10 +307,10 @@ class FilesDlg(wx.Dialog):
 		self.lbFiles.SetSelection(0)
 		self.selectedIndex = 0
 
-		self.bUp = wx.BitmapButton(self, wx.ID_ANY, images.pngJogupred, size=(54, 54), pos=(470, 60))
+		self.bUp = wx.BitmapButton(self, wx.ID_ANY, images.pngUparrow, size=(54, 54), pos=(470, 60))
 		self.Bind(wx.EVT_BUTTON, self.onBUp, self.bUp)
-		self.bDn = wx.BitmapButton(self, wx.ID_ANY, images.pngJogdnred, size=(54, 54), pos=(470, 160))
-		self.Bind(wx.EVT_BUTTON, self.onBDown, self.bDn)
+		self.bDown = wx.BitmapButton(self, wx.ID_ANY, images.pngDownarrow, size=(54, 54), pos=(470, 160))
+		self.Bind(wx.EVT_BUTTON, self.onBDown, self.bDown)
 
 		self.bCheckAll = wx.BitmapButton(self, wx.ID_ANY, images.pngBcheckall, size=(54, 54), pos=(135, 270))
 		self.Bind(wx.EVT_BUTTON, self.onBCheckAll, self.bCheckAll)
