@@ -12,6 +12,7 @@ class SpindlePanel(wx.Panel):
 		self.spindleOn = False
 		self.spindleSpeed = 0
 		self.maxSpindleSpeed = 6000
+		self.reportedSpindleSpeed = 0
 
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
@@ -19,7 +20,7 @@ class SpindlePanel(wx.Panel):
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
 
-		self.bOnOff = wx.BitmapButton(self, wx.ID_ANY, images.pngOff, pos=(75, 30), size=(54, 54))
+		self.bOnOff = wx.BitmapButton(self, wx.ID_ANY, images.pngOn, pos=(75, 30), size=(54, 54))
 		self.Bind(wx.EVT_BUTTON,  self.onBOnOff, self.bOnOff)
 
 		self.slSpindleSpeed = wx.Slider(self, wx.ID_ANY,
@@ -57,6 +58,11 @@ class SpindlePanel(wx.Panel):
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
+		self.shapeoko.registerSpeedHandler(self.updateSpeeds)
+
+	def updateSpeeds(self, feed, spindle):
+		self.reportedSpindleSpeed = spindle
+		print("spindle speed updated to %d" % spindle)
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -109,4 +115,11 @@ class SpindlePanel(wx.Panel):
 		self.spindleSpeed = self.slSpindleSpeed.GetValue()
 		if self.spindleOn:
 			self.shapeoko.setSpindleSpeed(self.spindleSpeed)
+
+	def updateFromShapeoko(self):
+		self.spindleOn = self.reportedSpindleSpeed != 0
+		self.bOnOff.SetBitmap(self.images.pngOff if self.spindleOn else self.images.pngOn)
+		self.spindleSpeed = self.reportedSpindleSpeed
+		self.slSpindleSpeed.SetValue(self.spindleSpeed)
+		self.stSpindleState.SetLabel("Spindle is ON" if self.spindleOn else "Spindle is OFF")
 

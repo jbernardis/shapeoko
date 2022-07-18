@@ -32,6 +32,8 @@ class Shapeoko(threading.Thread):
 		self.invertXJog = False
 		self.inveryYJog = True
 		self.invertZJog = False
+		self.feedspeed = 0
+		self.spindlespeed = 0
 
 		self.isRunning = False
 		self.endOfLife = False
@@ -45,6 +47,7 @@ class Shapeoko(threading.Thread):
 		self.cbPositionHandlers = []
 		self.cbParserStateHandlers = []
 		self.cbAlarmHandlers = []
+		self.cbProbeHandlers = []
 		self.cbErrorHandlers = []
 		self.cbMessageHandlers = []
 		self.cbConfigHandlers = []
@@ -107,6 +110,13 @@ class Shapeoko(threading.Thread):
 		for cb in self.cbPositionHandlers:
 			cb(position, offset)
 
+	def registerSpeedHandler(self, cbSpeedHandler):
+		self.cbSpeedHandlers.append(cbSpeedHandler)
+
+	def sendSpeeds(self, feed, spindle):
+		for cb in self.cbSpeedHandlers:
+			cb(feed, spindle)
+
 	def registerParserStateHandler(self, cbParserStateHandler):
 		self.cbParserStateHandlers.append(cbParserStateHandler)
 
@@ -120,6 +130,13 @@ class Shapeoko(threading.Thread):
 
 	def sendAlarm(self, msg):
 		for cb in self.cbAlarmHandlers:
+			cb(msg)
+
+	def registerProbeHandler(self, cbProbeHandler):
+		self.cbProbeHandlers.append(cbProbeHandler)
+
+	def sendProbe(self, msg):
+		for cb in self.cbProbeHandlers:
 			cb(msg)
 
 	def registerErrorHandler(self, cbErrorHandler):
@@ -144,6 +161,7 @@ class Shapeoko(threading.Thread):
 			self.sendStatus(self.status)
 
 		posChanged = False
+		spdChanged = False
 		for term in terms[1:]:
 			if term.startswith("MPos:"):
 				posterm = term[5:].replace(">", "")
@@ -196,8 +214,24 @@ class Shapeoko(threading.Thread):
 						self.offz = nz
 						posChanged = True
 
+			elif term.startswith("FS:"):
+				spdterm = term[3:].replace(">", "")
+				newspd = spdterm.split(",")
+				if len(newspd) == 2:
+					nf = float(newspd[0])
+					ns = float(newspd[1])
+					if self.feedspeed != nf:
+						self.feedspeed = nf
+						spdChanged = True
+					if self.spindlespeed!= ns:
+						self.spindlespeed = ns
+						spdChanged = True
+
 		if posChanged:
 			self.sendPosition({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
+
+		if spdChanged:
+			self.sendSpeeds(self.feedspeed, self.spindlespeed)
 
 	def getDistance(self, dx):
 		if dx < 0:
@@ -415,6 +449,9 @@ class Shapeoko(threading.Thread):
 
 				elif msg["type"] == "alarm":
 					self.sendAlarm(msg["data"])
+
+				elif msg["type"] == "probe":
+					self.sendProbe(msg["data"])
 
 				elif msg["type"] == "abort":
 					self.sendMessage("File aborted: (%s)" % msg["file"])

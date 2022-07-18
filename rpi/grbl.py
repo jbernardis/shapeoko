@@ -166,6 +166,8 @@ class ListenThread(threading.Thread):
 							except:
 								body = line
 							msg = {"type": "feedback", "data": body}
+						elif line.startswith("[PRB:"):
+							msg = {"type": "probe", "data": line}
 						else:
 							msg = {"type": "message", "data": line}
 
@@ -241,7 +243,7 @@ class Grbl:
 		return self.sendCommand("$H", tries=400)
 
 	def probe(self):
-		return self.sendCommand("G38.2 Z-10 F100", tries=200)
+		return self.sendCommand("G38.2 Z-50 F24", tries=200)
 
 	def goto(self, x, y, z):
 		gotocmd = "G90 G0"

@@ -1,6 +1,10 @@
 
 import wx
+from wx.lib import newevent
+
 from common import XAXIS, YAXIS, ZAXIS
+(ProbeEvent, EVT_PROBE) = newevent.NewEvent()  
+
 
 class JogPanel(wx.Panel):
 	def __init__(self, parent, win, images):		
@@ -26,7 +30,7 @@ class JogPanel(wx.Panel):
 		self.bHome = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(54, 54), pos=(basex,  basey))
 		self.bHome.Bind(wx.EVT_BUTTON,  self.onHomeButton)
 
-		self.bProbe = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(54, 54), pos=(basex+bdim,  basey))
+		self.bProbe = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(54, 54), pos=(basex+bdim+10,  basey))
 		self.bProbe.Bind(wx.EVT_BUTTON,  self.onProbeButton)
 
 		self.bY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupgreen,    size=(40, 40), pos=(colx,  basey))
@@ -111,6 +115,8 @@ class JogPanel(wx.Panel):
 		self.shapeoko = shapeoko
 		self.settings = settings
 		self.shapeoko.registerStatusHandler(self.statusUpdate)
+		self.shapeoko.registerProbeHandler(self.probeReport)
+		self.Bind(EVT_PROBE, self.probeEvent)
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -148,3 +154,13 @@ class JogPanel(wx.Panel):
 
 	def statusUpdate(self, ns):  #thread context
 		self.status = ns
+
+	def probeReport(self, msg): # thread context
+		print("probe report (%s)" % msg)
+		evt = ProbeEvent(msg=msg)
+		wx.PostEvent(self, evt)
+
+	def probeEvent(self, evt):
+		print("probe event (%s)" % evt.msg)
+		self.shapeoko.resetAxis(z=self.settings.probeheight)
+
