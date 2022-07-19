@@ -34,29 +34,47 @@ class SpindlePanel(wx.Panel):
 		self.Bind(wx.EVT_SLIDER, self.onSlSpindleSpeed, self.slSpindleSpeed)
 
 		ybase = 30
-		self.bUp100 = wx.BitmapButton(self, wx.ID_ANY, images.pngUp3, pos=(210, ybase), size=(54, 54))
-		self.Bind(wx.EVT_BUTTON,  self.onBUp100, self.bUp100)
+		self.bSpindleSpeedUp100 = wx.BitmapButton(self, wx.ID_ANY, images.pngUp3, pos=(210, ybase), size=(54, 54))
+		self.Bind(wx.EVT_BUTTON,  self.onBSpindleSpeedUp100, self.bSpindleSpeedUp100)
 
-		self.bUp10 = wx.BitmapButton(self, wx.ID_ANY, images.pngUp2, pos=(210, ybase+60), size=(54, 54))
-		self.Bind(wx.EVT_BUTTON,  self.onBUp10, self.bUp10)
+		self.bSpindleSpeedUp10 = wx.BitmapButton(self, wx.ID_ANY, images.pngUp2, pos=(210, ybase+60), size=(54, 54))
+		self.Bind(wx.EVT_BUTTON,  self.onBSpindleSpeedUp10, self.bSpindleSpeedUp10)
 
-		self.bUp1 = wx.BitmapButton(self, wx.ID_ANY, images.pngUp1, pos=(210, ybase+60*2), size=(54, 54))
-		self.Bind(wx.EVT_BUTTON,  self.onBUp1, self.bUp1)
+		self.bSpindleSpeedUp1 = wx.BitmapButton(self, wx.ID_ANY, images.pngUp1, pos=(210, ybase+60*2), size=(54, 54))
+		self.Bind(wx.EVT_BUTTON,  self.onBSpindleSpeedUp1, self.bSpindleSpeedUp1)
 
-		self.bDown1 = wx.BitmapButton(self, wx.ID_ANY, images.pngDown1, pos=(210, ybase+60*3), size=(54, 54))
-		self.Bind(wx.EVT_BUTTON,  self.onBDown1, self.bDown1)
+		self.bSpindleSpeedDown1 = wx.BitmapButton(self, wx.ID_ANY, images.pngDown1, pos=(210, ybase+60*3), size=(54, 54))
+		self.Bind(wx.EVT_BUTTON,  self.onBSpindleSpeedDown1, self.bSpindleSpeedDown1)
 
-		self.bDown10 = wx.BitmapButton(self, wx.ID_ANY, images.pngDown2, pos=(210, ybase+60*4), size=(54, 54))
-		self.Bind(wx.EVT_BUTTON,  self.onBDown10, self.bDown10)
+		self.bSpindleSpeedDown10 = wx.BitmapButton(self, wx.ID_ANY, images.pngDown2, pos=(210, ybase+60*4), size=(54, 54))
+		self.Bind(wx.EVT_BUTTON,  self.onBSpindleSpeedDown10, self.bSpindleSpeedDown10)
 
-		self.bDown100 = wx.BitmapButton(self, wx.ID_ANY, images.pngDown3, pos=(210, ybase+60*5), size=(54, 54))
-		self.Bind(wx.EVT_BUTTON,  self.onBDown100, self.bDown100)
+		self.bSpindleSpeedDown100 = wx.BitmapButton(self, wx.ID_ANY, images.pngDown3, pos=(210, ybase+60*5), size=(54, 54))
+		self.Bind(wx.EVT_BUTTON,  self.onBSpindleSpeedDown100, self.bSpindleSpeedDown100)
 
 		text = "Spindle is OFF"
 		w,h = dc.GetTextExtent(text)
 		self.stSpindleState = wx.StaticText(self, wx.ID_ANY, text, pos=(80, 410), size=(w, h+10))
 		self.stSpindleState.SetFont(font)
 
+		# adjustSpindleSpeed(-10, -1, 0, 1, 10)
+
+		self.bFeedUp10 = wx.Button(self, wx.ID_ANY, "+10%", pos=(410, ybase), size=(54, 54))
+		self.bFeedUp10.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, 10))
+
+		self.bFeedUp1 = wx.Button(self, wx.ID_ANY, "+1%", pos=(410, ybase+60), size=(54, 54))
+		self.bFeedUp1.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, 1))
+
+		self.bFeed100 = wx.Button(self, wx.ID_ANY, "100%", pos=(410, ybase+60*2), size=(54, 54))
+		self.bFeed100.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, 0))
+
+		self.bFeedDown1 = wx.Button(self, wx.ID_ANY, "-1%", pos=(410, ybase+60*3), size=(54, 54))
+		self.bFeedDown1.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, -1))
+
+		self.bFeedDown10 = wx.Button(self, wx.ID_ANY, "-10%", pos=(410, ybase+60*4), size=(54, 54))
+		self.bFeedDown1.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, -10))
+
+		# adjustRapidRate(100, 50, 25)
 
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
@@ -66,9 +84,6 @@ class SpindlePanel(wx.Panel):
 	def updateSpeeds(self, feed, spindle):
 		if spindle is not None:
 			self.reportedSpindleSpeed = spindle
-			print("spindle speed updated to %d" % spindle)
-		else:
-			print("spindle speed unchanged")
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
@@ -85,25 +100,25 @@ class SpindlePanel(wx.Panel):
 			self.stSpindleState.SetLabel("Spindle is ON")
 			self.spindleOn = True
 
-	def onBUp1(self, _):
-		self.adjustSpindleSpeed(1)
+	def onBSpindleSpeedUp1(self, _):
+		self.setSpindleSpeed(1)
 
-	def onBUp10(self, _):
-		self.adjustSpindleSpeed(10)
+	def onBSpindleSpeedUp10(self, _):
+		self.setSpindleSpeed(10)
 
-	def onBUp100(self, _):
-		self.adjustSpindleSpeed(100)
+	def onBSpindleSpeedSpindleSpeedUp100(self, _):
+		self.setSpindleSpeed(100)
 
-	def onBDown1(self, _):
-		self.adjustSpindleSpeed(-1)
+	def onBSpindleSpeedDown1(self, _):
+		self.setSpindleSpeed(-1)
 
-	def onBDown10(self, _):
-		self.adjustSpindleSpeed(-10)
+	def onBSpindleSpeedDown10(self, _):
+		self.setSpindleSpeed(-10)
 
-	def onBDown100(self, _):
-		self.adjustSpindleSpeed(-100)
+	def onBSpindleSpeedDown100(self, _):
+		self.setSpindleSpeed(-100)
 
-	def adjustSpindleSpeed(self, inc):
+	def setSpindleSpeed(self, inc):
 		if self.spindleSpeed + inc > self.maxSpindleSpeed:
 			self.spindleSpeed = self.maxSpindleSpeed
 		elif self.spindleSpeed + inc < 0:
@@ -121,11 +136,14 @@ class SpindlePanel(wx.Panel):
 			self.shapeoko.setSpindleSpeed(self.spindleSpeed)
 
 	def onBRefresh(self, _):
-		self.updateFromSpindle()
+		self.updateFromShapeoko()
 
 	def updateFromShapeoko(self):
 		self.spindleOn = self.reportedSpindleSpeed != 0
 		self.spindleSpeed = self.reportedSpindleSpeed
 		self.slSpindleSpeed.SetValue(self.spindleSpeed)
 		self.stSpindleState.SetLabel("Spindle is ON" if self.spindleOn else "Spindle is OFF")
+
+	def onFeedButton(self, inc):
+		self.shapeoko.adjustFeedRate(inc)
 

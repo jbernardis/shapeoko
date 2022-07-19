@@ -292,6 +292,15 @@ class Shapeoko(threading.Thread):
 	def setSpindleSpeed(self, speed):
 		return self.grbl.setSpindleSpeed(speed)
 
+	def adjustSpindleSpeed(self, inc):
+		return self.grbl.adjustSpindleSpeed(inc)
+
+	def adjustFeedRate(self, inc):
+		return self.grbl.adjustFeedRate(inc)
+
+	def adjustRapidRate(self, inc):
+		return self.grbl.adjustRapidRate(inc)	
+
 	def jog(self, cmd):
 		terms = cmd.split(" ")
 		if len(terms) == 2:
@@ -459,6 +468,7 @@ class Shapeoko(threading.Thread):
 
 				elif msg["type"] == "probe":
 					self.sendProbe(msg["data"])
+					self.sendMessage(msg["data"])
 
 				elif msg["type"] == "abort":
 					self.sendMessage("File aborted: (%s)" % msg["file"])

@@ -30,7 +30,7 @@ class JogPanel(wx.Panel):
 		self.bHome = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(54, 54), pos=(basex,  basey))
 		self.bHome.Bind(wx.EVT_BUTTON,  self.onHomeButton)
 
-		self.bProbe = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHome,    size=(54, 54), pos=(basex+bdim+10,  basey))
+		self.bProbe = wx.BitmapButton(self, wx.ID_ANY, self.images.pngProbe,    size=(54, 54), pos=(basex+bdim+10,  basey))
 		self.bProbe.Bind(wx.EVT_BUTTON,  self.onProbeButton)
 
 		self.bY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupgreen,    size=(40, 40), pos=(colx,  basey))

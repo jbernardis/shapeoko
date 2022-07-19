@@ -306,6 +306,49 @@ class Grbl:
 	def setSpindleSpeed(self, speed):
 		return self.sendCommand("S%d" % speed)
 
+	def adjustFeedRate(self, inc):
+		if inc in [0, 100]:
+			return self.sendImmediate(chr(0x90))
+
+		if inc == 1:
+			return self.sendImmediate(chr(0x93))
+
+		if inc == 10:
+			return self.sendImmediate(chr(0x91))
+
+		if inc == -1:
+			return self.sendImmediate(chr(0x94))
+
+		if inc == -10:
+			return self.sendImmediate(chr(0x92))
+
+	def adjustRapidRate(self, inc):
+		if inc in [0, 100]:
+			return self.sendImmediate(chr(0x95))
+
+		if inc == 50:
+			return self.sendImmediate(chr(0x96))
+
+		if inc == 25:
+			return self.sendImmediate(chr(0x97))
+
+	def adjustSpindleSpeed(self, inc):
+		if inc in [0, 100]:
+			return self.sendImmediate(chr(0x99))
+
+		if inc == 1:
+			return self.sendImmediate(chr(0x9c))
+
+		if inc == 10:
+			return self.sendImmediate(chr(0x9a))
+
+		if inc == -1:
+			return self.sendImmediate(chr(0x9d))
+
+		if inc == -10:
+			return self.sendImmediate(chr(0x9b))
+
+
 	def startPoll(self):
 		if not self.connected:
 			return False
