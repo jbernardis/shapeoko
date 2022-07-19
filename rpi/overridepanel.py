@@ -5,7 +5,7 @@ from common import XAXIS, YAXIS, ZAXIS
 
 (RateEvent, EVT_RATE) = newevent.NewEvent()
 
-class SpindlePanel(wx.Panel):
+class OverridePanel(wx.Panel):
 	def __init__(self, parent, win, images):		
 		wx.Panel.__init__(self, parent, wx.ID_ANY)
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))

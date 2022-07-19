@@ -1,4 +1,4 @@
-feed speed, overrides
+rename spindle panel as overide panel
 
 up/down buttons on log and status screens
 
