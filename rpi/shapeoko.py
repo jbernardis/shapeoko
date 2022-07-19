@@ -34,6 +34,9 @@ class Shapeoko(threading.Thread):
 		self.invertZJog = False
 		self.feedspeed = 0
 		self.spindlespeed = 0
+		self.feedov = 100
+		self.rapidov = 100
+		self.spindleov = 100
 
 		self.isRunning = False
 		self.endOfLife = False
@@ -52,6 +55,7 @@ class Shapeoko(threading.Thread):
 		self.cbErrorHandlers = []
 		self.cbMessageHandlers = []
 		self.cbConfigHandlers = []
+		self.cbOverrideHandlers = []
 
 		self.shapeokoserver = None
 
@@ -118,6 +122,13 @@ class Shapeoko(threading.Thread):
 		for cb in self.cbSpeedHandlers:
 			cb(feed, spindle)
 
+	def registerOverrideHandler(self, cbOverrideHandler):
+		self.cbOverrideHandlers.append(cbOverrideHandler)
+
+	def sendOverrides(self, feed, rapid, spindle):
+		for cb in self.cbOverrideHandlers:
+			cb(feed, rapid, spindle)
+
 	def registerParserStateHandler(self, cbParserStateHandler):
 		self.cbParserStateHandlers.append(cbParserStateHandler)
 
@@ -163,8 +174,12 @@ class Shapeoko(threading.Thread):
 
 		posChanged = False
 		spdChanged = False
+		ovChanged = False
 		nf = None
 		ns = None
+		ovf = None
+		ovr = None
+		ovs = None
 		for term in terms[1:]:
 			if term.startswith("MPos:"):
 				posterm = term[5:].replace(">", "")
@@ -228,17 +243,47 @@ class Shapeoko(threading.Thread):
 						spdChanged = True
 					else:
 						nf = None
-					if self.spindlespeed!= ns:
+
+					if self.spindlespeed != ns:
 						self.spindlespeed = ns
 						spdChanged = True
 					else:
 						ns = None
+
+			elif term.startswith("Ov:"):
+				ovterm = term[3:].replace(">", "")
+				newov = ovterm.split(",")
+				if len(newov) == 3:
+					ovf = float(newov[0])
+					ovr = float(newov[1])
+					ovs = float(newov[2])
+					if self.feedov != ovf:
+						self.feedov = ovf
+						ovChanged = True
+					else:
+						ovf = None
+
+					if self.rapidov != ovr:
+						self.rapidov = ovr
+						ovChanged = True
+					else:
+						ovr = None
+
+					if self.spindleov != ovs:
+						self.spindleov = ovs
+						ovChanged = True
+					else:
+						ovs = None
 
 		if posChanged:
 			self.sendPosition({ XAXIS: self.x, YAXIS: self.y, ZAXIS: self.z }, { XAXIS: self.offx, YAXIS: self.offy, ZAXIS: self.offz })
 
 		if spdChanged:
 			self.sendSpeeds(nf, ns)
+
+		if ovChanged:
+			print("sending overrides")
+			self.sendOverrides(ovf, ovr, ovs)
 
 	def getDistance(self, dx):
 		if dx < 0:

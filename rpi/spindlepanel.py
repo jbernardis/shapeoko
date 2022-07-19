@@ -1,6 +1,9 @@
-
 import wx
+from wx.lib import newevent
+
 from common import XAXIS, YAXIS, ZAXIS
+
+(RateEvent, EVT_RATE) = newevent.NewEvent()
 
 class SpindlePanel(wx.Panel):
 	def __init__(self, parent, win, images):		
@@ -14,11 +17,16 @@ class SpindlePanel(wx.Panel):
 		self.maxSpindleSpeed = 6000
 		self.reportedSpindleSpeed = 0
 
+		self.feedrate = 100
+		self.rapidrate = 100
+		self.spindlerate = 100
+
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
 		font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
+		ratew,rateh = dc.GetTextExtent("100%")
 
 		self.bOnOff = wx.BitmapButton(self, wx.ID_ANY, images.pngPower, pos=(35, 30), size=(54, 54))
 		self.Bind(wx.EVT_BUTTON,  self.onBOnOff, self.bOnOff)
@@ -56,30 +64,85 @@ class SpindlePanel(wx.Panel):
 		w,h = dc.GetTextExtent(text)
 		self.stSpindleState = wx.StaticText(self, wx.ID_ANY, text, pos=(80, 410), size=(w, h+10))
 		self.stSpindleState.SetFont(font)
+		self.stSpindleState.SetSize((w, h+10))
 
-		# adjustSpindleSpeed(-10, -1, 0, 1, 10)
+		header = "---------Overrides---------"
+		w,h = dc.GetTextExtent(header)
+		self.stHeader = wx.StaticText(self, wx.ID_ANY, header, pos=(360, 30), size=(w, h))
+		self.stHeader.SetFont(font)
 
-		self.bFeedUp10 = wx.Button(self, wx.ID_ANY, "+10%", pos=(410, ybase), size=(54, 54))
+		# adjustFeedRate(-10, -1, 0, 1, 10)
+		xcol = 360
+		ybase = 60
+		yrates = ybase+60*5+20
+		self.bFeedUp10 = wx.Button(self, wx.ID_ANY, "+10%", pos=(xcol, ybase), size=(54, 54))
 		self.bFeedUp10.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, 10))
 
-		self.bFeedUp1 = wx.Button(self, wx.ID_ANY, "+1%", pos=(410, ybase+60), size=(54, 54))
+		self.bFeedUp1 = wx.Button(self, wx.ID_ANY, "+1%", pos=(xcol, ybase+60), size=(54, 54))
 		self.bFeedUp1.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, 1))
 
-		self.bFeed100 = wx.Button(self, wx.ID_ANY, "100%", pos=(410, ybase+60*2), size=(54, 54))
+		self.bFeed100 = wx.Button(self, wx.ID_ANY, "100%", pos=(xcol, ybase+60*2), size=(54, 54))
 		self.bFeed100.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, 0))
 
-		self.bFeedDown1 = wx.Button(self, wx.ID_ANY, "-1%", pos=(410, ybase+60*3), size=(54, 54))
+		self.bFeedDown1 = wx.Button(self, wx.ID_ANY, "-1%", pos=(xcol, ybase+60*3), size=(54, 54))
 		self.bFeedDown1.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, -1))
 
-		self.bFeedDown10 = wx.Button(self, wx.ID_ANY, "-10%", pos=(410, ybase+60*4), size=(54, 54))
-		self.bFeedDown1.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, -10))
+		self.bFeedDown10 = wx.Button(self, wx.ID_ANY, "-10%", pos=(xcol, ybase+60*4), size=(54, 54))
+		self.bFeedDown10.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, -10))
+
+		self.stFeedRate = wx.StaticText(self, wx.ID_ANY, "100%", pos=(xcol, yrates))
+		self.stFeedRate.SetFont(font)
+		self.stFeedRate.SetSize((ratew, rateh))
 
 		# adjustRapidRate(100, 50, 25)
+		xcol = 460
+		ybase = 120
+		self.bRapid100 = wx.Button(self, wx.ID_ANY, "100%", pos=(xcol, ybase), size=(54, 54))
+		self.bRapid100.Bind(wx.EVT_BUTTON,  lambda event: self.onRapidButton(event, 100))
+
+		self.bRapid50 = wx.Button(self, wx.ID_ANY, "50%", pos=(xcol, ybase+60), size=(54, 54))
+		self.bRapid50.Bind(wx.EVT_BUTTON,  lambda event: self.onRapidButton(event, 50))
+
+		self.bRapid25 = wx.Button(self, wx.ID_ANY, "25%", pos=(xcol, ybase+60*2), size=(54, 54))
+		self.bRapid25.Bind(wx.EVT_BUTTON,  lambda event: self.onRapidButton(event, 25))
+
+		self.stRapidRate = wx.StaticText(self, wx.ID_ANY, "100%", pos=(xcol, yrates))
+		self.stRapidRate.SetFont(font)
+		self.stRapidRate.SetSize((ratew, rateh))
+
+		# adjustSpindleSpeed(-10, -1, 0, 1, 10)
+		xcol = 560
+		ybase = 60
+		self.bSpindleUp10 = wx.Button(self, wx.ID_ANY, "+10%", pos=(xcol, ybase), size=(54, 54))
+		self.bSpindleUp10.Bind(wx.EVT_BUTTON,  lambda event: self.onSpindleButton(event, 10))
+
+		self.bSpindleUp1 = wx.Button(self, wx.ID_ANY, "+1%", pos=(xcol, ybase+60), size=(54, 54))
+		self.bSpindleUp1.Bind(wx.EVT_BUTTON,  lambda event: self.onSpindleButton(event, 1))
+
+		self.bSpindle100 = wx.Button(self, wx.ID_ANY, "100%", pos=(xcol, ybase+60*2), size=(54, 54))
+		self.bSpindle100.Bind(wx.EVT_BUTTON,  lambda event: self.onSpindleButton(event, 0))
+
+		self.bSpindleDown1 = wx.Button(self, wx.ID_ANY, "-1%", pos=(xcol, ybase+60*3), size=(54, 54))
+		self.bSpindleDown1.Bind(wx.EVT_BUTTON,  lambda event: self.onSpindleButton(event, -1))
+
+		self.bSpindleDown10 = wx.Button(self, wx.ID_ANY, "-10%", pos=(xcol, ybase+60*4), size=(54, 54))
+		self.bSpindleDown10.Bind(wx.EVT_BUTTON,  lambda event: self.onSpindleButton(event, -10))
+
+		self.stSpindleRate = wx.StaticText(self, wx.ID_ANY, "100%", pos=(xcol, yrates))
+		self.stSpindleRate.SetFont(font)
+		self.stSpindleRate.SetSize((ratew, rateh))
+
+		colLabel = "Feed      Rapid    Spindle"
+		w,h = dc.GetTextExtent(colLabel)
+		self.stColLabel = wx.StaticText(self, wx.ID_ANY, colLabel, pos=(360, yrates+30), size=(w, h))
+		self.stColLabel.SetFont(font)
 
 	def initialize(self, shapeoko, settings):
 		self.shapeoko = shapeoko
 		self.settings = settings
 		self.shapeoko.registerSpeedHandler(self.updateSpeeds)
+		self.shapeoko.registerOverrideHandler(self.updateOverrides)
+		self.Bind(EVT_RATE, self.rateEvent)
 
 	def updateSpeeds(self, feed, spindle):
 		if spindle is not None:
@@ -106,7 +169,7 @@ class SpindlePanel(wx.Panel):
 	def onBSpindleSpeedUp10(self, _):
 		self.setSpindleSpeed(10)
 
-	def onBSpindleSpeedSpindleSpeedUp100(self, _):
+	def onBSpindleSpeedUp100(self, _):
 		self.setSpindleSpeed(100)
 
 	def onBSpindleSpeedDown1(self, _):
@@ -144,6 +207,28 @@ class SpindlePanel(wx.Panel):
 		self.slSpindleSpeed.SetValue(self.spindleSpeed)
 		self.stSpindleState.SetLabel("Spindle is ON" if self.spindleOn else "Spindle is OFF")
 
-	def onFeedButton(self, inc):
+	def onFeedButton(self, _, inc):
 		self.shapeoko.adjustFeedRate(inc)
 
+	def onRapidButton(self, _, inc):
+		self.shapeoko.adjustRapidRate(inc)
+
+	def onSpindleButton(self, _, inc):
+		self.shapeoko.adjustSpindleSpeed(inc)
+
+	def updateOverrides(self, feed, rapid, spindle): # thread context
+		print("Overrides: Feed(%s)  Rapid(%s)  Spindle(%s)" % (feed, rapid, spindle))
+		evt = RateEvent(feed=feed, rapid=rapid, spindle=spindle)
+		wx.PostEvent(self, evt)
+
+	def rateEvent(self, evt):
+		print("got the rate event")
+		if evt.feed is not None:
+			self.feedrate = evt.feed
+			self.stFeedRate.SetLabel("%d%%" % self.feedrate)
+		if evt.rapid is not None:
+			self.rapidrate = evt.rapid
+			self.stRapidRate.SetLabel("%d%%" % self.rapidrate)
+		if evt.spindle is not None:
+			self.spindlerate = evt.spindle
+			self.stSpindleRate.SetLabel("%d%%" % self.spindlerate)
