@@ -24,16 +24,16 @@ class LogPanel(wx.Panel):
 		font = wx.Font(16, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		self.teLog.SetFont(font)
 
-		self.cbVerbose = wx.CheckBox(self, wx.ID_ANY, "Verbose", pos=(40, 420), size=(120, 21))
+		self.cbVerbose = wx.CheckBox(self, wx.ID_ANY, "Verbose", size=(120, 21))
 		self.cbVerbose.SetFont(font)
 		self.cbVerbose.SetValue(True)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbVerbose, self.cbVerbose)
 
-		self.cbStatus = wx.CheckBox(self, wx.ID_ANY, "Status", pos=(200, 420), size=(120, 21))
+		self.cbStatus = wx.CheckBox(self, wx.ID_ANY, "Status", size=(120, 21))
 		self.cbStatus.SetFont(font)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbStatus, self.cbStatus)
 
-		self.bClear = wx.BitmapButton(self, wx.ID_ANY, images.pngBclearlog, size=(100, 60), pos=(500, 410))
+		self.bClear = wx.BitmapButton(self, wx.ID_ANY, images.pngBclearlog, size=(100, 60))
 		self.Bind(wx.EVT_BUTTON, self.onBClear, self.bClear)
 
 	def onCbVerbose(self, _):
@@ -50,7 +50,11 @@ class LogPanel(wx.Panel):
 		self.settings = settings
 
 		h, v = self.GetClientSize()
-		self.teLog.SetSize((h, v-80))
+		self.teLog.SetSize((h-130, v))
+
+		self.cbVerbose.SetPosition((h-120, 40))
+		self.cbStatus.SetPosition((h-120, 100))
+		self.bClear.SetPosition((h-120, 180))
 
 		self.shapeoko.registerAlarmHandler(self.alarmHandler)
 		self.Bind(EVT_ALARM, self.showAlarm)

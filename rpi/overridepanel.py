@@ -68,13 +68,13 @@ class OverridePanel(wx.Panel):
 
 		header = "---------Overrides---------"
 		w,h = dc.GetTextExtent(header)
-		self.stHeader = wx.StaticText(self, wx.ID_ANY, header, pos=(360, 30), size=(w, h))
+		self.stHeader = wx.StaticText(self, wx.ID_ANY, header, pos=(360, 10), size=(w, h))
 		self.stHeader.SetFont(font)
 
 		# adjustFeedRate(-10, -1, 0, 1, 10)
 		xcol = 360
-		ybase = 60
-		yrates = ybase+60*5+20
+		ybase = 40
+		yrates = ybase+60*5
 		self.bFeedUp10 = wx.Button(self, wx.ID_ANY, "+10%", pos=(xcol, ybase), size=(54, 54))
 		self.bFeedUp10.Bind(wx.EVT_BUTTON,  lambda event: self.onFeedButton(event, 10))
 
@@ -96,7 +96,7 @@ class OverridePanel(wx.Panel):
 
 		# adjustRapidRate(100, 50, 25)
 		xcol = 460
-		ybase = 120
+		ybase = 100
 		self.bRapid100 = wx.Button(self, wx.ID_ANY, "100%", pos=(xcol, ybase), size=(54, 54))
 		self.bRapid100.Bind(wx.EVT_BUTTON,  lambda event: self.onRapidButton(event, 100))
 
@@ -112,7 +112,7 @@ class OverridePanel(wx.Panel):
 
 		# adjustSpindleSpeed(-10, -1, 0, 1, 10)
 		xcol = 560
-		ybase = 60
+		ybase = 40
 		self.bSpindleUp10 = wx.Button(self, wx.ID_ANY, "+10%", pos=(xcol, ybase), size=(54, 54))
 		self.bSpindleUp10.Bind(wx.EVT_BUTTON,  lambda event: self.onSpindleButton(event, 10))
 

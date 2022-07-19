@@ -18,8 +18,8 @@ class DROPanel(wx.Panel):
 		self.displayPos = { XAXIS: None, YAXIS: None, ZAXIS: None }
 		self.showMPos = False
 
-		font = wx.Font(72, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
-		fontCoords = wx.Font(72, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
+		font = wx.Font(56, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
+		fontCoords = wx.Font(56, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
 		fontButton = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL) 
 		dc = wx.ScreenDC()
 		dc.SetFont(font)
@@ -40,9 +40,9 @@ class DROPanel(wx.Panel):
 		lblPosX = 10
 		valPosX = lblPosX + lblw + 20
 
-		self.addPositionLine(XAXIS, lblPosX, valPosX, 120, lblw, valw, valh, font, fontCoords)
-		self.addPositionLine(YAXIS, lblPosX, valPosX, 240, lblw, valw, valh, font, fontCoords)
-		self.addPositionLine(ZAXIS, lblPosX, valPosX, 360, lblw, valw, valh, font, fontCoords)
+		self.addPositionLine(XAXIS, lblPosX, valPosX, 100, lblw, valw, valh, font, fontCoords)
+		self.addPositionLine(YAXIS, lblPosX, valPosX, 200, lblw, valw, valh, font, fontCoords)
+		self.addPositionLine(ZAXIS, lblPosX, valPosX, 300, lblw, valw, valh, font, fontCoords)
 
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))

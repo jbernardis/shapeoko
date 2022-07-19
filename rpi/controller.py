@@ -37,7 +37,7 @@ class MainFrame(wx.Frame):
 		self.registeredTickers = []
 		self.registeredLogs = []
 
-		self.lb = wx.Listbook(self, wx.ID_ANY, style=wx.BK_RIGHT)
+		self.lb = wx.Listbook(self, wx.ID_ANY, style=wx.BK_BOTTOM)
 		il = wx.ImageList(32, 32)
 
 		il.Add(self.images.pngDropanel)

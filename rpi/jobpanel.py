@@ -52,23 +52,23 @@ class JobPanel(wx.Panel):
 		self.stFileDate = wx.StaticText(self, wx.ID_ANY, "", pos=(240, 200))
 		self.stFileDate.SetFont(fontText)
 
-		self.bCheckSize = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBchecksize, size=(120, 120), pos=(50, 160))
+		self.bCheckSize = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBchecksize, size=(120, 120), pos=(50, 150))
 		self.bCheckSize.SetBitmapDisabled(self.images.pngBchecksizedis)
 		self.Bind(wx.EVT_BUTTON, self.onBCheckSize, self.bCheckSize)
 
-		self.bPlay = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBplay, size=(120, 120), pos=(50, 300))
+		self.bPlay = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBplay, size=(120, 120), pos=(50, 280))
 		self.bPlay.SetBitmapDisabled(self.images.pngBplaydis)
 		self.Bind(wx.EVT_BUTTON, self.onBPlay, self.bPlay)
 
-		self.bPause = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBpause, size=(120, 120), pos=(200, 300))
+		self.bPause = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBpause, size=(120, 120), pos=(200, 280))
 		self.bPause.SetBitmapDisabled(self.images.pngBpausedis)
 		self.Bind(wx.EVT_BUTTON, self.onBPause, self.bPause)
 
-		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(350, 300))
+		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(350, 280))
 		self.bReset.SetBitmapDisabled(self.images.pngBresetdis)
 		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
 
-		self.bCheck = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBcheck, size=(120, 120), pos=(500, 300))
+		self.bCheck = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBcheck, size=(120, 120), pos=(500, 280))
 		self.bCheck.SetBitmapDisabled(self.images.pngBcheckdis)
 		self.Bind(wx.EVT_BUTTON, self.onBCheck, self.bCheck)
 

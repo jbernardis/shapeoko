@@ -36,11 +36,11 @@ class StatPanel(wx.Panel):
 		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBrefresh, size=(120, 120), pos=(50, 20))
 		self.Bind(wx.EVT_BUTTON, self.onBRefresh, self.bRefresh)
 
-		self.bClearAlarm = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBclearalarm, size=(120, 120), pos=(50, 160))
+		self.bClearAlarm = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBclearalarm, size=(120, 120), pos=(50, 150))
 		self.bClearAlarm.SetBitmapDisabled(self.images.pngBclearalarmdis)
 		self.Bind(wx.EVT_BUTTON, self.onBClearAlarm, self.bClearAlarm)
 		
-		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(50, 300))
+		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngBreset, size=(120, 120), pos=(50, 280))
 		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
 
 		self.enableButtons()

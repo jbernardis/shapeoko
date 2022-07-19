@@ -10,6 +10,7 @@ class ConfigPanel(wx.Panel):
 		wx.Panel.__init__(self, parent, wx.ID_ANY)
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
 
+		self.parent = parent #the actual book
 		self.parentFrame = win
 		self.images = images
 
@@ -77,7 +78,7 @@ class ConfigPanel(wx.Panel):
 class ConfigListCtrl(wx.ListCtrl):
 	def __init__(self, parent):
 		wx.ListCtrl.__init__(
-			self, parent, wx.ID_ANY, size=(700, 280),
+			self, parent, wx.ID_ANY, size=(800, 280),
 			style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_VRULES|wx.LC_SINGLE_SEL
 			)
 
@@ -94,8 +95,8 @@ class ConfigListCtrl(wx.ListCtrl):
 		self.InsertColumn(3, "Description")
 		self.SetColumnWidth(0, 140)
 		self.SetColumnWidth(1, 140)
-		self.SetColumnWidth(2, 140)
-		self.SetColumnWidth(3, 280)
+		self.SetColumnWidth(2, 180)
+		self.SetColumnWidth(3, 340)
 		
 		self.SetItemCount(0)
 
