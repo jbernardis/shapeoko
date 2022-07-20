@@ -5,8 +5,6 @@ import sys
 
 ShutDownFlag = False
 
-DEPLOYED = False
-
 from shapeoko import Shapeoko
 from images import Images
 from dropanel import DROPanel
@@ -60,9 +58,6 @@ class MainFrame(wx.Frame):
 		self.CfgPanel = ConfigPanel(self.lb, self, self.images)
 		self.LogPanel = LogPanel(self.lb, self, self.images)
 
-		if not DEPLOYED:
-			self.ExitPanel = ExitPanel(self.lb, self)
-
 		self.pages = [
 			[ self.DROPanel, "DRO", 0 ],
 			[ self.StatPanel, "Status", 1 ],
@@ -72,9 +67,6 @@ class MainFrame(wx.Frame):
 			[ self.CfgPanel, "Config", 5 ],
 			[ self.LogPanel, "Log", 6 ]
 		]
-
-		if not DEPLOYED:
-			self.pages.append([ self.ExitPanel, "EXIT", 7 ]) 
 
 		for pg in self.pages:
 			self.lb.AddPage(pg[0], pg[1], imageId=pg[2])
@@ -94,10 +86,6 @@ class MainFrame(wx.Frame):
 			self.pages[page][0].switchToPage()
 		except AttributeError:
 			pass
-
-	def isDeployed(self):
-		return DEPLOYED
-
 	def initialize(self):
 		try:
 			self.shapeoko = Shapeoko(self, self.settings)
@@ -171,32 +159,16 @@ class MainFrame(wx.Frame):
 
 		self.Destroy()
 
-class ExitPanel(wx.Panel):
-	def __init__(self, parent, win):		
-		wx.Panel.__init__(self, parent, wx.ID_ANY)
-		self.win = win
-		self.SetBackgroundColour(wx.Colour(196, 196, 196))
-
-		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
-
-		self.b = wx.Button(self, wx.ID_ANY, "exit", pos=(50, 50), size=(120, 120))
-		self.Bind(wx.EVT_BUTTON, win.onClose, self.b)
-
-	def OnPanelSize(self, evt):
-		self.SetPosition((0,0))
-		self.SetSize(evt.GetSize())
-
 class App(wx.App):
 	def OnInit(self):
 		self.frame = MainFrame()
 		self.frame.ShowFullScreen(True)
 		return True
 
-if DEPLOYED:
-	ofp = open("shapeoko.out", "w")
-	efp = open("shapeoko.err", "w")
-	sys.stdout = ofp
-	sys.stderr = efp
+ofp = open("shapeoko.out", "w")
+efp = open("shapeoko.err", "w")
+sys.stdout = ofp
+sys.stderr = efp
 
 app = App(False)
 app.MainLoop()
