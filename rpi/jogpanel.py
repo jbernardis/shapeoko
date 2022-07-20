@@ -69,6 +69,15 @@ class JogPanel(wx.Panel):
 		self.bX3.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG X 3"))
 		self.bX4.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG X 4"))
 
+		self.bXY1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJoglfupgreen, size=(40, 40), pos=(basex+bdim, basey+bdim))
+		self.bXY1.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY -4 4"))
+		self.bXY2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogrtupgreen, size=(40, 40), pos=(basex+bdim*7, basey+bdim))
+		self.bXY1.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY 4 4"))
+		self.bXY3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJoglfdtgreen, size=(40, 40), pos=(basex+bdim, basey+bdim*7))
+		self.bXY3.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY -4 -4"))
+		self.bXY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogrtdngreen, size=(40, 40), pos=(basex+bdim*7, basey+bdim*7))
+		self.bXY4.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY 4 -4"))
+
 		zbasex = int(basex+7*bdim+bdim/2)
 		zbasey = int(basey+5*bdim)
 

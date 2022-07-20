@@ -353,13 +353,21 @@ class Shapeoko(threading.Thread):
 
 		elif len(terms) == 3:
 			axis = terms[1]
-			distance = int(terms[2])
+			distance = self.getDistance(int(terms[2]))
+
 			if axis == "X":
-				self.grbl.jogxy(self.getDistance(distance), None, 800)
+				self.grbl.jogxy(distance, None, 800)
 			elif axis == "Y":
-				self.grbl.jogxy(None, self.getDistance(distance), 800)
+				self.grbl.jogxy(None, distance, 800)
 			elif axis == "Z":
-				self.grbl.jogz(self.getDistance(distance), 800)
+				self.grbl.jogz(distance, 800)
+
+		elif len(terms) == 4:
+			axis = terms[1]
+			distX = self.getDistance(int(terms[2]))
+			distY = self.getDistance(int(terms[3]))
+			if axis == "XY":
+				self.grbl.jogxy(distX, distY, 800)
 
 	def kill(self):
 		self.isRunning = False

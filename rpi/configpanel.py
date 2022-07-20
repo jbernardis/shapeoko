@@ -40,8 +40,8 @@ class ConfigPanel(wx.Panel):
 		self.settings = settings
 		
 		h, v = self.GetClientSize()
-		self.lcConfig.SetSize((h, v-50))
-		self.lcConfig.SetPosition((0, 50))
+		self.lcConfig.SetSize((h, v-70))
+		self.lcConfig.SetPosition((0, 70))
 
 		self.lcConfig.setValues(self.values)
 

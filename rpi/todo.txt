@@ -1,2 +1,8 @@
 
 up/down buttons on status screen
+
+axis reset/goto on DRO screen
+
+Verify sizing of menu on rpi
+
+verify layout of jog panel

@@ -44,6 +44,18 @@ class DROPanel(wx.Panel):
 		self.addPositionLine(YAXIS, lblPosX, valPosX, 200, lblw, valw, valh, font, fontCoords)
 		self.addPositionLine(ZAXIS, lblPosX, valPosX, 300, lblw, valw, valh, font, fontCoords)
 
+		basex = 50
+		basey = 10
+
+		bdim = 45
+		self.bResetX = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx, size=(54, 54), pos=(basex+10*bdim, basey+50))
+		self.bResetY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy, size=(54, 54), pos=(basex+10*bdim, basey+50+70))
+		self.bResetZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz, size=(54, 54), pos=(basex+10*bdim, basey+50+70*2))
+		self.bResetX.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, XAXIS))
+		self.bResetY.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, YAXIS))
+		self.bResetZ.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, ZAXIS))
+
+
 	def OnPanelSize(self, evt):
 		self.SetPosition((0,0))
 		self.SetSize(evt.GetSize())
@@ -79,6 +91,14 @@ class DROPanel(wx.Panel):
 		else:
 			self.bCoord.SetLabel("Work")
 		self.displayPosition()
+
+	def onResetButton(self, evt, axis):
+		if axis == XAXIS:
+			self.shapeoko.resetAxis(x=0)
+		elif axis == YAXIS:
+			self.shapeoko.resetAxis(y=0)
+		elif axis == ZAXIS:
+			self.shapeoko.resetAxis(z=0)
 
 	def statusUpdate(self, newStatus): # Thread context
 		evt = StatusEvent(status=newStatus)
