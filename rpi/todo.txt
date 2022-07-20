@@ -1,5 +1,2 @@
-rename spindle panel as overide panel
 
-up/down buttons on log and status screens
-
-look into bigger bitmaps/not text to improve list book navigation
+up/down buttons on status screen

@@ -18,8 +18,14 @@ class ConfigPanel(wx.Panel):
 		self.dc = wx.ScreenDC()
 		self.dc.SetFont(fontText)
 
-		self.stVersion = wx.StaticText(self, wx.ID_ANY, "", pos=(300, 10))
+		self.stVersion = wx.StaticText(self, wx.ID_ANY, "", pos=(50, 10))
 		self.stVersion.SetFont(fontText)
+
+		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp1, size=(54, 54), pos=(300, 10))
+		self.Bind(wx.EVT_BUTTON, self.onBUp, self.bUp)
+
+		self.bDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDown1, size=(54, 54), pos=(370, 10))
+		self.Bind(wx.EVT_BUTTON, self.onBDown, self.bDown)
 
 		self.lcConfig = ConfigListCtrl(self)
 
@@ -75,6 +81,12 @@ class ConfigPanel(wx.Panel):
 		self.SetPosition((0,0))
 		self.SetSize(evt.GetSize())
 
+	def onBDown(self, _):
+		self.lcConfig.scrollDown()
+
+	def onBUp(self, _):
+		self.lcConfig.scrollUp()
+
 class ConfigListCtrl(wx.ListCtrl):
 	def __init__(self, parent):
 		wx.ListCtrl.__init__(
@@ -99,6 +111,7 @@ class ConfigListCtrl(wx.ListCtrl):
 		self.SetColumnWidth(3, 340)
 		
 		self.SetItemCount(0)
+		self.selectedIndex = 0
 
 		self.normalA = wx.ItemAttr()
 		self.normalB = wx.ItemAttr()
@@ -116,8 +129,31 @@ class ConfigListCtrl(wx.ListCtrl):
 	def setValues(self, vl):
 		self.values = vl
 		self.SetItemCount(len(self.values))	
+		self.SetSelection(0)
+		self.selectedIndex = 0
+
+	def scrollDown(self):
+		if self.selectedIndex is None:
+			return
+
+		if self.selectedIndex+1 == len(self.values):
+			return
+
+		self.selectedIndex += 1
+		self.SetSelection(self.selectedIndex)
+
+	def scrollUp(self):
+		if self.selectedIndex is None:
+			return
+		
+		if self.selectedIndex == 0:
+			return
+
+		self.selectedIndex -= 1
+		self.SetSelection(self.selectedIndex)
 		
 	def OnItemHint(self, evt):
+		print("on item hint")
 		if self.GetFirstSelected() == -1:
 			self.setSelection(None)
 			
