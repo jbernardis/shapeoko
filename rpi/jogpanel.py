@@ -33,19 +33,21 @@ class JogPanel(wx.Panel):
 		self.bProbe = wx.BitmapButton(self, wx.ID_ANY, self.images.pngProbe,    size=(54, 54), pos=(basex+bdim+20,  basey))
 		self.bProbe.Bind(wx.EVT_BUTTON,  self.onProbeButton)
 
-		self.bY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupgreen,    size=(40, 40), pos=(colx,  basey))
-		self.bY3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupblue,     size=(40, 40), pos=(colx,  basey+bdim))
-		self.bY2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupred,      size=(40, 40), pos=(colx,  basey+bdim*2))
-		self.bY1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupyellow,   size=(40, 40), pos=(colx,  basey+bdim*3))
+		yoff = 15
+		self.bY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupgreen,    size=(40, 40), pos=(colx,  basey+yoff))
+		self.bY3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupblue,     size=(40, 40), pos=(colx,  basey+yoff+bdim))
+		self.bY2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupred,      size=(40, 40), pos=(colx,  basey+yoff+bdim*2))
+		self.bY1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogupyellow,   size=(40, 40), pos=(colx,  basey+yoff+bdim*3))
 		self.bY4.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG Y 4"))
 		self.bY3.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG Y 3"))
 		self.bY2.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG Y 2"))
 		self.bY1.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG Y 1"))
 
-		self.bYm1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdnyellow,   size=(40, 40), pos=(colx, basey+bdim*5))
-		self.bYm2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdnred,      size=(40, 40), pos=(colx, basey+bdim*6))
-		self.bYm3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdnblue,     size=(40, 40), pos=(colx, basey+bdim*7))
-		self.bYm4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdngreen,    size=(40, 40), pos=(colx, basey+bdim*8))
+		yoff = -15
+		self.bYm1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdnyellow,   size=(40, 40), pos=(colx, basey+yoff+bdim*5))
+		self.bYm2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdnred,      size=(40, 40), pos=(colx, basey+yoff+bdim*6))
+		self.bYm3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdnblue,     size=(40, 40), pos=(colx, basey+yoff+bdim*7))
+		self.bYm4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdngreen,    size=(40, 40), pos=(colx, basey+yoff+bdim*8))
 		self.bYm1.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG Y -1"))
 		self.bYm2.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG Y -2"))
 		self.bYm3.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG Y -3"))
@@ -69,16 +71,16 @@ class JogPanel(wx.Panel):
 		self.bX3.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG X 3"))
 		self.bX4.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG X 4"))
 
-		self.bXY1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJoglfupgreen, size=(40, 40), pos=(basex+bdim, basey+bdim))
+		self.bXY1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJoglfupgreen, size=(40, 40), pos=(basex+bdim*2, basey+bdim*2))
 		self.bXY1.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY -4 4"))
-		self.bXY2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogrtupgreen, size=(40, 40), pos=(basex+bdim*7, basey+bdim))
-		self.bXY1.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY 4 4"))
-		self.bXY3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJoglfdtgreen, size=(40, 40), pos=(basex+bdim, basey+bdim*7))
+		self.bXY2 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogrtupgreen, size=(40, 40), pos=(basex+bdim*6, basey+bdim*2))
+		self.bXY2.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY 4 4"))
+		self.bXY3 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJoglfdngreen, size=(40, 40), pos=(basex+bdim*2, basey+bdim*6))
 		self.bXY3.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY -4 -4"))
-		self.bXY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogrtdngreen, size=(40, 40), pos=(basex+bdim*7, basey+bdim*7))
+		self.bXY4 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogrtdngreen, size=(40, 40), pos=(basex+bdim*6, basey+bdim*6))
 		self.bXY4.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG XY 4 -4"))
 
-		zbasex = int(basex+7*bdim+bdim/2)
+		zbasex = int(basex+9*bdim+bdim/2)
 		zbasey = int(basey+5*bdim)
 
 		self.bZm1 = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogdnyellow, size=(40, 40), pos=(zbasex, zbasey+bdim/2))
@@ -98,18 +100,18 @@ class JogPanel(wx.Panel):
 		self.bStopJog = wx.BitmapButton(self, wx.ID_ANY, self.images.pngJogstop, size=(54, 54), pos=(basex+7*bdim, basey))
 		self.bStopJog.Bind(wx.EVT_BUTTON,  lambda event: self.onJogButton(event, "JOG STOP"))
 
-		self.bResetX = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx, size=(54, 54), pos=(basex+10*bdim, basey+50))
-		self.bResetY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy, size=(54, 54), pos=(basex+10*bdim, basey+50+70))
-		self.bResetZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz, size=(54, 54), pos=(basex+10*bdim, basey+50+70*2))
+		self.bResetX = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx, size=(54, 54), pos=(basex+12*bdim, basey+50))
+		self.bResetY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy, size=(54, 54), pos=(basex+12*bdim, basey+50+70))
+		self.bResetZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz, size=(54, 54), pos=(basex+12*bdim, basey+50+70*2))
 		self.bResetX.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, XAXIS))
 		self.bResetY.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, YAXIS))
 		self.bResetZ.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, ZAXIS))
 
 
-		self.bGoToX =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx,  size=(54, 54), pos=(basex+12*bdim, basey+50))
-		self.bGoToY =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy,  size=(54, 54), pos=(basex+12*bdim, basey+50+70))
-		self.bGoToZ =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz,  size=(54, 54), pos=(basex+12*bdim, basey+50+70*3))
-		self.bGoToXY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisxy, size=(66, 54), pos=(basex+12*bdim-6, basey+50+70*2))
+		self.bGoToX =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx,  size=(54, 54), pos=(basex+14*bdim, basey+50))
+		self.bGoToY =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy,  size=(54, 54), pos=(basex+14*bdim, basey+50+70))
+		self.bGoToZ =  wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz,  size=(54, 54), pos=(basex+14*bdim, basey+50+70*3))
+		self.bGoToXY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisxy, size=(66, 54), pos=(basex+14*bdim-6, basey+50+70*2))
 		self.bGoToX.Bind(wx.EVT_BUTTON,  lambda event: self.onGoToButton(event, XAXIS))
 		self.bGoToY.Bind(wx.EVT_BUTTON,  lambda event: self.onGoToButton(event, YAXIS))
 		self.bGoToZ.Bind(wx.EVT_BUTTON,  lambda event: self.onGoToButton(event, ZAXIS))
@@ -117,7 +119,7 @@ class JogPanel(wx.Panel):
 
 		txt = "RESET    GO TO"
 		w,h = dc.GetTextExtent(txt)
-		hdr = wx.StaticText(self, wx.ID_ANY, txt, pos=(basex+10*bdim, basey), size=(w, h))
+		hdr = wx.StaticText(self, wx.ID_ANY, txt, pos=(basex+12*bdim, basey), size=(w, h))
 		hdr.SetFont(font)
 
 	def initialize(self, shapeoko, settings):

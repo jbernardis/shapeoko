@@ -7,9 +7,11 @@ from common import XAXIS, YAXIS, ZAXIS, AxisList, StateColors
 (PositionEvent, EVT_NEWPOSITION) = newevent.NewEvent()  
 
 class DROPanel(wx.Panel):
-	def __init__(self, parent, win):		
+	def __init__(self, parent, win, images):		
 		wx.Panel.__init__(self, parent, wx.ID_ANY)
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
+
+		self.images = images
 
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 		self.shapeokoStatus = ""
@@ -44,16 +46,22 @@ class DROPanel(wx.Panel):
 		self.addPositionLine(YAXIS, lblPosX, valPosX, 200, lblw, valw, valh, font, fontCoords)
 		self.addPositionLine(ZAXIS, lblPosX, valPosX, 300, lblw, valw, valh, font, fontCoords)
 
-		basex = 50
-		basey = 10
+		basex = 550 + 50
+		basey = 180
 
 		bdim = 45
-		self.bResetX = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx, size=(54, 54), pos=(basex+10*bdim, basey+50))
-		self.bResetY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy, size=(54, 54), pos=(basex+10*bdim, basey+50+70))
-		self.bResetZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz, size=(54, 54), pos=(basex+10*bdim, basey+50+70*2))
+		self.bResetX = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisx, size=(54, 54), pos=(basex, basey))
+		self.bResetY = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisy, size=(54, 54), pos=(basex, basey+70))
+		self.bResetZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAxisz, size=(54, 54), pos=(basex, basey+70*2))
 		self.bResetX.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, XAXIS))
 		self.bResetY.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, YAXIS))
 		self.bResetZ.Bind(wx.EVT_BUTTON,  lambda event: self.onResetButton(event, ZAXIS))
+
+		txt = "RESET"
+		dc.SetFont(fontButton)
+		w,h = dc.GetTextExtent(txt)
+		hdr = wx.StaticText(self, wx.ID_ANY, txt, pos=(basex-int(w/4), basey-h-10), size=(w, h))
+		hdr.SetFont(fontButton)
 
 
 	def OnPanelSize(self, evt):

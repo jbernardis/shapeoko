@@ -52,7 +52,7 @@ class MainFrame(wx.Frame):
 
 		self.lb.AssignImageList(il)
 
-		self.DROPanel = DROPanel(self.lb, self)
+		self.DROPanel = DROPanel(self.lb, self, self.images)
 		self.StatPanel = StatPanel(self.lb, self, self.images)
 		self.JobPanel = JobPanel(self.lb, self, self.images)
 		self.JogPanel = JogPanel(self.lb, self, self.images)
