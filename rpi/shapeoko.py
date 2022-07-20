@@ -282,7 +282,6 @@ class Shapeoko(threading.Thread):
 			self.sendSpeeds(nf, ns)
 
 		if ovChanged:
-			print("sending overrides")
 			self.sendOverrides(ovf, ovr, ovs)
 
 	def getDistance(self, dx):

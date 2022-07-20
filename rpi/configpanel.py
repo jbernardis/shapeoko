@@ -129,7 +129,7 @@ class ConfigListCtrl(wx.ListCtrl):
 	def setValues(self, vl):
 		self.values = vl
 		self.SetItemCount(len(self.values))	
-		self.SetSelection(0)
+		self.Select(0)
 		self.selectedIndex = 0
 
 	def scrollDown(self):
@@ -140,7 +140,8 @@ class ConfigListCtrl(wx.ListCtrl):
 			return
 
 		self.selectedIndex += 1
-		self.SetSelection(self.selectedIndex)
+		self.Select(self.selectedIndex)
+		self.EnsureVisible(self.selectedIndex)
 
 	def scrollUp(self):
 		if self.selectedIndex is None:
@@ -150,10 +151,10 @@ class ConfigListCtrl(wx.ListCtrl):
 			return
 
 		self.selectedIndex -= 1
-		self.SetSelection(self.selectedIndex)
+		self.Select(self.selectedIndex)
+		self.EnsureVisible(self.selectedIndex)
 		
 	def OnItemHint(self, evt):
-		print("on item hint")
 		if self.GetFirstSelected() == -1:
 			self.setSelection(None)
 			
