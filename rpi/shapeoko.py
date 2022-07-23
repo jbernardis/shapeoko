@@ -476,6 +476,11 @@ class Shapeoko(threading.Thread):
 			resp = "shutdown requested"
 			self.HttpRespQ.put((200, resp.encode()))
 
+		elif verb == "reboot":
+			self.parent.requestClose(reboot=True)
+			resp = "reboot requested"
+			self.HttpRespQ.put((200, resp.encode()))
+
 		else:
 			msg = "Unknown command: %s" % cmd
 			self.HttpRespQ.put((400, msg.encode()))

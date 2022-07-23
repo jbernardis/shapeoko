@@ -4,6 +4,7 @@ from wx.lib import newevent
 import sys
 
 ShutDownFlag = False
+RebootFlag = False
 
 from shapeoko import Shapeoko
 from images import Images
@@ -14,6 +15,7 @@ from jogpanel import JogPanel
 from overridepanel import OverridePanel
 from configpanel import ConfigPanel
 from logpanel import LogPanel
+from exitpanel import ExitPanel
 from settings import Settings
 from msgdlg import MessageDlg
 
@@ -45,7 +47,6 @@ class MainFrame(wx.Frame):
 		il.Add(self.images.pngOverridepanel)
 		il.Add(self.images.pngCfgpanel)
 		il.Add(self.images.pngLogpanel)
-
 		il.Add(self.images.pngExitpanel)
 
 		self.lb.AssignImageList(il)
@@ -57,6 +58,7 @@ class MainFrame(wx.Frame):
 		self.OverridePanel = OverridePanel(self.lb, self, self.images)
 		self.CfgPanel = ConfigPanel(self.lb, self, self.images)
 		self.LogPanel = LogPanel(self.lb, self, self.images)
+		self.ExitPanel = ExitPanel(self.lb, self, self.images)
 
 		self.pages = [
 			[ self.DROPanel, "DRO", 0 ],
@@ -66,6 +68,7 @@ class MainFrame(wx.Frame):
 			[ self.OverridePanel, "Override", 4 ],
 			[ self.CfgPanel, "Config", 5 ],
 			[ self.LogPanel, "Log", 6 ]
+			[ self.ExitPanel, "Exit", 7 ]
 		]
 
 		for pg in self.pages:
@@ -86,6 +89,7 @@ class MainFrame(wx.Frame):
 			self.pages[page][0].switchToPage()
 		except AttributeError:
 			pass
+		
 	def initialize(self):
 		try:
 			self.shapeoko = Shapeoko(self, self.settings)
@@ -134,17 +138,23 @@ class MainFrame(wx.Frame):
 	def getJobInfo(self):
 		return self.JobPanel.getJobInfo()
 
-	def requestClose(self, shutdown=False):
-		evt = CloseRequest(shutdown=shutdown)
+	def requestClose(self, shutdown=False, reboot=False):
+		evt = CloseRequest(shutdown=shutdown, reboot=reboot)
 		wx.PostEvent(self, evt)
 
 	def onCloseRequest(self, evt):
 		global ShutDownFlag
+		global RebootFlag
 		try:
 			ShutDownFlag = evt.shutdown
 			
 		except:
 			ShutDownFlag = False
+		try:
+			RebootFlag = evt.reboot
+			
+		except:
+			RebootFlag = False
 
 		self.doClose()
 
@@ -173,5 +183,8 @@ sys.stderr = efp
 app = App(False)
 app.MainLoop()
 
-if ShutDownFlag:
+if RebootFlag:
+	os.system("sudo reboot")
+
+elif ShutDownFlag:
 	os.system("sudo poweroff")
