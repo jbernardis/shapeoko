@@ -14,6 +14,18 @@ int ibits = 24;
 int ichips = 3;
 int * inputValues;
 
+#define DIR_NONE ""
+#define DIR_N  "Y 4"
+#define DIR_NE "XY 4 4"
+#define DIR_E  "X 4"
+#define DIR_SE "XY 4 -4"
+#define DIR_S  "Y -4"
+#define DIR_SW "XY -4 -4"
+#define DIR_W  "X -4"
+#define DIR_NW "XY -4 4"
+
+char joggingDir[9];
+char requestedDir[9];
 
 void setup() {
 	Serial.begin(115200);
@@ -31,6 +43,8 @@ void setup() {
 		*(inputValues+i) = inBd.getBit(i);
 	}
 	timer.setInterval(250, pulse);
+
+	strcpy(joggingDir, DIR_NONE);
 }
 
 void loop() {
@@ -39,12 +53,82 @@ void loop() {
 
 void pulse() {
 	inBd.retrieve();
-	for (int i=0; i<ibits; i++) {
-		int bv = inBd.getBit(i);
-		if (bv != *(inputValues+i)) {
-			checkJog(i, bv);
-			*(inputValues+i) = bv;
+	if (strcmp(joggingDir, DIR_NONE) == 0) {
+		for (int i=0; i<ibits; i++) {
+			int bv = inBd.getBit(i);
+			if (i == 0 || i == 7 || i == 8 || i == 15) {
+				// green continuous jog buttons
+				*(inputValues+i) = bv;
+			}
+			if (bv != *(inputValues+i)) {
+				checkJog(i, bv);
+				*(inputValues+i) = bv;
+			}
 		}
+	}
+	else {
+		*(inputValues+0) = inBd.getBit(0);
+		*(inputValues+7) = inBd.getBit(7);
+		*(inputValues+8) = inBd.getBit(8);
+		*(inputValues+15) = inBd.getBit(15);
+	}
+	bool reqN = *(inputValues+15) == 0;
+	bool reqS = *(inputValues+8) == 0;
+	bool reqE = *(inputValues+7) == 0;
+	bool reqW = *(inputValues+0) == 0;
+
+	if ((reqN && reqS) || (reqE && reqW)){
+		if (strcmp(joggingDir, DIR_NONE) != 0) {
+			Serial.println("JOG STOP");
+			strcpy(joggingDir, DIR_NONE);
+		}
+	}
+	else {
+		strcpy(requestedDir, DIR_NONE);
+		if (reqN) {
+			if (reqE) {
+				strcpy(requestedDir, DIR_NE);
+			}
+			else if (reqW) {
+				strcpy(requestedDir, DIR_NW);
+			}
+			else {
+				strcpy(requestedDir, DIR_N);
+			}
+		}
+		else if (reqS) {
+			if (reqE) {
+				strcpy(requestedDir, DIR_SE);
+			}
+			else if (reqW) {
+				strcpy(requestedDir, DIR_SW);
+			}
+			else {
+				strcpy(requestedDir, DIR_S);
+			}
+		}
+		else if (reqE) {
+			strcpy(requestedDir, DIR_E);
+		}
+		else if (reqW) {
+			strcpy(requestedDir, DIR_W);
+		}
+
+		if (strcmp(requestedDir, joggingDir) != 0) {
+			if (strcmp(requestedDir, DIR_NONE) == 0) {
+				strcpy(joggingDir, DIR_NONE);
+				Serial.println("JOG STOP");
+			}
+			else {
+				if (strcmp(joggingDir, DIR_NONE) != 0) {
+					Serial.println("JOG STOP");
+				}
+				strcpy(joggingDir, requestedDir);
+				Serial.print("JOG ");
+				Serial.println(requestedDir);
+			}
+		}
+		
 	}
 
 	if (bResetX.pressed()) {
