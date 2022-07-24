@@ -3,7 +3,7 @@ import wx
 from wx.lib import newevent
 import sys
 
-ShutDownFlag = False
+ShutdownFlag = False
 RebootFlag = False
 
 from shapeoko import Shapeoko
@@ -67,7 +67,7 @@ class MainFrame(wx.Frame):
 			[ self.JogPanel, "Jog", 3 ],
 			[ self.OverridePanel, "Override", 4 ],
 			[ self.CfgPanel, "Config", 5 ],
-			[ self.LogPanel, "Log", 6 ]
+			[ self.LogPanel, "Log", 6 ],
 			[ self.ExitPanel, "Exit", 7 ]
 		]
 
@@ -143,19 +143,32 @@ class MainFrame(wx.Frame):
 		wx.PostEvent(self, evt)
 
 	def onCloseRequest(self, evt):
-		global ShutDownFlag
-		global RebootFlag
 		try:
-			ShutDownFlag = evt.shutdown
-			
+			sd = evt.shutdown
 		except:
-			ShutDownFlag = False
+			sd = False
 		try:
-			RebootFlag = evt.reboot
-			
+			rb = evt.reboot
 		except:
-			RebootFlag = False
+			rb=False
 
+		self.doCloseRequest(shutdown=sd, reboot=rb)
+
+	def onBExit(self, _):
+		self.doClose()
+
+	def onBShutdown(self, _):
+		self.doCloseRequest(shutdown=True)
+
+	def onBReboot(self, _):
+		self.doCloseRequest(reboot=True)
+
+	def doCloseRequest(self, shutdown=False, reboot=False):
+		global ShutdownFlag
+		global RebootFlag
+		
+		ShutdownFlag = shutdown
+		RebootFlag = reboot
 		self.doClose()
 
 	def onClose(self, evt):
@@ -186,5 +199,6 @@ app.MainLoop()
 if RebootFlag:
 	os.system("sudo reboot")
 
-elif ShutDownFlag:
+if ShutdownFlag:
 	os.system("sudo poweroff")
+
