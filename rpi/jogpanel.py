@@ -12,6 +12,8 @@ class JogPanel(wx.Panel):
 		self.SetBackgroundColour(wx.Colour(196, 196, 196))
 
 		self.images = images
+		self.status = ""
+		self.frame = win
 
 		self.Bind(wx.EVT_SIZE, self.OnPanelSize)
 
@@ -134,15 +136,21 @@ class JogPanel(wx.Panel):
 		self.SetSize(evt.GetSize())
 
 	def onHomeButton(self, evt):
-		if self.status.lower() == "alarm":
+		if self.status == "alarm":
 			self.shapeoko.clearAlarm()
 		self.shapeoko.gotoHome()
 
 	def onProbeButton(self, evt):
-		self.shapeoko.probe()
+		if self.status == "idle":
+			self.shapeoko.probe()
+		else:
+			self.frame.log("Probe command illegal while in '%s' stats" % self.status)
 
 	def onJogButton(self, evt, command):
-		self.shapeoko.jog(command)
+		if self.status in ["idle", "jog"]:
+			self.shapeoko.jog(command)
+		else:
+			self.frame.log("Jog command illegal while in '%s' stats" % self.status)
 
 	def onResetButton(self, evt, axis):
 		if axis == XAXIS:
@@ -164,7 +172,7 @@ class JogPanel(wx.Panel):
 		self.shapeoko.goto(x=0, y=0)
 
 	def statusUpdate(self, ns):  #thread context
-		self.status = ns
+		self.status = ns.lower()
 
 	def probeReport(self, msg): # thread context
 		evt = ProbeEvent(msg=msg)

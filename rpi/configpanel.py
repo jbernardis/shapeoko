@@ -13,6 +13,7 @@ class ConfigPanel(wx.Panel):
 		self.parent = parent #the actual book
 		self.parentFrame = win
 		self.images = images
+		self.status = ""
 
 		fontText = wx.Font(24, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		self.dc = wx.ScreenDC()
@@ -48,6 +49,8 @@ class ConfigPanel(wx.Panel):
 		self.shapeoko.registerConfigHandler(self.configHandler)
 		self.Bind(EVT_CONFIG, self.showConfig)
 
+		self.shapeoko.registerStatusHandler(self.statusHandler)
+
 	def configHandler(self, msg):  # thread context
 		evt = ConfigEvent(msg=msg)
 		wx.PostEvent(self, evt)
@@ -70,6 +73,9 @@ class ConfigPanel(wx.Panel):
 			if icx is not None and icx in Settings.keys():
 				self.values[icx] = val
 				self.lcConfig.refreshItem(icx)
+
+	def statusHandler(self, ns):
+		self.status = ns
 
 	def switchToPage(self):
 		try:
