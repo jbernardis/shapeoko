@@ -138,38 +138,50 @@ class JogPanel(wx.Panel):
 	def onHomeButton(self, evt):
 		if self.status == "alarm":
 			self.shapeoko.clearAlarm()
-		self.shapeoko.gotoHome()
+		elif self.status == "idle":
+			self.shapeoko.gotoHome()
+		else:
+			self.frame.log("\"Home\" command illegal while in '%s' state" % self.status)
 
 	def onProbeButton(self, evt):
 		if self.status == "idle":
 			self.shapeoko.probe()
 		else:
-			self.frame.log("Probe command illegal while in '%s' stats" % self.status)
+			self.frame.log("\"Probe\" command illegal while in '%s' state" % self.status)
 
 	def onJogButton(self, evt, command):
 		if self.status in ["idle", "jog"]:
 			self.shapeoko.jog(command)
 		else:
-			self.frame.log("Jog command illegal while in '%s' stats" % self.status)
+			self.frame.log("\"Jog\" command illegal while in '%s' state" % self.status)
 
 	def onResetButton(self, evt, axis):
-		if axis == XAXIS:
-			self.shapeoko.resetAxis(x=0)
-		elif axis == YAXIS:
-			self.shapeoko.resetAxis(y=0)
-		elif axis == ZAXIS:
-			self.shapeoko.resetAxis(z=0)
+		if self.status == "idle":
+			if axis == XAXIS:
+				self.shapeoko.resetAxis(x=0)
+			elif axis == YAXIS:
+				self.shapeoko.resetAxis(y=0)
+			elif axis == ZAXIS:
+				self.shapeoko.resetAxis(z=0)
+		else:
+			self.frame.log("\"Reset Axis\" command illegal while in '%s' state" % self.status)
 
 	def onGoToButton(self, evt, axis):
-		if axis == XAXIS:
-			self.shapeoko.goto(x=0)
-		elif axis == YAXIS:
-			self.shapeoko.goto(y=0)
-		elif axis == ZAXIS:
-			self.shapeoko.goto(z=0)
+		if self.status == "idle":
+			if axis == XAXIS:
+				self.shapeoko.goto(x=0)
+			elif axis == YAXIS:
+				self.shapeoko.goto(y=0)
+			elif axis == ZAXIS:
+				self.shapeoko.goto(z=0)
+		else:
+			self.frame.log("\"Go To\" command illegal while in '%s' state" % self.status)
 
 	def onGoToXYButton(self, evt):
-		self.shapeoko.goto(x=0, y=0)
+		if self.status == "idle":
+			self.shapeoko.goto(x=0, y=0)
+		else:
+			self.frame.log("\"Go To\" command illegal while in '%s' state" % self.status)
 
 	def statusUpdate(self, ns):  #thread context
 		self.status = ns.lower()
