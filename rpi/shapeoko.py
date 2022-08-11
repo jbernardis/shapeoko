@@ -481,6 +481,9 @@ class Shapeoko(threading.Thread):
 			resp = "reboot requested"
 			self.HttpRespQ.put((200, resp.encode()))
 
+		elif verb == "refresh":
+			print("still need to implement refrech upon file upload or delete")
+
 		else:
 			msg = "Unknown command: %s" % cmd
 			self.HttpRespQ.put((400, msg.encode()))
