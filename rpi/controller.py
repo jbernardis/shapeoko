@@ -22,6 +22,7 @@ from msgdlg import MessageDlg
 (CloseRequest, EVT_CLOSEREQUEST) = newevent.NewEvent()
 (FeedbackMsg, EVT_FEEDBACK) = newevent.NewEvent()
 
+
 class MainFrame(wx.Frame):
 	def __init__(self):		
 		wx.Frame.__init__(self, None)
@@ -182,11 +183,13 @@ class MainFrame(wx.Frame):
 
 		self.Destroy()
 
+
 class App(wx.App):
 	def OnInit(self):
 		self.frame = MainFrame()
 		self.frame.ShowFullScreen(True)
 		return True
+
 
 ofp = open("shapeoko.out", "w")
 efp = open("shapeoko.err", "w")
